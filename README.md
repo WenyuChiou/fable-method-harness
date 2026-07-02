@@ -60,6 +60,11 @@ All three converge on the same startup ladder below — they are launchers,
 not rule stores. The rules stay in the routed files, so the entry layer can
 stay short and stable.
 
+A fourth entry, [`core/GLOBAL_BOOTSTRAP.md`](core/GLOBAL_BOOTSTRAP.md), is
+the portable path for work on any OTHER project: it loads only the `core/`
+discipline layer and never the project-bound files (L1/L2, phase playbooks,
+`memory/`).
+
 ## How to use it (the reading order)
 
 1. **`context/L0_bootstrap.md`** — the minimal first read. Under 300 words.

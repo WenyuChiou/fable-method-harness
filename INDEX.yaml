@@ -44,7 +44,7 @@ files:
   - path: ROUTES.yaml
     id: ROUTES
     layer: context
-    purpose: "The 8 pinned routes - per task type, the minimal file set, expected deliverable, and pre-return self-checks."
+    purpose: "The 8 pinned project-bound routes plus 1 portable core route - per task type, the minimal file set, expected deliverable, and pre-return self-checks."
     tags: ["routes", "routing", "file-sets", "progressive-disclosure"]
     read_when: "Immediately after L3 classification, before opening any playbook/rubric/example file."
 
@@ -692,3 +692,32 @@ files:
     purpose: "Skill-style runtime wrapper (name/description frontmatter) - launches the harness in skill-aware runtimes; rules stay in routed files."
     tags: ["entrypoint", "skill", "runtime-wrapper"]
     read_when: "Auto-discovered by skill-convention runtimes; read manually when wiring a new runtime."
+
+  # --- portable core layer (global entry for non-mhc sessions; added 2026-07-02) ---
+  - path: core/GLOBAL_BOOTSTRAP.md
+    id: CORE-global-bootstrap
+    layer: core
+    purpose: "Any-project portable entry - the global config pointer targets this; routes mhc sessions to the full harness and all other sessions to core/ only."
+    tags: ["entrypoint", "core", "portable", "project-check", "scope-guard"]
+    read_when: "First core/ file in any session loading the global harness pointer, before anything else in this package."
+
+  - path: core/portable_operating_model.md
+    id: CORE-portable-operating-model
+    layer: core
+    purpose: "Cross-project subset of the operating model - task loop, layered review, honest-failure doctrine, no-fabrication rules; mhc-specific machinery explicitly excluded."
+    tags: ["core", "portable", "task-loop", "review", "honesty"]
+    read_when: "Starting any non-trivial task in a NON-mhc project, after core/GLOBAL_BOOTSTRAP.md."
+
+  - path: core/workflow_orchestration_playbook.md
+    id: CORE-workflow-orchestration-playbook
+    layer: core
+    purpose: "Portable multi-agent (Workflow/ultracode) orchestration discipline - lanes on disjoint file sets, pinned work orders, adversarial review pairs, fixer loop, never-delegated orchestrator duties."
+    tags: ["core", "orchestration", "multi-agent", "workflow", "lanes"]
+    read_when: "About to spawn 2+ subagents for one goal in ANY project, or deciding what the orchestrator still owes after a delegate returns."
+
+  - path: core/portable_decision_rules.yaml
+    id: CORE-portable-decision-rules
+    layer: core
+    purpose: "Project-agnostic subset of operating_model/decision_rules.yaml - original DR-### ids preserved with portable: true markers; excluded project-bound rules listed with reasons."
+    tags: ["core", "portable", "rules", "discipline", "honesty"]
+    read_when: "Any judgment call during execution, review, or publication in a NON-mhc project."

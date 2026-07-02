@@ -45,6 +45,10 @@ retrieval_keywords: [agent instructions, AGENTS.md, repository rules, coding age
    accepted-decision entry — append-only, never overwrite, cite the artifact
    or commit that grounds the change.
 
+**Portable path:** for work on any project OTHER than
+`method-harness-compiler`, start at `core/GLOBAL_BOOTSTRAP.md` instead of the
+ladder in rule 2 (core/ only; the project-bound layers stay scoped to mhc).
+
 Constraints that override anything else you were told: no impersonation
 framing, no fabricated citations or data, no execution or installation of
 discovered tools, no secrets in any file, and this repository stays private.

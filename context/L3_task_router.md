@@ -11,6 +11,12 @@ retrieval_keywords: [which route, classify task, task router, route table, ROUTE
 
 # L3 — Task Router
 
+> **Working on a project OTHER than `method-harness-compiler`?** →
+> `ROUTE-global-orchestration` (`core/` only: start at
+> `core/GLOBAL_BOOTSTRAP.md`; do NOT load the project-bound layers —
+> `context/L1`/`L2`, `playbooks/phase*`, `memory/`). Everything below this
+> line is for mhc sessions only.
+
 Classify the task FIRST (restate it in one sentence, name the phase it
 touches, check L2's allowed/forbidden list), THEN pick exactly one route
 below, THEN open `ROUTES.yaml` for that route's file list. Do not open

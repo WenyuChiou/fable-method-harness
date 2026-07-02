@@ -17,6 +17,9 @@ as files you load incrementally. It is not general documentation and it is
 not a prompt dump. It tells you *how to work on that project*, in a way that
 survives model and session changes.
 
+> **Not working on `method-harness-compiler`?** Use the portable path
+> instead: read `core/GLOBAL_BOOTSTRAP.md` (core/ only — skip the ladder below).
+
 ## Startup sequence (mandatory, in order)
 
 1. Read `context/L0_bootstrap.md` — what this harness is and is not.

@@ -1,0 +1,111 @@
+# id: CORE-portable-decision-rules
+# layer: core
+# purpose: The project-agnostic subset of operating_model/decision_rules.yaml,
+#   selected for use in ANY repository via core/GLOBAL_BOOTSTRAP.md. Original
+#   DR-### ids are preserved; no new numbering. Each portable rule adds
+#   portable: true + why_portable; excluded rules are listed with reasons.
+# read_when: Any judgment call during execution, review, or publication in a
+#   NON-mhc project (mhc sessions read operating_model/decision_rules.yaml).
+# depends_on: [../operating_model/decision_rules.yaml, ./portable_operating_model.md]
+# used_by: [CORE-global-bootstrap, CORE-portable-operating-model, any-project-session]
+# tags: [core, portable, rules, discipline, honesty, no-fabrication]
+# retrieval_keywords: portable decision rules, project agnostic rules, which
+#   rules apply anywhere, excluded project bound, deterministic first, no
+#   silent pass, publish failures, halt is success
+
+# Source of truth for rule text: ../operating_model/decision_rules.yaml
+# (id: OM-decision-rules). detail/rationale/real_instance are NOT restated
+# here — read them there. This file only marks portability.
+
+rules:
+  - id: DR-001
+    rule: deterministic-before-model
+    portable: true
+    why_portable: "Cheapest-reliable-method ordering (script/template before LLM) applies to any task in any repo."
+  - id: DR-002
+    rule: todo-on-uncertainty-never-guess
+    portable: true
+    why_portable: "Failing explicit stubs on unknowns beats fabrication everywhere; the stub marker name may differ per repo."
+  - id: DR-003
+    rule: grader-fix-lands-separately-from-beneficiary
+    portable: true
+    why_portable: "Any check/test/gate in any repo is gameable if fixed in the same change that benefits from the fix."
+  - id: DR-004
+    rule: computed-artifacts-only-via-runners
+    portable: true
+    why_portable: "Hand-asserted numbers are the universal fabrication pattern; every project has some runner/script to compute from."
+  - id: DR-005
+    rule: frozen-transcripts-immutable
+    portable: true
+    why_portable: "Generalizes to: never edit captured evidence (logs, transcripts, measurements); re-derive results through tooling."
+  - id: DR-006
+    rule: explicit-path-staging-with-count-assertion
+    portable: true
+    why_portable: "Pure git hygiene; prevents committing unrelated or half-done work in any repository."
+  - id: DR-007
+    rule: corrections-append-never-overwrite
+    portable: true
+    why_portable: "Append-only correction notices and superseding records apply to any published claim or memory file."
+  - id: DR-008
+    rule: friction-recorded-not-absorbed
+    portable: true
+    why_portable: "Any frozen contract (API, schema, spec freeze) benefits from inventorying chafe and batching ratified fixes."
+  - id: DR-009
+    rule: publish-own-failures
+    portable: true
+    why_portable: "Honest-failure publishing is trust-building in any project that reports results."
+  - id: DR-010
+    rule: halt-is-success
+    portable: true
+    why_portable: "HALT / UNSCORED / NO_GO as correct outputs is a universal agent-safety invariant, not an mhc feature."
+  - id: DR-011
+    rule: no-silent-pass
+    portable: true
+    why_portable: "A check that can silently pass will eventually silently lie — true of any test suite or gate anywhere."
+  - id: DR-012
+    rule: read-only-discovery-never-execute
+    portable: true
+    why_portable: "Research/discovery of third-party tools without installing, executing, or signing up is safe practice in any repo."
+  - id: DR-013
+    rule: clean-break-renames-while-prerelease
+    portable: true
+    why_portable: "Conditional rule that travels with its condition: no-consumer pre-release code needs no alias layers, in any project."
+  - id: DR-014
+    rule: regression-net-ships-with-contract-change
+    portable: true
+    why_portable: "A contract only exists if something breaks when violated — applies to any schema/API/config contract."
+  - id: DR-015
+    rule: pin-measured-numbers-as-floors-never-invent-bars
+    portable: true
+    why_portable: "Post-hoc invented pass thresholds are self-grading in any measurement context; floors from measured values are not."
+  - id: DR-016
+    rule: pre-registration-before-runs-and-commit-it-first
+    portable: true
+    why_portable: "Commit-evidenced ordering of criteria-before-results applies to any evaluation or experiment in any repo."
+  - id: DR-020
+    rule: single-source-of-truth-for-checks
+    portable: true
+    why_portable: "Forked check logic drifts and disagrees silently in any codebase; import, never re-implement."
+  - id: DR-021
+    rule: verify-agent-observations-on-disk
+    portable: true
+    why_portable: "Adjudicating conflicting subagent reports by direct filesystem verification is core multi-agent discipline anywhere."
+  - id: DR-022
+    rule: extend-marker-lists-never-loosen-ad-hoc
+    portable: true
+    why_portable: "Documented-list extension + pinned regression fixture keeps any deterministic checker from becoming a rubber stamp."
+  - id: DR-023
+    rule: auto-discover-per-package-constants
+    portable: true
+    why_portable: "Hand-maintained inclusion lists (test lists, registries) silently exclude the newest module in any multi-module repo."
+
+excluded_project_bound:
+  - id: DR-017
+    rule: attribution-caps-enforced-as-code
+    reason: "Bound to mhc's evidence-card schema fields (direct_quote / quoted_primary / primary_artifact_locator); other repos lack the schema."
+  - id: DR-018
+    rule: drafts-never-write-governed-filenames
+    reason: "Mechanism is mhc's phc `.generated.yaml` sibling + --force convention; the draft-vs-governed principle is carried by core/portable_operating_model.md instead."
+  - id: DR-019
+    rule: risk-computed-from-conservative-proxies-with-basis
+    reason: "Bound to mhc's ToolCard permission_level/risk_level model and its specific proxy signals; only the conservative-unknown instinct generalizes."

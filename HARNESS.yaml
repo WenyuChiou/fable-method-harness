@@ -18,6 +18,7 @@ provenance:
       first_principles_engineering)
 layers:
   - context        # L0-L5 progressive-disclosure layers (context/)
+  - core           # portable any-project discipline subset (core/), entered via core/GLOBAL_BOOTSTRAP.md
   - operating_model  # the distilled method skeleton (operating_model/)
   - playbook       # step-by-step procedures, PLAYBOOK-* (playbooks/)
   - rubric         # scoring/review rubrics, RUBRIC-* (rubrics/)
@@ -38,6 +39,7 @@ routes:
   - ROUTE-runtime-export
   - ROUTE-repo-maintenance
   - ROUTE-ab-test-design
+  - ROUTE-global-orchestration   # portable core; start = core/GLOBAL_BOOTSTRAP.md, not the L0/L2/L3 ladder
 portability_targets:
   - claude_code
   - codex

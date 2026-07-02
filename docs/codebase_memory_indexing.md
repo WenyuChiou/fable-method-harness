@@ -92,6 +92,16 @@ Recommended first query for a fresh session with this repo indexed:
 search `bootstrap startup sequence` → open `BOOTSTRAP.md` → follow the
 ladder. Total pre-task reading stays under five files by design.
 
+**Global usage (portable core, non-mhc projects):** index this harness repo
+ONCE (its own root, per §1) and reuse that index from any project — the
+harness is wired globally precisely so large/multi-agent sessions elsewhere
+can reach it. For a session in a project OTHER than
+`method-harness-compiler`, the first query is `global bootstrap portable` →
+open `core/GLOBAL_BOOTSTRAP.md` and follow its PROJECT CHECK: non-mhc
+sessions resolve `ROUTE-global-orchestration` (the `core/` files plus the
+portable rubrics it names) and never load the project-bound layers
+(`context/L1`/`L2`, `playbooks/phase*`, `memory/`).
+
 ## 6. Smoke-test the retrieval surface
 
 After any indexing or frontmatter change, run the procedure in

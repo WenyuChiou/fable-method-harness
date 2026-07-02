@@ -1,16 +1,18 @@
 # ---
 # id: ROUTES
 # layer: context
-# purpose: The 8 pinned routes - per task type, the exact minimal file set to load, the expected deliverable, and the pre-return self-checks.
+# purpose: The 8 pinned project-bound routes plus 1 portable core route - per task type, the exact minimal file set to load, the expected deliverable, and the pre-return self-checks.
 # read_when: Immediately after L3 classification, before opening any playbook/rubric/example file.
 # depends_on: [context/L3_task_router.md, context/L4_progressive_disclosure_policy.md, schemas/route.schema.yaml]
-# used_by: [ROUTE-phase-review, ROUTE-tool-discovery, ROUTE-pr-review, ROUTE-eval-design, ROUTE-memory-update, ROUTE-runtime-export, ROUTE-repo-maintenance, ROUTE-ab-test-design]
+# used_by: [ROUTE-phase-review, ROUTE-tool-discovery, ROUTE-pr-review, ROUTE-eval-design, ROUTE-memory-update, ROUTE-runtime-export, ROUTE-repo-maintenance, ROUTE-ab-test-design, ROUTE-global-orchestration]
 # tags: [routes, routing, file-sets, progressive-disclosure]
 # retrieval_keywords: [route file list, which files to load, required optional, expected output, self check, ROUTE ids]
 # ---
 # Each entry validates against schemas/route.schema.yaml.
-# start is ALWAYS the L0 -> L2 -> L3 context ladder. Load required in full;
-# open optional only with a stated one-line reason (L4 rule 3).
+# start is ALWAYS the L0 -> L2 -> L3 context ladder — with ONE exception:
+# ROUTE-global-orchestration starts at core/GLOBAL_BOOTSTRAP.md only, because
+# the ladder is project-bound (see the comment on that route). Load required
+# in full; open optional only with a stated one-line reason (L4 rule 3).
 
 # Entry files that lead INTO the start ladder (runtime-convention launchers;
 # they are pre-route entrypoints, not route members — all three converge on
@@ -22,6 +24,8 @@ entrypoints:
     convention: repository_agent_instructions
   - path: SKILL.md
     convention: skill_discovery_frontmatter
+  - path: core/GLOBAL_BOOTSTRAP.md
+    convention: global_portable_entry
 
 routes:
 
@@ -259,3 +263,38 @@ routes:
       - "EQ-4 (baselines_and_ablations): baseline and ablation arms are specified, not just the harness arm."
       - "EQ-3 (grader_hardening): grading is blinded to arm identity; leakage/contamination probes are specified."
       - "L2 check: no run was started under this route — design only."
+
+  # EXCEPTION to the start-ladder rule (portable core, added 2026-07-02):
+  # this route's start is core/GLOBAL_BOOTSTRAP.md ONLY — NOT the
+  # L0 -> L2 -> L3 ladder. The ladder is project-bound: L2 carries
+  # method-harness-compiler's phase state and L3's table classifies mhc
+  # tasks; loading either in another project's session would apply mhc's
+  # constraints to the wrong repo. See core/GLOBAL_BOOTSTRAP.md
+  # "PROJECT CHECK" and the matching start oneOf in schemas/route.schema.yaml.
+  - id: ROUTE-global-orchestration
+    task_type: global_orchestration
+    status: active
+    start:
+      - core/GLOBAL_BOOTSTRAP.md
+    required:
+      - core/portable_operating_model.md
+      - core/workflow_orchestration_playbook.md
+      - core/portable_decision_rules.yaml
+    optional:
+      - rubrics/pr_review_rubric.yaml
+      - rubrics/maintainability_rubric.yaml
+      - rubrics/eval_quality_rubric.yaml
+      - rubrics/progressive_disclosure_rubric.yaml
+      - datasets/failure_modes.yaml
+    expected_output: >-
+      A large or multi-agent (Workflow/ultracode) task in ANY non-mhc project
+      executed under the portable discipline: pinned work orders, disjoint
+      lanes, adversarial review with orthogonal lenses, orchestrator
+      re-verification, honest UNSCORED/TODO on unknowns — closing with
+      Decision / Risks / Required changes / Next actions.
+    self_check:
+      - "PROJECT CHECK done: session is NOT method-harness-compiler, and NO project-bound file (context/L1, context/L2, playbooks/phase*, memory/) was loaded (core/GLOBAL_BOOTSTRAP.md)."
+      - "DR-011 (no-silent-pass): skipped or inapplicable checks are recorded with a reason; unknowns yield UNSCORED/TODO, never a guess."
+      - "Orchestrator duties never delegated: verification re-RUN (not re-read), explicit-path staging with count assertion, review verdict gates the commit (core/workflow_orchestration_playbook.md section 4)."
+      - "DR-003/DR-004: no check was loosened in the change that benefits from it; every reported number was computed by a runner/script, never hand-asserted."
+      - "Output ends with Decision / Risks / Required changes / Next actions (core/GLOBAL_BOOTSTRAP.md output contract)."

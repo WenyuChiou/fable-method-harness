@@ -131,3 +131,65 @@ discovery plan"*, following only the on-disk progressive-disclosure rules
   memory log exists yet, so this dated section is the append-only record of
   this run (friction noted, not silently absorbed).
 - P1–P12 probe grid still owed a full run before any public flip.
+
+---
+
+## Executed 2026-07-02 — portable-core global-entry probe (core/ wiring round)
+
+**Scope:** simulated *"Opus starts a large multi-agent (ultracode) task in
+the research-hub repo, with this harness indexed globally"*. Resolution path
+under test: global pointer → `core/GLOBAL_BOOTSTRAP.md` → PROJECT CHECK
+(non-mhc) → `ROUTE-global-orchestration` in `ROUTES.yaml`. Checks were
+COMPUTED by a script (52 assertions), not claimed; the P1–P12 mhc probe grid
+was NOT RUN this round and is recorded as such.
+
+### Resolution walk (ROUTE-global-orchestration)
+
+| Order | File | Tier |
+|---|---|---|
+| 1 | `core/GLOBAL_BOOTSTRAP.md` | entry (route `start`; the ONLY start file — L0/L2/L3 ladder deliberately not loaded) |
+| 2 | `ROUTES.yaml` | route resolution (`ROUTE-global-orchestration` entry) |
+| 3 | `core/portable_operating_model.md` | required |
+| 4 | `core/workflow_orchestration_playbook.md` | required |
+| 5 | `core/portable_decision_rules.yaml` | required |
+| — | 4 portable rubrics (`pr_review`, `maintainability`, `eval_quality`, `progressive_disclosure`) + `datasets/failure_modes.yaml` | optional — open only with a stated one-line reason |
+
+### Checks
+
+| Check | Result | Detail |
+|---|---|---|
+| (a) every referenced path exists on disk | **PASS** | 9/9 start+required+optional paths real |
+| (b) reading set excludes ALL project-bound files (`context/L1`, `context/L2`, `playbooks/`, `phase*`, `memory/`) | **PASS** | zero matches in required AND optional tiers |
+| (c) total required reading ≤ 6 files | **PASS** | 5 files (entry + ROUTES.yaml + 3 required) |
+| (d) entrypoints list carries `core/GLOBAL_BOOTSTRAP.md` (`global_portable_entry`) | **PASS** | 4th entrypoint alongside BOOTSTRAP/AGENTS/SKILL |
+| (e) all 9 routes conform to `schemas/route.schema.yaml`; zero dangling entries | **PASS** | schema extended this round (see fix 1) |
+| (f) INDEX.yaml lists each core/ file exactly once, `layer: core`; all INDEX paths exist | **PASS** | 4 new entries |
+| (g) core/ frontmatter carries all 8 keys | **PASS** | 3 md files + comment-style yaml |
+| (h) UTF-8, no tabs, YAML parse on every edited file | **PASS** | 11 files |
+
+### Fixes applied (same round)
+
+1. `schemas/route.schema.yaml`: without a change, the new route would have
+   FAILED its own declared validation (`task_type` enum lacked
+   `global_orchestration`; `start` demanded `minItems: 3`). Extended
+   additively — enum gains one value; `start` gains a `oneOf`
+   (3-item ladder | exactly `["core/GLOBAL_BOOTSTRAP.md"]`) so the
+   project-bound constraint is NOT loosened for the other 8 routes.
+2. `core/GLOBAL_BOOTSTRAP.md`: added the back-reference naming
+   `ROUTE-global-orchestration`, so the GLOBAL_BOOTSTRAP → route resolution
+   is an on-disk link, not an implied one.
+3. `HARNESS.yaml`: pinned route list and `layers:` were going stale
+   (manifest omitted the new route and the `core` layer) — synced
+   additively, per MT-5 index-matches-disk discipline.
+
+### Verdict: **PASS** (portable-core scope) — 52/52 computed checks green.
+
+### Noted, non-blocking
+
+- The global wiring itself (the pointer in the user's global config that
+  loads `core/GLOBAL_BOOTSTRAP.md`) lives OUTSIDE this repo and is
+  UNVERIFIED by this probe — the probe verifies the harness side only.
+- `datasets/failure_modes.yaml` sits in the route's optional tier; its
+  records cite mhc artifacts, which is acceptable (provenance citations are
+  not reading requirements — same class as the 2026-07-02 route-resolution
+  run's check (c) note).

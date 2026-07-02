@@ -12,10 +12,11 @@ $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "fable-style-project-harness/schemas/route.schema.yaml"
 title: Route entry (ROUTES.yaml)
 description: >-
-  Shape of a single route in ROUTES.yaml. start is always the L0/L2/L3
-  context ladder; required is the minimal file set to execute the task;
-  optional is escalation material loaded one layer at a time per
-  context/L4_progressive_disclosure_policy.md.
+  Shape of a single route in ROUTES.yaml. start is the L0/L2/L3 context
+  ladder for project-bound routes, or the single portable entry
+  core/GLOBAL_BOOTSTRAP.md for ROUTE-global-orchestration; required is the
+  minimal file set to execute the task; optional is escalation material
+  loaded one layer at a time per context/L4_progressive_disclosure_policy.md.
 type: object
 additionalProperties: true
 required: [id, task_type, start, required, expected_output, self_check]
@@ -27,7 +28,8 @@ properties:
     type: string
     description: Snake_case task type matching the datasets' vocabulary.
     enum: [phase_review, tool_discovery, pr_review, eval_design,
-           memory_update, runtime_export, repo_maintenance, ab_test_design]
+           memory_update, runtime_export, repo_maintenance, ab_test_design,
+           global_orchestration]
   status:
     type: string
     description: Route readiness; "future-work" marks a route whose execution is gated by L2.
@@ -35,9 +37,15 @@ properties:
     default: active
   start:
     type: array
-    description: Context entry ladder — always L0, L2, L3, in that order.
-    minItems: 3
+    description: >-
+      Context entry ladder — L0, L2, L3, in that order, for project-bound
+      routes. Sole exception: ROUTE-global-orchestration starts at
+      core/GLOBAL_BOOTSTRAP.md only (the ladder is project-bound and must
+      not load in non-mhc sessions).
     items: { type: string }
+    oneOf:
+      - minItems: 3                            # project-bound L0/L2/L3 ladder
+      - const: ["core/GLOBAL_BOOTSTRAP.md"]    # portable-core entry (ROUTE-global-orchestration)
   required:
     type: array
     description: Repo-relative paths that MUST be loaded to execute this route.

@@ -26,6 +26,9 @@ Any task touching the `method-harness-compiler` project: planning, review,
 building, evaluating, releasing, or maintaining. Also when asked to "work
 the way this project works."
 
+For large or multi-agent (ultracode) tasks on any OTHER project, the
+portable entry is `core/GLOBAL_BOOTSTRAP.md` (core/ only — skip section 2).
+
 ## 2. Required startup sequence
 
 Read, in order: `context/L0_bootstrap.md` → `context/L2_current_phase.md` →
