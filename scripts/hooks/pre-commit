@@ -1,0 +1,19 @@
+#!/bin/sh
+# pre-commit — tier-0 overlay integrity gate for fable-style-project-harness.
+#
+# Runs the offline artifact validator (no network, no LLM, standard-library only).
+# A nonzero exit blocks the commit — the overlay-local form of DR-011 no-silent-pass.
+#
+# Enable once per clone:   git config core.hooksPath scripts/hooks
+# Bypass (discouraged, justify in the commit body):   git commit --no-verify
+set -e
+
+py=python
+command -v python >/dev/null 2>&1 || py=py
+
+echo "pre-commit: validating agent-optimization overlay..." >&2
+if ! "$py" scripts/check_agent_artifacts.py >&2; then
+  echo "pre-commit: BLOCKED — overlay validation failed (see above)." >&2
+  echo "            Fix the reported gap, or 'git commit --no-verify' to bypass." >&2
+  exit 1
+fi

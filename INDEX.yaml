@@ -20,6 +20,13 @@ files:
     tags: ["gitignore", "privacy", "hygiene"]
     read_when: "Adding a new artifact class to the repo, or auditing the privacy posture."
 
+  - path: .gitattributes
+    id: GITATTRIBUTES
+    layer: doc
+    purpose: "Line-ending policy - pins shell hooks (scripts/hooks/*) to LF so a CRLF-defaulting editor or clone cannot silently break the POSIX pre-commit hook."
+    tags: ["gitattributes", "line-endings", "hooks", "hygiene"]
+    read_when: "Adding a shell script / hook, or debugging a CRLF-related hook failure."
+
   - path: HARNESS.yaml
     id: HARNESS-manifest
     layer: doc
@@ -795,3 +802,10 @@ files:
     purpose: "Regression tests pinning check_agent_artifacts.py's depends_on frontmatter parser (block-list + inline + edge cases) so a future refactor that silently breaks depends_on checking fails loudly. Pure-stdlib asserts, no pytest."
     tags: ["validation", "test", "regression", "parser", "overlay"]
     read_when: "After changing check_agent_artifacts.py's frontmatter parsing; run to confirm the parser contract holds."
+
+  - path: scripts/hooks/pre-commit
+    id: HOOK-pre-commit-overlay
+    layer: validation
+    purpose: "Versioned git pre-commit hook that runs scripts/check_agent_artifacts.py; a nonzero exit blocks the commit (overlay-local DR-011 no-silent-pass). Enable per clone: git config core.hooksPath scripts/hooks."
+    tags: ["hook", "pre-commit", "validation", "gate", "overlay"]
+    read_when: "Wiring the overlay integrity gate into git, or onboarding a fresh clone (must set core.hooksPath scripts/hooks)."

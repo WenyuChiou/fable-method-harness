@@ -1,0 +1,4 @@
+# Line-ending policy.
+# Shell hooks MUST stay LF: a CRLF-corrupted POSIX sh script breaks the shebang /
+# line handling on some sh implementations, silently disabling the pre-commit gate.
+scripts/hooks/* text eol=lf

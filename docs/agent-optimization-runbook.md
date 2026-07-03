@@ -198,6 +198,18 @@ python scripts/check_agent_artifacts.py
   do not commit, do not report "done", fix the broken reference and re-run
   until it exits 0. This is the overlay-local form of
   `DR-011` no-silent-pass and `DR-021` verify-agent-observations-on-disk.
+- **Automate it as a git gate (recommended):** this repo ships a versioned
+  pre-commit hook at
+  [`scripts/hooks/pre-commit`](../scripts/hooks/pre-commit)
+  (`HOOK-pre-commit-overlay`) that runs the validator and blocks the commit on
+  any gap. Enable it once per clone — the hook is versioned but `core.hooksPath`
+  is a local git setting, so a fresh clone (or a restored machine) must opt in:
+
+  ```bash
+  git config core.hooksPath scripts/hooks
+  ```
+
+  Bypass a specific commit with `git commit --no-verify` (justify it in the body).
 
 ## 5. Anti-patterns
 
