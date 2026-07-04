@@ -30,7 +30,7 @@ properties:
     description: Snake_case task type matching the datasets' vocabulary.
     enum: [phase_review, tool_discovery, pr_review, eval_design,
            memory_update, runtime_export, repo_maintenance, ab_test_design,
-           global_orchestration, completion_integrity]
+           global_orchestration, completion_integrity, distillation]
   status:
     type: string
     description: Route readiness; "future-work" marks a route whose execution is gated by L2.
@@ -40,9 +40,10 @@ properties:
     type: array
     description: >-
       Context entry ladder — L0, L2, L3, in that order, for project-bound
-      routes. Portable routes (ROUTE-global-orchestration and
-      ROUTE-completion-integrity) instead start at core/GLOBAL_BOOTSTRAP.md
-      only (the ladder is project-bound and must not load in non-mhc sessions).
+      routes. Portable routes (ROUTE-global-orchestration,
+      ROUTE-completion-integrity, and ROUTE-distillation) instead start at
+      core/GLOBAL_BOOTSTRAP.md only (the ladder is project-bound and must not
+      load in non-mhc sessions).
     items: { type: string }
     oneOf:
       - minItems: 3                            # project-bound L0/L2/L3 ladder

@@ -51,7 +51,7 @@ files:
   - path: ROUTES.yaml
     id: ROUTES
     layer: context
-    purpose: "The 8 pinned project-bound routes plus 2 portable core routes - per task type, the minimal file set, expected deliverable, and pre-return self-checks."
+    purpose: "The 8 pinned project-bound routes plus 3 portable core routes - per task type, the minimal file set, expected deliverable, and pre-return self-checks."
     tags: ["routes", "routing", "file-sets", "progressive-disclosure"]
     read_when: "Immediately after L3 classification, before opening any playbook/rubric/example file."
 
@@ -131,6 +131,27 @@ files:
     purpose: "60 teacher-example records (TE-001..TE-060) in the pinned shape - observable method episodes grounded in source-repo artifacts and commits."
     tags: ["teacher-examples", "episodes", "method-steps"]
     read_when: "Retrieving a worked precedent for the current task type - grep by TE id or task_type, never bulk-read."
+
+  - path: distillation/setup-checklist.md
+    id: DOC-distillation-setup-checklist
+    layer: doc
+    purpose: "Phase-1 pre-run checklist that instruments a project so a working-style distillation cycle can yield load-bearing signal (git-from-commit-0, base-rate control arm, >=2 projects, non-priming); the go/no-go gate before observing."
+    tags: ["distillation", "checklist", "setup", "base-rate", "non-priming"]
+    read_when: "Before starting a working-style distillation cycle; deciding whether a project is distillable or only negative-findings-capable."
+
+  - path: distillation/analyst-prompt.md
+    id: PROMPT-distillation-analyst
+    layer: prompt
+    purpose: "The blind-analyst prompt for a distillation cycle - handed to a de-identified analyst over a REDACTED transcript (never to the subject); applies the non-waivable load-bearing gate and lands survivors on the harness surfaces."
+    tags: ["distillation", "prompt", "blind-analyst", "load-bearing-gate", "non-priming"]
+    read_when: "Running the observe+analyse step of a distillation cycle after the setup checklist gates GO."
+
+  - path: distillation/distillation-log.md
+    id: DOC-distillation-log
+    layer: doc
+    purpose: "Append-only log of distillation cycles - one entry per candidate/negative with its trace, gate label, base-rate delta, and cross-project recurrence; the accumulation surface that turns hypotheses into traits over >=2 projects."
+    tags: ["distillation", "living-doc", "append-only", "recurrence", "load-bearing"]
+    read_when: "Recording candidates/verdicts during a cycle; deciding whether a candidate has recurred across enough projects to promote."
 
   - path: docs/ab_test_protocol.md
     id: DOC-ab-test-protocol

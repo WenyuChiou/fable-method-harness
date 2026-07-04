@@ -1,17 +1,17 @@
 # ---
 # id: ROUTES
 # layer: context
-# purpose: The 8 pinned project-bound routes plus 2 portable core routes - per task type, the exact minimal file set to load, the expected deliverable, and the pre-return self-checks.
+# purpose: The 8 pinned project-bound routes plus 3 portable core routes - per task type, the exact minimal file set to load, the expected deliverable, and the pre-return self-checks.
 # read_when: Immediately after L3 classification, before opening any playbook/rubric/example file.
 # depends_on: [context/L3_task_router.md, context/L4_progressive_disclosure_policy.md, schemas/route.schema.yaml]
-# used_by: [ROUTE-phase-review, ROUTE-tool-discovery, ROUTE-pr-review, ROUTE-eval-design, ROUTE-memory-update, ROUTE-runtime-export, ROUTE-repo-maintenance, ROUTE-ab-test-design, ROUTE-global-orchestration, ROUTE-completion-integrity]
+# used_by: [ROUTE-phase-review, ROUTE-tool-discovery, ROUTE-pr-review, ROUTE-eval-design, ROUTE-memory-update, ROUTE-runtime-export, ROUTE-repo-maintenance, ROUTE-ab-test-design, ROUTE-global-orchestration, ROUTE-completion-integrity, ROUTE-distillation]
 # tags: [routes, routing, file-sets, progressive-disclosure]
 # retrieval_keywords: [route file list, which files to load, required optional, expected output, self check, ROUTE ids]
 # ---
 # Each entry validates against schemas/route.schema.yaml.
 # start is ALWAYS the L0 -> L2 -> L3 context ladder — EXCEPT the portable routes
-# (ROUTE-global-orchestration, ROUTE-completion-integrity) which start at
-# core/GLOBAL_BOOTSTRAP.md only, because the ladder is project-bound (see the
+# (ROUTE-global-orchestration, ROUTE-completion-integrity, ROUTE-distillation)
+# which start at core/GLOBAL_BOOTSTRAP.md only, because the ladder is project-bound (see the
 # comment on those routes). Load required in full; open optional only with a
 # stated one-line reason (L4 rule 3).
 
@@ -335,3 +335,31 @@ routes:
       - "DR-010 halt-is-success: on missing/contradictory evidence, a published 'cannot honestly claim completion because ...' was emitted rather than a guessed done."
       - "DR-009 publish-own-failures: any gap or failure is surfaced with equal prominence, not buried under a green summary."
       - "Output ends with Decision / Risks / Required changes / Next actions (core/GLOBAL_BOOTSTRAP.md output contract)."
+
+  - id: ROUTE-distillation
+    task_type: distillation
+    status: active
+    start:
+      - core/GLOBAL_BOOTSTRAP.md
+    required:
+      - distillation/setup-checklist.md
+      - distillation/analyst-prompt.md
+      - distillation/distillation-log.md
+    optional:
+      - docs/ab_skill_effect_protocol.md
+      - operating_model/decision_rules.yaml
+    expected_output: >-
+      A working-style distillation cycle over one project: the setup checklist
+      gates GO/NO-GO (git-from-commit-0 + a base-rate control arm are
+      non-negotiable), a blind analyst reverse-infers style from traces (never by
+      prompting the subject) under the non-waivable load-bearing gate, and each
+      candidate is labelled load-bearing / baseline / quarantined / cosmetic /
+      negative and landed append-only — most cycles yield "nothing distinctive
+      yet" plus any negative finding, which is a correct outcome. Closes with
+      Decision / Risks / Required changes / Next actions.
+    self_check:
+      - "setup-checklist.md go/no-go gate applied: git-from-commit-0 (section 1) and a base-rate control arm (section 2) are both present, or the run is labelled negative-findings-only (section 5)."
+      - "Every candidate is sourced two-level (trace signature + the downstream decision it changed); no trait rests on the subject's self-report (DR-004/DR-021)."
+      - "Baseline is subtracted: behaviours a plain agent does at ceiling are labelled baseline, not findings; distillable = subject minus base-rate (no base-rate run means not promoted)."
+      - "n=1 stays HYPOTHESIS; a trait is promoted only on >=2-project recurrence; negatives are logged with equal prominence (DR-009)."
+      - "Working-style outputs land in memory/ + datasets/ (never core/; DR only as an artifact-cited prescriptive rule); output ends with Decision / Risks / Required changes / Next actions."
