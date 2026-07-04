@@ -139,6 +139,13 @@ files:
     tags: ["ab-test", "evaluation", "future-work", "pre-registration", "baseline"]
     read_when: "Designing the harness-effectiveness experiment, or asked whether the harness \"works\""
 
+  - path: docs/ab_skill_effect_protocol.md
+    id: DOC-ab-skill-effect-protocol
+    layer: doc
+    purpose: "Pre-registered 5-arm A/B protocol (A / A+ptr / A+len / B-flat / C) testing whether ACTIVATING the fable-harness skill improves Opus 4.8 correctness/verification/honesty vs plain Opus and a length-matched placebo — DESIGN-ONLY, running gated; the non-proxy, confound-controlled successor to ab_test_protocol.md."
+    tags: ["ab-test", "evaluation", "future-work", "pre-registration", "skill-effect", "confound-control"]
+    read_when: "Designing, ratifying, or running the skill-effect experiment; reviewing the confound-controlled arm design and the non-proxy activation mechanism."
+
   - path: docs/codebase_memory_indexing.md
     id: DOC-codebase-memory-indexing
     layer: doc
