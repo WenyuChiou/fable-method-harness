@@ -42,4 +42,4 @@ cross-project index that makes recurrence visible.
   - **base-rate delta:** NO BASE-RATE RUN (n=1, no control arm — cannot separate subject from any agent).
   - **label:** negative-finding
   - **recurrence:** 1/1 project.
-  - **landing:** proposed LL-018 + EC-025 (not yet appended; pending operator authorization). Maps onto existing DR-004 / DR-009 / DR-011 + `docs/completion-honesty-gate.md` (a fresh instance, not a new rule).
+  - **landing:** appended LL-018 (`memory/lessons_learned.jsonl`) + EC-025 (`datasets/edge_cases.yaml`). Maps onto existing DR-004 / DR-009 / DR-011 + `docs/completion-honesty-gate.md` (a fresh instance, not a new rule).

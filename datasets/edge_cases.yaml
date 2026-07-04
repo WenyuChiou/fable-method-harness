@@ -132,3 +132,8 @@ edge_cases:
     wrong_response: Dismiss as user error since it works in the dev environment.
     correct_response: Treat as P1; fix the doc in ALL locale mirrors; record remaining unverified paths in an honest UNVERIFIED list; add a self-check script where possible.
     principle: Fresh-user walkthrough is a gate, not marketing (commit 7134227; docs/quality/fresh_user_walkthrough.md).
+  - id: EC-025
+    situation: A dedup / tie-break step collapses a raw run that contained an ok:false (timeout/error) row into an all-green canonical artifact, and the summary report shows only the green aggregate.
+    wrong_response: Trust the derived report's all-green aggregate (e.g. "4/4", "16/16, Bad count 0") because the caveats section looks thorough; retain post-timeout recovery/retry rows in latency aggregates.
+    correct_response: Reconcile the report against the canonical artifact AND the raw log; require the dropped-failure count to appear in the report's own aggregate voice (a failure named only inside a quoted model-output excerpt does NOT count as surfaced); exclude or flag post-timeout retry runs in latency metrics; verify the run's caveats name THIS run's actual failure, not generic disclaimers.
+    principle: Raw-capture honesty must be enforced into the derived layer or it is decorative; prefer-ok dedup is a silent-pass surface (DR-009 publish-own-failures, DR-011 no-silent-pass; completion-honesty-gate #5-#6; model-routing-benchmark seam, LL-018).
