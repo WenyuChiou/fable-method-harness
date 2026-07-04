@@ -43,3 +43,12 @@ cross-project index that makes recurrence visible.
   - **label:** negative-finding
   - **recurrence:** 1/1 project.
   - **landing:** appended LL-018 (`memory/lessons_learned.jsonl`) + EC-025 (`datasets/edge_cases.yaml`). Maps onto existing DR-004 / DR-009 / DR-011 + `docs/completion-honesty-gate.md` (a fresh instance, not a new rule).
+
+- **id:** DL-20260704-02
+  - **project:** person-harness-compiler (Fable session `3b07caec`, transcript-based → **clean attribution**; NO base-rate arm yet — Round-1)
+  - **candidate:** Round-1 Track-1 distillation of the orchestrator's working-style from a 57-turn build+orchestration transcript.
+  - **trace:** `scratchpad/distillation_design/track1_mhc/timeline.md`; workflow `wf_cbf650ca-fd5` (3 lenses → gate → adversarial audit).
+  - **base-rate delta:** NO BASE-RATE RUN yet (planned: Opus session `cc8d85c0` as a weak same-task contrast + the H-A/H-B cross-project fork).
+  - **label:** 1 LOAD-BEARING (L1 claim-targeted verification) + 7 HYPOTHESIS + 4 NEGATIVE; the adversarial audit demoted 3 load-bearing → 1.
+  - **recurrence:** 1/1 project — every trait capped at HYPOTHESIS pending a ≥2nd-project fork.
+  - **landing:** appended LL-019 (L1), LL-020 (N2), LL-021 (N4), EC-026 (N3). **N1 (code-review-verdict-not-gating) was INVESTIGATED against the full transcript and DROPPED** — the "same-turn commit / no verdict" basis did not hold; the `code-review` skill ran a real review each time (diff + reads + grep), so the verdict-gating characterization was a condensed-timeline artifact (DR-021 caught it before landing).
