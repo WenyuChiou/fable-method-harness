@@ -1,0 +1,4 @@
+# schema: v1
+name: service_07
+retry: 3
+timeout_ms: 5000

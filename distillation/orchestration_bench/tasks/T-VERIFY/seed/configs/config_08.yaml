@@ -1,0 +1,8 @@
+# schema: v2
+name: service_08
+retry:
+  max_attempts: 3
+  backoff_ms: 250
+timeout:
+  connect_ms: 2000
+  read_ms: 5000

@@ -29,3 +29,15 @@ tmp/
 local/
 *.local.md
 private/
+
+# Codebase-memory index + harvest staging — never part of the distillation
+.codebase-memory/
+distillation/harvest/
+
+# Orchestration-bench throwaway build outputs (the FINDINGS live in distillation-log.md,
+# not in the 100s of generated trial packages). Keep the instrument (ladder.py, graders,
+# tasks/ fixtures, evidence/ sample), ignore the generated runs + calibration scratch.
+distillation/orchestration_bench/ladder_runs/
+distillation/orchestration_bench/ladder_runs_v1_compressible/
+distillation/orchestration_bench/calib/
+distillation/orchestration_bench/calib_large/
