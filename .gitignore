@@ -34,6 +34,13 @@ private/
 .codebase-memory/
 distillation/harvest/
 
+# AI-review / adaptive-harness generated report runs (same rationale as the
+# orchestration_bench block below: FINDINGS live in tracked memory/ + the
+# operator's ~/.claude/audits history, not in regenerable report artifacts).
+# Privacy also applies: reports can embed telemetry harvested from the local
+# ~/.claude harness scan, which must never land in a public repo.
+reports/
+
 # Orchestration-bench throwaway build outputs (the FINDINGS live in distillation-log.md,
 # not in the 100s of generated trial packages). Keep the instrument (ladder.py, graders,
 # tasks/ fixtures, evidence/ sample), ignore the generated runs + calibration scratch.

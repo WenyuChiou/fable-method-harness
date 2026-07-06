@@ -193,3 +193,26 @@ was NOT RUN this round and is recorded as such.
   records cite mhc artifacts, which is acceptable (provenance citations are
   not reading requirements — same class as the 2026-07-02 route-resolution
   run's check (c) note).
+
+---
+
+## Executed 2026-07-06 — Phase-1 AI-review surface probe (scoped)
+
+**Scope:** the edit round adding the AI-review runner surface (2 schemas,
+runner + test, mode prompts, codex policy, benchmark scaffold, 7 INDEX
+entries). Checks COMPUTED by script (scratchpad smoke_probe.py — grep on
+retrieval_keywords/content terms + INDEX ghost sweep), not claimed. The
+P1–P12 mhc probe grid was NOT RUN this round (unchanged surface) and is
+recorded as such.
+
+### Checks
+
+| Check | Result | Detail |
+|---|---|---|
+| 6 new-surface probes ("codex delegation policy tripwire", "ai review modes checklist ingest", "review report schema shared contract", "recommendation finding schema traceability", "ai review benchmark cases ab test", "ai review runner report-only") | **PASS 6/6** | every probe's expected file matched on all terms |
+| INDEX.yaml ghost sweep (124 entries) | **PASS** | 0 entries point at missing files |
+| ROUTES.yaml path references | **PASS** | via scripts/check_agent_artifacts.py, exit 0 (no route edits this round) |
+| INDEX-matches-disk (reverse direction) | **KNOWN GAP** | 31 pre-existing unregistered files under distillation/orchestration_bench/ — now machine-detected every run by scripts/run_ai_review.py (index_drift); disposition tracked as OPT-20260706-001 (patch_proposal, human decision) |
+
+### Verdict: **PASS** (scoped) — with the pre-existing orchestration_bench
+INDEX gap explicitly carried as an open OPT item, not silently absorbed.

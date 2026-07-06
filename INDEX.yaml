@@ -837,3 +837,52 @@ files:
     purpose: "Versioned git pre-commit hook that runs scripts/check_agent_artifacts.py; a nonzero exit blocks the commit (overlay-local DR-011 no-silent-pass). Enable per clone: git config core.hooksPath scripts/hooks."
     tags: ["hook", "pre-commit", "validation", "gate", "overlay"]
     read_when: "Wiring the overlay integrity gate into git, or onboarding a fresh clone (must set core.hooksPath scripts/hooks)."
+
+  - path: schemas/review_report.schema.yaml
+    id: SCHEMA-review-report
+    layer: schema
+    purpose: "JSON Schema (draft 2020-12) for one AI-review / adaptive-harness review report - the shared report contract both systems write and read so they never fork formats; deterministic fields computed by the runner, semantic arrays filled only via validated LLM ingest."
+    tags: ["schema", "ai-review", "adaptive-harness", "report", "shared-contract"]
+    read_when: "Writing or validating a review report JSON, a history row's parent report, or wiring a new review mode."
+
+  - path: schemas/recommendation.schema.yaml
+    id: SCHEMA-recommendation
+    layer: schema
+    purpose: "JSON Schema (draft 2020-12) for one review recommendation record - evidence on both sides, Keep/Simplify/Remove/Replace/Merge/Cache/Experiment disposition, suggested test, and source_review_id traceability; the finding contract the adaptive-harness rolling loop consumes."
+    tags: ["schema", "recommendation", "finding", "ai-review", "traceability"]
+    read_when: "Producing findings for --ingest, validating a report's recommendations, or linking a benchmark case to its source recommendation."
+
+  - path: scripts/run_ai_review.py
+    id: SCRIPT-run-ai-review
+    layer: validation
+    purpose: "Deterministic AI-review runner - 7 modes, repo inventory, INDEX/ROUTES integrity, diff scan, deprecated-marker scan, ~/.claude telemetry harvest (calls existing scripts, never reimplements), validated LLM ingest, JSON+MD reports, JSONL history; never edits harness files, dry-run writes nothing, scheduled mode is report-only."
+    tags: ["validation", "script", "ai-review", "runner", "report-only", "deterministic"]
+    read_when: "Running any AI-review mode, wiring a scheduled review, or extending collectors/modes."
+
+  - path: scripts/test_run_ai_review.py
+    id: TEST-run-ai-review
+    layer: validation
+    purpose: "Regression tests pinning the AI-review runner contract: dry-run writes nothing, every mode emits schema-core-valid JSON, scheduled mode is report-only, invalid ingest findings are rejected, history JSONL appends, and the benchmark/mode-prompt/policy artifacts stay wired. Dual-runnable: standalone (exit 0/1) or pytest."
+    tags: ["validation", "test", "regression", "ai-review", "runner"]
+    read_when: "After changing run_ai_review.py or any Phase-1 AI-review artifact; run to confirm the contract holds."
+
+  - path: prompts/ai-review-modes.md
+    id: PROMPT-ai-review-modes
+    layer: prompt
+    purpose: "Semantic (LLM-side) checklists for each AI-review mode - harness cleanup, invocation efficiency, codex delegation, diff, experiment - with the ingest output contract and model-tier boundaries; the judgment half of the runner's deterministic/semantic split."
+    tags: ["prompt", "ai-review", "modes", "checklist", "ingest"]
+    read_when: "An LLM session is executing a review mode and needs the mode's judgment checklist and output contract."
+
+  - path: docs/codex-delegation-policy.md
+    id: DOC-codex-delegation-policy
+    layer: doc
+    purpose: "The single canonical Codex delegation policy: one-line rule, canonical >=3-file tripwire, suitable/unsuitable lists, non-negotiable mechanics (brief-first, scope fence, never commits, review-before-ship), fallbacks; other files point here instead of restating."
+    tags: ["doc", "codex", "delegation", "policy", "canonical"]
+    read_when: "Deciding whether to delegate to Codex, running codex_delegation_review, or resolving conflicting delegation statements."
+
+  - path: benchmarks/ai_review_cases.yaml
+    id: DATASET-ai-review-cases
+    layer: dataset
+    purpose: "A/B benchmark scaffold for uncertain-value harness scaffolding - 8 pre-registered cases (planning, todo, scan scope, subagent, codex delegation, brief, report generation, pointer-based CLAUDE.md) each linked to its motivating recommendation id."
+    tags: ["dataset", "benchmark", "ab-test", "ai-review", "pre-registration"]
+    read_when: "experiment_review mode, or when a Keep/Remove dispute needs data instead of debate."

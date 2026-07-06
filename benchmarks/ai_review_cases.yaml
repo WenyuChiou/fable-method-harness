@@ -1,0 +1,99 @@
+# ---
+# id: DATASET-ai-review-cases
+# layer: dataset
+# purpose: A/B benchmark scaffold for harness scaffolding whose value is uncertain - each case pins variants, metrics, and success criteria BEFORE any run (DR-016), and links to the recommendation that motivated it.
+# read_when: experiment_review mode; deciding whether a Keep/Remove dispute needs data instead of debate; after any case completes, to record the verdict.
+# depends_on: [../schemas/recommendation.schema.yaml, ../docs/ab_test_protocol.md]
+# used_by: [SCRIPT-run-ai-review, PROMPT-ai-review-modes]
+# tags: [dataset, benchmark, ab-test, ai-review, experiments, pre-registration]
+# retrieval_keywords: [ai review benchmark cases, ab test scaffold, planning vs direct, todo vs no todo, diff only scan, subagent vs single agent, codex delegation benchmark, pointer based claude md, experiment status]
+# ---
+# Format contract: flat blocks parseable by run_ai_review.py::parse_benchmark_cases
+# (`- case_name:` first, then 4-space-indented flat keys). Keep it flat on purpose.
+# status enum: proposed | running | completed | rejected.
+# RUNNING a case is gated by pre-registration discipline (docs/ab_test_protocol.md):
+# criteria are committed BEFORE any arm runs; grading is blinded to arm identity.
+# KNOWN CEILING RISK (memory: harness-ab-ceilings-on-opus): plain-arm success on
+# Opus-class models hit 88-100% across prior scenario types - cases comparing
+# "harness on vs off" need tasks hard enough to leave headroom, or they measure nothing.
+
+cases:
+  - case_name: planning_vs_direct_execution
+    task_type: multi_step_repo_edit
+    variant_a: "Forced explicit plan step (plan file / plan mode) before any edit"
+    variant_b: "Direct execution, model plans implicitly"
+    expected_metrics: "task success, wall-clock, tokens, correction count, scope drift incidents"
+    success_criteria: "Adopt B if success rate is within 5pp of A while tokens or wall-clock drop >=20%; keep A if drift incidents rise"
+    manual_review_notes: "Ceiling risk HIGH on Opus/Fable-class (see header). Use tasks with >=3 distinct sub-goals and a trap (ambiguous requirement) or the arms will tie at ceiling."
+    status: proposed
+    linked_recommendation_id: REC-20260706-026
+
+  - case_name: todo_tracking_vs_no_todo
+    task_type: long_session_multi_goal
+    variant_a: "TaskCreate/TaskUpdate tracking enforced for sessions with >=3 sub-goals"
+    variant_b: "No task tracking, model barrels forward"
+    expected_metrics: "sub-goal completion rate, dropped-goal count, user 'you forgot X' corrections"
+    success_criteria: "Keep A only if dropped-goal count in B is measurably higher across >=10 sessions; else downgrade the discipline to optional"
+    manual_review_notes: "Existing signal: /ai-review 2026-W22 action #17 counted barrel-forward sessions - reuse that counting method for comparability."
+    status: proposed
+    linked_recommendation_id: REC-20260706-027
+
+  - case_name: broad_repo_scan_vs_diff_only_scan
+    task_type: review_run_scoping
+    variant_a: "harness_cleanup_review over the whole repo every run"
+    variant_b: "diff_review (--changed-files-only --since-ref <last-review-tag>) between monthly full scans"
+    expected_metrics: "findings recall (does B miss issues A catches?), runtime_sec from report metrics, tokens for the semantic pass"
+    success_criteria: "Adopt B cadence if it catches >=90% of A's non-recurring findings at <30% of the cost; full scan stays monthly regardless"
+    manual_review_notes: "Deterministic metrics come free from reports/ai-review history (runtime_sec, files_inspected counts) - compare there, not by impression."
+    status: proposed
+    linked_recommendation_id: REC-20260706-028
+
+  - case_name: subagent_review_vs_single_agent_review
+    task_type: code_review_gate
+    variant_a: "code-reviewer subagent spawn for the gate"
+    variant_b: "same checklist run inline by the main agent"
+    expected_metrics: "defects caught (seeded-bug recall), tokens, wall-clock, merge overhead"
+    success_criteria: "Keep A if seeded-bug recall is >=10pp higher (fresh-context isolation earning its cost); else B for small diffs with A reserved for governance/release triggers"
+    manual_review_notes: "Seed known bugs from the v0.88.15 retroactive-audit class (SDK kwarg, whitespace env var, silent normalization) for a real recall measure."
+    status: proposed
+    linked_recommendation_id: REC-20260706-029
+
+  - case_name: codex_delegation_vs_main_agent_mechanical
+    task_type: mechanical_multi_file_edit
+    variant_a: "Codex via codex-delegate skill (brief-first) on a 3-5 file mechanical transform"
+    variant_b: "Main agent does the same transform directly"
+    expected_metrics: "end-to-end wall-clock incl. brief writing + review, main-agent tokens, diff correctness on acceptance commands"
+    success_criteria: "Pin the tripwire: if A is not >=1.5x cheaper in main-agent tokens at 3-4 files, raise the mandatory threshold; the 3-5 file band is currently UNMEASURED (policy doc admits this)"
+    manual_review_notes: "Measured data exists only at 1, 8, 10+, 20+ files (codex-delegate SKILL.md dogfood table). This case fills the 3-5 gap that the canonical >=3 tripwire stands on."
+    status: proposed
+    linked_recommendation_id: REC-20260706-030
+
+  - case_name: codex_with_brief_vs_codex_without_brief
+    task_type: delegation_protocol
+    variant_a: "Codex with full on-disk brief (scope fence + runnable acceptance)"
+    variant_b: "Codex with a 2-3 sentence inline prompt, no brief file"
+    expected_metrics: "out-of-fence writes, acceptance pass rate first try, rework rounds, total wall-clock"
+    success_criteria: "Keep brief-first mandatory if B shows any out-of-fence write or >1 extra rework round in >=5 trials; else allow inline for single-file scoped tasks"
+    manual_review_notes: "The wrapper currently blocks long inline prompts (guard exits 2) - run variant B under CLAUDE_ALLOW_RAW_CODEX=1 in a scratch repo only."
+    status: proposed
+    linked_recommendation_id: REC-20260706-031
+
+  - case_name: llm_written_report_vs_script_json_plus_llm_summary
+    task_type: report_generation
+    variant_a: "LLM writes the whole review report from scratch each run"
+    variant_b: "run_ai_review.py generates JSON + MD deterministically; LLM only writes findings via --ingest"
+    expected_metrics: "tokens per report, number fabrication rate (numbers not traceable to a collector), format drift across runs"
+    success_criteria: "B adopted if fabrication rate is 0 and tokens drop >=50% - this is the DR-004 computed-not-claimed architecture; A should lose"
+    manual_review_notes: "B is already implemented as of Phase 1; this case exists to VALIDATE the migration with data, and as the regression bar if anyone proposes reverting to free-form reports."
+    status: proposed
+    linked_recommendation_id: REC-20260706-032
+
+  - case_name: legacy_claude_md_vs_pointer_based_slim
+    task_type: governance_file_architecture
+    variant_a: "Current ~215-line CLAUDE.md with inline rule bodies (dual review-gate sections, inline incident tables)"
+    variant_b: "~140-155 line pointer-based CLAUDE.md (single merged gate, incident narratives -> vault-rule pointers, per-repo content relocated)"
+    expected_metrics: "claude_md_eval.py verdicts on the 6-incident replay suite, rule-adherence probes, line count"
+    success_criteria: "B ships ONLY if claude_md_eval passes (all 6 incident replays still refuse/block/review correctly) - evidence, not vibes; a single regression = keep A and iterate"
+    manual_review_notes: "Runner: ~/.claude/scripts/claude_md_eval.py --samples 3, STANDALONE terminal only (it swaps the live global CLAUDE.md). The 6 replay scenarios are listed in the audit's Keep finding (REC-20260706-014)."
+    status: proposed
+    linked_recommendation_id: REC-20260706-015

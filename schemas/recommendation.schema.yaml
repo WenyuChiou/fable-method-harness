@@ -1,0 +1,87 @@
+# ---
+# id: SCHEMA-recommendation
+# layer: schema
+# purpose: JSON Schema (draft 2020-12) for one review recommendation record - the shared finding contract AI-review emits and the adaptive-harness rolling loop consumes, tracks across runs, and links to benchmarks.
+# read_when: Producing findings for --ingest, validating a report's recommendations array, or linking a benchmark case to its source recommendation.
+# depends_on: [./review_report.schema.yaml]
+# used_by: [SCRIPT-run-ai-review, PROMPT-ai-review-modes, DATASET-ai-review-cases]
+# tags: [schema, recommendation, finding, ai-review, adaptive-harness, shared-contract]
+# retrieval_keywords: [recommendation shape, finding schema, keep simplify remove replace experiment, evidence obsolete, risk if changed, suggested test, source review id, traceability]
+# ---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "fable-style-project-harness/schemas/recommendation.schema.yaml"
+title: Review recommendation record
+description: >-
+  One component-level finding with evidence, a disposition, and a test.
+  Traceability is the point (source_review_id + file_path + suggested_test):
+  every recommendation must be traceable to the review that produced it and
+  falsifiable by a named check. Findings are recommendations, never
+  automatic commands - application is a human decision, and high-risk
+  changes travel as patch proposals only.
+type: object
+additionalProperties: true
+required:
+  - recommendation_id
+  - component_name
+  - component_type
+  - file_path
+  - current_purpose
+  - evidence_it_still_helps
+  - evidence_it_may_be_obsolete
+  - recommendation
+  - expected_impact
+  - risk_if_changed
+  - suggested_test
+  - confidence
+  - priority
+  - source_review_id
+properties:
+  recommendation_id:
+    type: string
+    description: "Stable id, e.g. REC-20260706-001. Benchmarks and later reviews reference this."
+    pattern: "^REC-[0-9]{8}-[0-9]{3}$"
+  component_name:
+    type: string
+  component_type:
+    type: string
+    description: "prompt | rule | hook | subagent | skill | command | script | schema | doc | workflow | tool-format | delegation | other"
+  file_path:
+    type: string
+  current_purpose:
+    type: string
+  evidence_it_still_helps:
+    type: string
+    description: "Cited evidence (file:line, telemetry, incident id) - or an explicit 'none found'."
+  evidence_it_may_be_obsolete:
+    type: string
+    description: "Cited evidence - or an explicit 'none found'. UNVERIFIED markers allowed; guesses are not."
+  recommendation:
+    type: string
+    enum: [Keep, Simplify, Remove, Replace, Merge, Cache, Experiment]
+  expected_impact:
+    type: string
+  risk_if_changed:
+    type: string
+    description: "Also covers risk_if_removed for Remove recommendations."
+  suggested_test:
+    type: string
+    description: A runnable or falsifiable check that would validate applying (or rejecting) this recommendation.
+  confidence:
+    type: string
+    enum: [low, medium, high]
+  priority:
+    type: string
+    enum: [P0, P1, P2, P3]
+  source_review_id:
+    type: string
+    description: review_id of the report this record first appeared in.
+  status:
+    type: string
+    enum: [open, repeated, resolved, rejected, superseded]
+    description: "Rolling-loop lifecycle (Phase 2): repeated = seen in 2+ reviews; resolved = a commit closed it."
+  linked_benchmark_case:
+    type: string
+    description: case_name in benchmarks/*.yaml when recommendation is Experiment.
+  requires_human_approval:
+    type: boolean
+    description: "True for high-risk classes: deleting prompts/subagents/hooks, permissions, settings.json, CI."
