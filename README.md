@@ -39,6 +39,45 @@ Two layers, one discipline:
   `docs/ai_review_adaptive_harness_integration.md` — deterministic scripts
   compute, LLMs judge, humans approve, scheduled runs stay report-only.
 
+## Quickstart (newcomers — you use Claude Code, you've never seen this repo)
+
+```bash
+git clone https://github.com/WenyuChiou/fable-style-project-harness
+cd fable-style-project-harness
+git config core.hooksPath scripts/hooks     # enable the pre-commit gates (recommended)
+python validation/integration_check.py      # 51 self-checks; all-PASS = your clone works
+```
+
+Two ways to use it, pick per task:
+
+**A. Run big tasks the Fable way** — tell Claude Code: *"read
+`core/GLOBAL_BOOTSTRAP.md` and follow it"* (or add a two-line pointer in
+your own `~/.claude/CLAUDE.md`). It loads ~5% of this repo per task via
+`ROUTES.yaml`, works the task loop, and gates every done-claim. Use it for
+multi-agent / long-horizon / expensive-if-wrong work; skip it for simple
+tasks (frontier models ace those bare — measured, see
+`distillation/distillation-log.md`).
+
+**B. Audit & continuously improve your own AI setup** (your CLAUDE.md,
+hooks, skills):
+
+```bash
+python scripts/run_ai_review.py --mode harness_cleanup_review --target <your-repo>
+# then in a Claude session: read reports/ai-review/latest.json, answer
+# prompts/ai-review-modes.md's checklist, save findings.json, and:
+python scripts/run_ai_review.py --mode harness_cleanup_review --ingest findings.json
+python scripts/run_adaptive_harness_review.py --mode rolling_improvement_review --target <your-repo>
+python scripts/run_adaptive_harness_review.py --mode patch_proposal   # high-risk items -> a sheet YOU approve
+```
+
+Approve a proposal → commit with `applies REC-YYYYMMDD-NNN` in the message
+→ the next rolling run marks it resolved with the commit sha. Optional
+hands-off weekly report: `scripts\register_scheduled_scan.bat` (Windows;
+report-only BY CODE — it can never modify anything). Non-Claude agents
+enter via [`AGENTS.md`](AGENTS.md) §Harness-maintenance path; collectors
+that depend on the original operator's machine mark themselves
+`unavailable` and everything else runs.
+
 ## What this repo IS
 
 - **Method summaries, procedures, rubrics, examples, and decision records**

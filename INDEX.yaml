@@ -952,6 +952,13 @@ files:
     tags: ["entrypoint", "skill", "runtime-wrapper"]
     read_when: "Auto-discovered by skill-convention runtimes; read manually when wiring a new runtime."
 
+  - path: scripts/register_scheduled_scan.bat
+    id: SCRIPT-register-scheduled-scan
+    layer: validation
+    purpose: "One-time Windows Task Scheduler registration for the weekly report-only AI-review scan (Mon 09:05) - path-portable via %~dp0 so the same script works on any clone; scheduled mode is report-only BY CODE and cannot mutate anything."
+    tags: ["script", "scheduling", "windows", "report-only", "ai-review"]
+    read_when: "Setting up hands-off weekly review reports on this or a new machine; delete via schtasks /delete /tn ClaudeAiReviewScheduledScan /f."
+
   # --- portable core layer (global entry for non-mhc sessions; added 2026-07-02) ---
   - path: core/GLOBAL_BOOTSTRAP.md
     id: CORE-global-bootstrap
