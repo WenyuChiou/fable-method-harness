@@ -55,3 +55,8 @@ distillation/orchestration_bench/ladder_runs/
 distillation/orchestration_bench/ladder_runs_v1_compressible/
 distillation/orchestration_bench/calib/
 distillation/orchestration_bench/calib_large/
+
+# Operator-machine audit findings (never-include: local scan output) — decision
+# records stay in 99_OPEN_OPTIMIZATION_SPACE.md; raw findings stay local.
+fable_ultracode_phase_workspace/phase1_findings.json
+fable_ultracode_phase_workspace/round2_open_findings.json

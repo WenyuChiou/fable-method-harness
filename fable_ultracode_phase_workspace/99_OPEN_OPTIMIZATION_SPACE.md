@@ -129,24 +129,24 @@ ingested into `reports/ai-review/history/2026-07-06-ai-review.json`.
 
 ### OPT-20260706-002 — Merge the 4 PreToolUse(Bash) hooks into one dispatcher
 - Source Phase: Phase 1 · Category: code_invocation_efficiency
-- Current Problem: 4 separate Python interpreters per Bash call (~280 ms measured); a logged 2,262-Bash-call session ⇒ ~8 min dead startup (audit invocation lane, measured 65-70 ms/hook).
+- Current Problem: 4 separate Python interpreters per Bash call (per-fire interpreter cost measured on the operator machine); heavy sessions accumulate minutes of dead startup (audit invocation lane; exact figures in the private dotfiles-side records).
 - Proposed Change: one dispatcher hook importing the 4 checks as module functions; keep per-check tests.
 - Classification: `patch_proposal` (hooks = governance surface; human approval)
-- Expected Benefit: ~200 ms saved per Bash call; thousands fewer Windows forks per heavy session.
+- Expected Benefit: most per-Bash-call interpreter overhead removed; thousands fewer Windows forks per heavy session.
 - Risk: one dispatcher bug degrades all 4 gates at once. Mitigate: import-not-rewrite + existing hooks/tests suite.
 - Required Test: replay logged Bash payloads through dispatcher, assert identical allow/warn/block verdicts per hook; time 100 fires before/after.
 - Human Approval Needed? yes · Status: proposed
 
 ### OPT-20260706-003 — Merge the 3 UserPromptSubmit Python hooks
-- Same shape as OPT-002 (~130 ms/prompt saving). Verify multiple additionalContext entries can be concatenated safely.
+- Same shape as OPT-002 (meaningful per-prompt saving). Verify multiple additionalContext entries can be concatenated safely.
 - Classification: `patch_proposal` · Human Approval Needed? yes · Status: proposed
 
 ### OPT-20260706-004 — Remove statusline_pro.mjs (superseded Node relic on UserPromptSubmit '*')
 - Source Phase: Phase 1 · Category: code_invocation_efficiency
-- Current Problem: 244 ms + ~6 forks per prompt, Node on a '*' matcher (the exact d5f0bde anti-pattern); superseded by the June-16 coralline statusLine; output likely invisible.
+- Current Problem: Node cold-start + multiple forks per prompt on a '*' matcher (the exact d5f0bde anti-pattern); superseded by a newer statusLine; output likely invisible.
 - Proposed Change: unwire from settings.json (file stays in git history).
 - Classification: `patch_proposal` (settings.json = human approval required)
-- Expected Benefit: ~55% of UserPromptSubmit hook latency removed.
+- Expected Benefit: the majority of UserPromptSubmit hook latency removed.
 - Risk: very low; one-week trial answers "did anyone miss it".
 - Required Test: one-week removal trial; confirm no missing-statusline complaint and prompt latency drop in hook telemetry.
 - Human Approval Needed? yes · Status: proposed
@@ -230,9 +230,9 @@ ingested into `reports/ai-review/history/2026-07-06-ai-review.json`.
 - Required Test: `python scripts/build_harness_graph.py` → root_relative_depends_on_count == 0 (if standardized).
 - Human Approval Needed? no (mechanical sweep, Codex-eligible if adopted) · Status: proposed
 
-### OPT-20260706-010 — Rotate/bound ~/.claude/logs/hook_events.jsonl (2.6 MB tail-read per tool call)
+### OPT-20260706-010 — Rotate/bound the hook-events telemetry log (multi-MB tail-read per tool call)
 - Source Phase: Phase 1 · Category: code_invocation_efficiency
-- Current Problem: correlate_brain_evidence.py (PostToolUse '*') tail-reads a growing 2.6 MB JSONL every tool call.
+- Current Problem: correlate_brain_evidence.py (PostToolUse '*') tail-reads a growing multi-MB JSONL every tool call.
 - Proposed Change: marker-file early-bail + size-based rotation (keep last N MB; hook_stats reads rotated set).
 - Classification: `patch_proposal` (hook + telemetry contract change)
 - Required Test: hook_stats.py --days 30 output identical across rotation boundary; per-fire time before/after.
