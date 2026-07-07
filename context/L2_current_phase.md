@@ -20,8 +20,24 @@ Snapshot as of **2026-07-06, source repo at commit `0b8e4f8`** (verified
 against the source repo's git log; reconciled from the retired old-clone
 worktree plus records PH-019..PH-028). **Major events since the previous
 committed snapshot: N=2 gate arm (a) RAN — NULL (`26d24df`) — AND the
-revised gate v2 RAN — NULL on BOTH claims (`0b8e4f8`). Phase 3 is NO_GO;
-the next real step is a STRATEGIC decision that belongs to the human.**
+revised gate v2 RAN — NULL on BOTH claims (`0b8e4f8`).**
+
+> **UPDATE 2026-07-06 (later round) — the strategic decision is RESOLVED
+> (AD-022 / PH-030).** The former TOP-priority "strategic decision pending
+> the human" is closed via REPOSITIONING: the product claim is the
+> auditable evidence/policy BUNDLE + toolchain (package standard, `phc
+> validate/eval/audit`, provenance discipline, computed scorecards) — NOT
+> behavioral superiority of harness structure over prompts; the "expert
+> packs you can audit" wedge (design review 2026-07-01, B9) becomes primary
+> positioning. Outcome-correctness (evaluation_framework Category 7) is
+> now the REQUIRED axis for any future capability claim. Phase 3 is
+> RE-GATED to **design-only CONDITIONAL_GO** (criteria below). Provenance:
+> decided 2026-07-06 by Fable under explicit user delegation
+> 「做你認為最好的」; **user retains veto**. Source-repo decision record:
+> the repositioning ADR in `method-harness-compiler` (lands in this same
+> 2026-07-06 orchestrated round, Lane 1). Honesty bound: the two NULLs
+> below remain published and stated AS-IS — the repositioning claims
+> nothing beyond the measured citation/policy-naming edge.
 
 ## Where the project actually is
 
@@ -35,7 +51,7 @@ the next real step is a STRATEGIC decision that belongs to the human.**
 | N=3 — third demo via `phc new` dogfood, zero schema edits | DONE |
 | M2a — tool-discovery research (27 sources scored, metadata-only) | DONE (2026-07-02, commit `510b79f`) |
 | M2b — first-wave builder primitives + fixture-regeneration gate | SHIPPED, gate-measured (commit `91b982b`) |
-| **Phase 3 — evidence and methodology extraction** | **NO_GO — work order exists (`2ad438b`) but its CONDITIONAL_GO collapsed when arm (a) failed (ARCH-1)** |
+| **Phase 3 — evidence and methodology extraction** | **RE-GATED (AD-022, 2026-07-06): design-only CONDITIONAL_GO — DESIGN allowed under the frozen extraction-quality criteria; BUILDING stays forbidden until the criteria pass.** (History: work order `2ad438b`; its original CONDITIONAL_GO collapsed when arm (a) failed (ARCH-1); v2 gate also NULL.) |
 
 Phases 0–2 are done *through the first-wave builder primitives at
 `91b982b`*, plus **BOTH second-wave registry adapters SHIPPED**
@@ -69,16 +85,28 @@ an OPTIONAL full model-router (task→tier dispatch). Suite: **768 passing,
 
 Per the phase-gate doctrine both NULLs are **published, not re-run**. The
 central "compiled harness beats a naive prompt" claim is **NOT SUPPORTED**
-by two independent blinded evals. The honest next step is **STRATEGIC, not
+by two independent blinded evals. The honest next step was **STRATEGIC, not
 a third behavioral gate**: (a) reposition around the evidence/policy bundle
 the harness demonstrably provides, (b) test a different value axis the
 behavioral gates don't reach (outcome correctness / auditability at scale /
-consistency across authors), or (c) accept the null. **That decision is the
-human's.**
+consistency across authors), or (c) accept the null.
 
-## Paused state — allowed vs forbidden
+**RESOLVED 2026-07-06 (AD-022): option (a) — repositioning — was taken,
+with (b)'s outcome-correctness axis adopted as the mandatory bar for any
+future capability claim.** The NULL results themselves stand unchanged.
 
-**Allowed while paused (no gate required):**
+## Current state — allowed vs forbidden (updated 2026-07-06, post-AD-022)
+
+**Allowed (no further gate required):**
+
+- **Phase-3 DESIGN under AD-022's frozen-criteria frame** — architecting
+  the no-fabrication code-gate for evidence extraction, and drafting/
+  freezing the falsifiable extraction-quality criteria BEFORE any build:
+  on a pre-registered source set, machine-extracted evidence cards must
+  meet the hand-authored bar — verified-ratio ≥ 0.9 on fetchable sources,
+  ZERO fabricated locators under adversarial audit, 100% quote-cap and
+  attribution-cap compliance. Failure on ANY criterion = extraction
+  automation NO_GO again.
 
 - Reading, auditing, and re-verifying any shipped artifact (re-run
   `scripts/run_evals.py`, `scripts/generator_gate.py`, pytest).
@@ -90,17 +118,21 @@ human's.**
 - Designing (not running) future evals and A/B protocols —
   pre-registration artifacts are welcome; runs are not.
 
-**Forbidden until the strategic decision is made:**
+**Forbidden:**
 
-- Starting Phase-3 automation (source discovery, evidence-card builder,
-  principle extractor, source-to-principle mapper, attribution classifier).
-  The architect work order exists (`docs/phase3_entry_work_order.md`,
-  `2ad438b`) BUT it is **NO_GO**: arm (a) did not pass (ARCH-1) and the
-  revised v2 gate also returned NULL on both claims (`0b8e4f8`). Building
-  stays forbidden until the human makes the strategic call (reposition /
-  new value axis / accept the null) and whatever gate that call implies is
-  re-cleared. **Do NOT design or run a third behavioral gate as a
-  substitute for that decision.**
+- **BUILDING Phase-3 extraction automation** (source discovery,
+  evidence-card builder, principle extractor, source-to-principle mapper,
+  attribution classifier). The strategic decision is resolved (AD-022) and
+  DESIGN is allowed, but **construction stays forbidden until the frozen
+  extraction-quality criteria (above) are ratified and then PASS** on the
+  pre-registered source set. History: work order `2ad438b`; arm (a) NULL
+  (ARCH-1) and v2 gate NULL on both claims (`0b8e4f8`). **Do NOT design or
+  run a third behavioral gate — behavioral-superiority claims are closed;
+  any future capability claim must be outcome-grounded (Category 7) and
+  pre-registered (AD-022 part 2).**
+- Any new capability claim (in README, docs, positioning, or eval reports)
+  implying the bundle is superior beyond the measured citation /
+  policy-naming edge; any weakening of the published NULL language.
 - Any schema edit outside a logged `CHANGELOG_STANDARD.md` revision with
   friction-ID citations and mutation regression tests.
 - Hand-editing any computed scorecard; guessing any UNSCORED value.
@@ -108,7 +140,7 @@ human's.**
 - Fabricating evidence to fill `TODO_FILL` markers.
 - Drawing capability/accuracy claims from the n=3 Category-7 pilot.
 
-## Required outputs of the next phase (Phase 3, per `development_plan.md` — currently NO_GO, do not start)
+## Required outputs of the next phase (Phase 3, per `development_plan.md` — design-only CONDITIONAL_GO per AD-022; do NOT build until the frozen criteria pass)
 
 - [ ] Source discovery
 - [ ] Evidence card builder
