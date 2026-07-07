@@ -74,16 +74,15 @@ candidate commit (not from memory):
 
 Any unchecked box = the publication event halts. Halt is a success.
 
-## Outstanding items (honest ledger — the repo went public before this
-checklist was formally executed)
+## Outstanding items ledger (append-only)
 
-- **License: NOT YET DECIDED.** No LICENSE file exists; the public repo
-  defaults to all-rights-reserved. `memory/project_state.md` records MIT +
-  NOTICE-carve-out intent — a human must decide and commit it
-  (OPT item in the Phase-2 workspace log; agents must not choose a license).
-- **Full-history secret scan: UNVERIFIED in this session** — the 2026-07-06
-  posture reconciliation verified visibility and updated policy text; it did
-  not run a history-wide scanner. Run one at the next release gate.
+- **License: DECIDED — MIT** (human decision 2026-07-06, OPT-20260706-011
+  closed): `LICENSE` committed at repo root, plain MIT (the source repo's
+  NOTICE carve-out was mhc-specific quoted material; this repo carries none).
+- **Full-history secret scan: EXECUTED 2026-07-06** — gitleaks 8.30.1 over
+  the complete git history (22 commits, ~1.05 MB scanned): **no leaks
+  found** (OPT-20260706-012 closed). Re-run at each future release gate;
+  the finding is point-in-time, not perpetual.
 
 ## 4. Required `.gitignore`
 
