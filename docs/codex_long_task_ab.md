@@ -102,6 +102,10 @@ local `.harness/` directory and points Codex to `.harness/core/GLOBAL_BOOTSTRAP.
 This keeps the activation readable inside `workspace-write` sandboxing without
 letting the trial inherit the harness repo's own runtime instructions.
 
+The runner sends the complete prompt to `codex exec -` over stdin. On Windows,
+this avoids `cmd /c` argument parsing truncating multi-section prompts before
+the `TASK:` block.
+
 ## 2026-07-08 Runner Smoke
 
 Run id: `live_probe_lt3_pathfix_20260708`.

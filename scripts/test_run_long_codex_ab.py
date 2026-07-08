@@ -60,6 +60,29 @@ def test_run_trial_command_uses_supported_exec_flags(monkeypatch=None):
     assert '"--ask-for-approval"' not in source
 
 
+def test_codex_prompt_is_sent_via_stdin():
+    source = RUNNER.read_text(encoding="utf-8")
+    assert '"-",' in source
+    assert "run_codex_process(cmd, work, timeout, prompt)" in source
+    assert "proc.communicate(input=stdin_text" in source
+    assert "stdin=subprocess.PIPE" in source
+
+
+def test_run_codex_process_delivers_multiline_stdin():
+    with tempfile.TemporaryDirectory() as tmp:
+        prompt = "ISOLATION:\nalpha\n\nTASK:\nbeta\n\nOUTPUT CONTRACT:\ngamma"
+        script = "import sys; data=sys.stdin.read(); print(data.replace('\\n', '<NL>'))"
+        stdout, stderr, rc, timeout_reason = runner.run_codex_process(
+            [sys.executable, "-c", script],
+            Path(tmp),
+            timeout=10,
+            stdin_text=prompt,
+        )
+        assert rc == 0, stderr
+        assert timeout_reason == ""
+        assert "ISOLATION:<NL>alpha<NL><NL>TASK:<NL>beta<NL><NL>OUTPUT CONTRACT:<NL>gamma" in stdout
+
+
 def test_timeout_is_recorded_as_unscored():
     source = RUNNER.read_text(encoding="utf-8")
     assert "except subprocess.TimeoutExpired" in source

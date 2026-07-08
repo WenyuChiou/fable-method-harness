@@ -81,13 +81,14 @@ def codex_exec_command(args: list[str]) -> list[str]:
     return ["codex", *args]
 
 
-def run_codex_process(cmd: list[str], work: Path, timeout: int) -> tuple[str, str, int | None, str]:
+def run_codex_process(cmd: list[str], work: Path, timeout: int, stdin_text: str = "") -> tuple[str, str, int | None, str]:
     """Run Codex and reliably terminate its process tree on timeout."""
     start_new_session = os.name != "nt"
     creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
     proc = subprocess.Popen(
         cmd,
         cwd=str(work),
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -97,7 +98,7 @@ def run_codex_process(cmd: list[str], work: Path, timeout: int) -> tuple[str, st
         creationflags=creationflags,
     )
     try:
-        stdout, stderr = proc.communicate(timeout=timeout)
+        stdout, stderr = proc.communicate(input=stdin_text, timeout=timeout)
         return stdout, stderr, proc.returncode, ""
     except subprocess.TimeoutExpired as exc:
         if os.name == "nt":
@@ -611,10 +612,10 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool,
         "--skip-git-repo-check",
         "-o",
         str(final_path),
-        prompt,
+        "-",
     ])
     started = time.perf_counter()
-    stdout, stderr, exit_code, timeout_reason = run_codex_process(cmd, work, timeout)
+    stdout, stderr, exit_code, timeout_reason = run_codex_process(cmd, work, timeout, prompt)
     duration = round(time.perf_counter() - started, 2)
     write(events_path, stdout)
     write(trial_dir / "codex_stderr.txt", stderr)
