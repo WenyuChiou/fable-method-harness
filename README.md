@@ -94,8 +94,9 @@ This repo is not marketed as a model-capability booster. The measured value is p
 | Clone health | 51 deterministic checks | `python validation/integration_check.py` |
 | Runtime compatibility | Haiku 4/4, Sonnet 2/2, Codex 2/2 executed cases; Codex n=1 scoped edit honored file fence and no-commit rule | `benchmarks/model_compatibility_cases.yaml` |
 | Context economy | Routed file sets are far smaller than whole-repo loading | `docs/evidence.md` |
-| GPT-5.5 forced-activation pilot | No quality lift detected: A 4/5 pass, B 4/5 pass; false-done A 1/5, B 1/5; B used 1.58x tool calls and 2.84x input tokens | `python scripts/summarize_harness_ab_pilot.py --markdown` |
-| Long/multi-step gap found | T5 governance-sensitive fixture failed in both arms; this is a harness gap, not a win | `evals/harness_ab/pilot_2026-07-07/scorecards/T5_pair.json` |
+| GPT-5.5 forced-activation pilot | No quality lift detected: A 4/5 pass, B 4/5 pass; false-done A 1/5, B 1/5; B used 1.58x tool calls and 2.84x input tokens | `docs/harness_ab_pilot_2026_07_07.md` |
+| Long/multi-step gap found | T5 governance-sensitive fixture failed in both arms; this is a harness gap, not a win | `docs/harness_ab_pilot_2026_07_07.md` |
+| Post-fix governance regression | After adding the governance trigger to `core/GLOBAL_BOOTSTRAP.md`, one isolated Codex T5 run left destructive settings unchanged and requested approval/narrower allowlist | `docs/t5_codex_governance_regression.md` |
 
 Interpretation: use the harness where process failure is plausible, not as a blanket prompt upgrade. The formal A/B protocol remains pre-registered future work in `docs/ab_skill_effect_protocol.md`.
 
@@ -116,7 +117,7 @@ python scripts/run_adaptive_harness_review.py --mode rolling_improvement_review 
 python scripts/run_adaptive_harness_review.py --mode patch_proposal
 ```
 
-Summarize the pilot A/B scorecards:
+Summarize local pilot A/B scorecards when the ignored raw `evals/` directory is present:
 
 ```bash
 python scripts/summarize_harness_ab_pilot.py --markdown
@@ -132,8 +133,9 @@ python scripts/summarize_harness_ab_pilot.py --markdown
 | `.claude/skills/adaptive-harness/` | Runtime-agnostic adapter for auditing and improving AI harnesses. |
 | `scripts/` | Deterministic runners, validators, setup, and evidence summarizers. |
 | `validation/` | Integration and retrieval smoke checks. |
-| `benchmarks/` and `evals/` | Compatibility cases and A/B pilot artifacts. |
-| `docs/` | Evidence, publication status, routing policy, integration guides. |
+| `benchmarks/` | Compatibility and retrieval cases. |
+| `docs/` | Evidence, durable A/B summaries, publication status, routing policy, integration guides. |
+| `evals/` | Local ignored raw runs only; do not cite as public evidence. |
 
 ## Safety And Publication Rules
 
@@ -145,7 +147,7 @@ This repo is public. Do not add secrets, credentials, private chat exports, hidd
 2. Add runnable evidence for new claims.
 3. Mark unmeasured dimensions `UNSCORED`, not guessed.
 4. Run `python validation/integration_check.py` before proposing a change.
-5. For README/evidence changes, run `python scripts/summarize_harness_ab_pilot.py --markdown` if you cite the pilot.
+5. For README/evidence changes, update `docs/harness_ab_pilot_2026_07_07.md` or the relevant tracked evidence doc; run `python scripts/summarize_harness_ab_pilot.py --markdown` only when local ignored scorecards are present.
 
 ## License
 

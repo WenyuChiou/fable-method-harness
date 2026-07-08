@@ -6,8 +6,8 @@ read_when: Deciding whether the harness improves agent work, updating README evi
 depends_on:
   - ./evidence.md
   - ./ab_skill_effect_protocol.md
-  - ../evals/harness_ab/pilot_2026-07-07/preregistration.md
-  - ../evals/harness_ab/pilot_2026-07-07/interim_report.md
+  - ./harness_ab_pilot_2026_07_07.md
+  - ./t5_codex_governance_regression.md
   - ../scripts/summarize_harness_ab_pilot.py
 used_by: [README, ROUTE-eval-design, ROUTE-ab-test-design]
 tags: [codebase-memory, evidence, ab-test, long-work, multi-step, codex]
@@ -23,7 +23,7 @@ This assessment used the codebase-memory MCP index for the harness repo as the f
 - YAML/Markdown harness surface plus Python utility scripts.
 - Deterministic runners in `scripts/run_ai_review.py` and `scripts/run_adaptive_harness_review.py`.
 - Verification surface in `validation/integration_check.py`, `validation/retrieval_probe.py`, and `scripts/build_harness_graph.py`.
-- A/B and long-work evidence under `distillation/orchestration_bench/` and `evals/harness_ab/`.
+- A/B and long-work evidence under `distillation/orchestration_bench/`, local ignored `evals/` runs, and tracked durable summaries in `docs/`.
 - Agent compatibility evidence in `benchmarks/model_compatibility_cases.yaml`.
 
 When the graph result was load-bearing, the actual file was opened and read. The index is an accelerator, not proof by itself.
@@ -35,7 +35,7 @@ The graph reduced discovery time by pointing directly to the scoring and runner 
 | Question | Codebase-memory result | Follow-up file evidence |
 |---|---|---|
 | Where are the executable entry points? | `get_architecture` listed setup, review, graph, integration, retrieval, and orchestration grader entry points. | `scripts/setup_harness.py`, `validation/integration_check.py`, `distillation/orchestration_bench/grade.py` |
-| Where are long/multi-step metrics likely to live? | Search for orchestration/eval terms surfaced `distillation/orchestration_bench` and benchmark parsers. | `distillation/distillation-log.md`, `evals/harness_ab/pilot_2026-07-07/` |
+| Where are long/multi-step metrics likely to live? | Search for orchestration/eval terms surfaced `distillation/orchestration_bench` and benchmark parsers. | `distillation/distillation-log.md`, `docs/harness_ab_pilot_2026_07_07.md` |
 | What should README expose? | Architecture showed this is a docs+runner harness, not a library API. | README should lead with install, agent entry points, evidence, verification, and public-safety posture. |
 | What is the compatibility surface? | Agent-routing docs and model compatibility cases are first-class repo artifacts. | `SETUP.md`, `docs/agent-routing-policy.md`, `benchmarks/model_compatibility_cases.yaml` |
 
@@ -43,7 +43,7 @@ Net effect for this task: codebase-memory improved orientation and file targetin
 
 ## Actual A/B Pilot Metrics
 
-The current runnable pilot is `evals/harness_ab/pilot_2026-07-07`. It is a same-environment proxy, not a formal capability A/B. Arm A may be contaminated by global verification discipline.
+The tracked pilot summary is `docs/harness_ab_pilot_2026_07_07.md`. It summarizes local ignored scorecards from `evals/harness_ab/pilot_2026-07-07`. It is a same-environment proxy, not a formal capability A/B. Arm A may be contaminated by global verification discipline.
 
 Run:
 
@@ -95,7 +95,7 @@ What is not supported:
 - T6 shows over-triggering on trivial work.
 - The formal A/B design in `docs/ab_skill_effect_protocol.md` remains future work.
 
-Practical rule: use the harness for long, high-risk, multi-agent, completion-sensitive, or governance-sensitive work, but do not force it on small edits. For governance-sensitive changes, the harness must route to explicit approval or patch proposal before writes.
+Practical rule: use the harness for long, high-risk, multi-agent, completion-sensitive, or governance-sensitive work, but do not force it on small edits. For governance-sensitive changes, the harness must route to explicit approval or patch proposal before writes. The 2026-07-08 post-fix T5 regression was followed by the desired Codex behavior in one isolated run, but it is not a general quality-lift result.
 
 ## Future Codex Interface Requirement
 

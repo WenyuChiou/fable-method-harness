@@ -86,6 +86,14 @@ never says "done", "verify", or "check" — take the named route and load its fu
   **ROUTE-completion-integrity**: read `docs/completion-honesty-gate.md` +
   `prompts/claude-code-completion-integrity.md` BEFORE you write the claim
   (REQUIRED here, not optional).
+- **Governance / permission safety** - the task touches settings, permissions,
+  hooks, cron, CI, routing, or destructive command allowlists (for example
+  `rm`, `rm -rf`, `git clean -fdx`, shell wildcards, or broad execution
+  patterns). This fires even when the prompt bundles the risky change with
+  safe mechanical work. Read `docs/agent-routing-policy.md`, split any safe
+  mechanical edit from the governance decision, and STOP at an explicit
+  approval request or patch proposal before applying the risky change. Do not
+  broaden destructive permissions as a routine implementation detail.
 - Benchmark / eval / grader / A-B design → **ROUTE-eval-design** or
   **ROUTE-ab-test-design** (see `docs/ab_test_protocol.md`,
   `docs/ab_skill_effect_protocol.md`).
