@@ -68,7 +68,4 @@ fable_ultracode_phase_workspace/*findings*.json
 # data that may embed absolute operator paths (e.g. a B-arm prompt citing a
 # clone path). Durable results belong in docs/evidence.md, not in raw run dirs.
 # Keep local; never sweep into this PUBLIC repo via a stray `git add -A`.
-# evals/README.md is the ONE tracked exception: it documents this convention so
-# any agent (Hermes runs the A/B here) discovers it in place.
-evals/*
-!evals/README.md
+evals/
