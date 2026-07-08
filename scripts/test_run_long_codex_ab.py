@@ -147,6 +147,8 @@ def test_init_run_writes_manifest_and_preregistration():
             "unit",
             "--output-root",
             tmp,
+            "--work-root",
+            str(Path(tmp) / "work-root"),
             "--trials",
             "2",
             "--arms",
@@ -167,9 +169,12 @@ def test_init_run_writes_manifest_and_preregistration():
         assert "Claude" in manifest["isolation_policy"]
         assert manifest["raw_output_root"] == str(Path(tmp).resolve())
         assert manifest["raw_output_root_gitignored"] is False
+        assert manifest["execution_work_root"] == str((Path(tmp) / "work-root").resolve())
+        assert manifest["execution_work_root_inside_harness_repo"] is False
         prereg = (run_dir / "pre_registration.md").read_text(encoding="utf-8")
         assert "executor: `codex exec`" in prereg
         assert "Codex-only isolation" in prereg
+        assert "execution_work_root_inside_harness_repo: `false`" in prereg
 
 
 def test_init_run_rejects_unknown_arm_or_scenario():
@@ -184,7 +189,17 @@ def test_init_run_rejects_unknown_arm_or_scenario():
 
 def test_dry_run_creates_unexecuted_trial_results():
     with tempfile.TemporaryDirectory() as tmp:
-        proc = run_cli("init-run", "--run-id", "dry", "--output-root", tmp, "--trials", "1")
+        proc = run_cli(
+            "init-run",
+            "--run-id",
+            "dry",
+            "--output-root",
+            tmp,
+            "--work-root",
+            str(Path(tmp) / "work-root"),
+            "--trials",
+            "1",
+        )
         assert proc.returncode == 0, proc.stderr
         run_dir = Path(tmp) / "dry"
         proc2 = run_cli("run", "--run-dir", str(run_dir), "--limit", "2")
@@ -193,6 +208,10 @@ def test_dry_run_creates_unexecuted_trial_results():
         assert scorecard["status"] == "partial"
         assert len(scorecard["trials"]) == 2
         assert all(t["unscored_reason"] == "dry-run-no-model-execution" for t in scorecard["trials"])
+        first = scorecard["trials"][0]
+        assert Path(first["work_dir"]).is_absolute()
+        assert not str(Path(first["work_dir"]).resolve()).startswith(str(run_dir.resolve()))
+        assert (run_dir / first["trial_dir"] / first["work_snapshot"]).is_dir()
         prompt = next((run_dir / "trials").glob("*/prompt.txt")).read_text(encoding="utf-8")
         assert "Evaluation isolation" in prompt
         assert "Do not call, invoke, delegate to, compare with, or rely on Claude" in prompt
@@ -203,7 +222,17 @@ def test_dry_run_creates_unexecuted_trial_results():
 
 def test_resume_skips_existing_trial_results():
     with tempfile.TemporaryDirectory() as tmp:
-        proc = run_cli("init-run", "--run-id", "resume", "--output-root", tmp, "--trials", "1")
+        proc = run_cli(
+            "init-run",
+            "--run-id",
+            "resume",
+            "--output-root",
+            tmp,
+            "--work-root",
+            str(Path(tmp) / "work-root"),
+            "--trials",
+            "1",
+        )
         assert proc.returncode == 0, proc.stderr
         run_dir = Path(tmp) / "resume"
         proc2 = run_cli("run", "--run-dir", str(run_dir), "--limit", "1")

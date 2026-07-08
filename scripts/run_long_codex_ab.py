@@ -18,6 +18,7 @@ import signal
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_ROOT = REPO / "evals" / "long_codex_ab"
+DEFAULT_WORK_ROOT = Path(tempfile.gettempdir()) / "codex_long_task_ab_work"
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_TIMEOUT = 900
 
@@ -131,6 +133,29 @@ def is_gitignored(path: Path) -> bool:
         return False
     proc = run(["git", "check-ignore", "-q", str(path.resolve())], REPO)
     return proc.returncode == 0
+
+
+def is_relative_to(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def remove_tree_under(path: Path, root: Path) -> None:
+    if path.exists():
+        if not is_relative_to(path, root):
+            raise RuntimeError(f"refusing to remove path outside work root: {path}")
+        shutil.rmtree(path)
+
+
+def copy_work_snapshot(work: Path, trial_dir: Path) -> str:
+    snapshot = trial_dir / "work_snapshot"
+    if snapshot.exists():
+        shutil.rmtree(snapshot)
+    shutil.copytree(work, snapshot)
+    return str(snapshot.relative_to(trial_dir))
 
 
 def init_git(work: Path) -> None:
@@ -421,6 +446,7 @@ def current_sha() -> str:
 
 def create_run(args: argparse.Namespace) -> Path:
     output_root = args.output_root.resolve()
+    work_root = args.work_root.resolve()
     run_dir = output_root / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     scenarios = args.scenarios.split(",")
@@ -443,6 +469,8 @@ def create_run(args: argparse.Namespace) -> Path:
         "non_codex_ai_allowed": False,
         "raw_output_root": repo_relative_or_absolute(output_root),
         "raw_output_root_gitignored": output_root_ignored,
+        "execution_work_root": str(work_root),
+        "execution_work_root_inside_harness_repo": is_relative_to(work_root, REPO),
         "seed": args.seed,
         "trials_per_cell": args.trials,
         "arms": arms,
@@ -466,6 +494,8 @@ def create_run(args: argparse.Namespace) -> Path:
 - model: `{args.model}`
 - executor: `{EXECUTOR}`
 - isolation: `{ISOLATION_POLICY}`
+- execution_work_root: `{work_root}`
+- execution_work_root_inside_harness_repo: `{str(is_relative_to(work_root, REPO)).lower()}`
 - seed: `{args.seed}`
 - scenarios: {', '.join(scenarios)}
 - arms: {', '.join(arms)}
@@ -474,6 +504,8 @@ def create_run(args: argparse.Namespace) -> Path:
 Raw trial data is written under `{repo_relative_or_absolute(run_dir)}`.
 Git ignored: `{str(output_root_ignored).lower()}`. Public runs should use the
 default ignored `evals/long_codex_ab/` root.
+Trial execution worktrees are created outside the harness repo by default to
+avoid inheriting this repo's AGENTS.md or other runtime instructions.
 The canonical public evidence artifact is `scorecard.json` after grading.
 """,
     )
@@ -484,12 +516,13 @@ def trial_name(row: dict) -> str:
     return f"{row['order']:04d}_{row['scenario']}_{row['arm']}_{row['trial']:02d}"
 
 
-def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool) -> dict:
+def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool, work_root: Path) -> dict:
     scenario = SCENARIOS[row["scenario"]]
     trial_dir = run_dir / "trials" / trial_name(row)
-    work = trial_dir / "work"
+    work = work_root / load_manifest(run_dir)["run_id"] / trial_name(row) / "work"
     if trial_dir.exists():
         shutil.rmtree(trial_dir)
+    remove_tree_under(work, work_root)
     work.mkdir(parents=True)
     scenario.build(work)
     prompt = ISOLATION_PREAMBLE + activation_for_arm(row["arm"], work) + scenario.prompt
@@ -497,9 +530,12 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool)
     final_path = trial_dir / "final_message.txt"
     events_path = trial_dir / "codex_events.jsonl"
     if not execute:
+        snapshot = copy_work_snapshot(work, trial_dir)
         result = {
             **row,
             "trial_dir": str(trial_dir.relative_to(run_dir)),
+            "work_dir": str(work),
+            "work_snapshot": snapshot,
             "scenario_name": scenario.name,
             "executor": EXECUTOR,
             "isolation_policy": ISOLATION_POLICY,
@@ -543,6 +579,8 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool)
     result = {
         **row,
         "trial_dir": str(trial_dir.relative_to(run_dir)),
+        "work_dir": str(work),
+        "work_snapshot": copy_work_snapshot(work, trial_dir),
         "scenario_name": scenario.name,
         "executor": EXECUTOR,
         "isolation_policy": ISOLATION_POLICY,
@@ -569,6 +607,7 @@ def load_manifest(run_dir: Path) -> dict:
 def run_schedule(args: argparse.Namespace) -> dict:
     run_dir = args.run_dir.resolve()
     manifest = load_manifest(run_dir)
+    work_root = Path(manifest["execution_work_root"]).resolve()
     schedule = manifest["schedule"]
     if args.limit:
         schedule = schedule[: args.limit]
@@ -578,7 +617,7 @@ def run_schedule(args: argparse.Namespace) -> dict:
         if args.resume and result_path.exists():
             results.append(json.loads(result_path.read_text(encoding="utf-8")))
             continue
-        results.append(run_trial(run_dir, row, manifest["model"], manifest["timeout_seconds"], args.execute))
+        results.append(run_trial(run_dir, row, manifest["model"], manifest["timeout_seconds"], args.execute, work_root))
     all_results = load_trial_results(run_dir)
     return write_scorecard(run_dir, manifest, all_results if all_results else results)
 
@@ -654,6 +693,7 @@ def main(argv: list[str] | None = None) -> int:
     p_init = sub.add_parser("init-run")
     p_init.add_argument("--run-id", required=True)
     p_init.add_argument("--output-root", type=Path, default=DEFAULT_ROOT)
+    p_init.add_argument("--work-root", type=Path, default=DEFAULT_WORK_ROOT)
     p_init.add_argument("--model", default=DEFAULT_MODEL)
     p_init.add_argument("--seed", type=int, default=20260708)
     p_init.add_argument("--trials", type=int, default=12)

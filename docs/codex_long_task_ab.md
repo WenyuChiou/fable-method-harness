@@ -91,6 +91,12 @@ Raw data lives under `evals/long_codex_ab/`, which is ignored by git. Durable
 public summaries must cite the computed `scorecard.json`, not hand-counted
 notes.
 
+Trial execution worktrees are created under the system temp directory by
+default (`--work-root` can override this). They are intentionally outside the
+harness repo so `codex exec -C <trial-workdir>` does not inherit this repo's
+`AGENTS.md` or other runtime instructions. After each trial, the runner copies a
+`work_snapshot` back under the ignored run directory for audit.
+
 ## 2026-07-08 Runner Smoke
 
 Run id: `live_probe_lt3_pathfix_20260708`.
