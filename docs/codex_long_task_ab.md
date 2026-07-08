@@ -69,12 +69,20 @@ Use:
 
 ```bash
 python scripts/run_long_codex_ab.py init-run --run-id <run-id>
-python scripts/run_long_codex_ab.py run --run-dir evals/long_codex_ab/<run-id> --execute
+python scripts/run_long_codex_ab.py run --run-dir evals/long_codex_ab/<run-id> --execute --resume
 python scripts/run_long_codex_ab.py grade --run-dir evals/long_codex_ab/<run-id> --markdown
 ```
 
 Without `--execute`, `run` only creates fixture directories and unexecuted
 trial records. This is for dry-run validation.
+
+Each trial prompt now starts with a Codex-only isolation preamble: the trial may
+be executed only by the current Codex process, and Claude, Fable, Gemini,
+Hermes, web services, and other AI/model runtimes are forbidden as executors or
+delegates. The manifest records `executor: codex exec`,
+`non_codex_ai_allowed: false`, and the isolation policy. `--resume` skips
+existing `trial_result.json` files so long runs can be continued without
+rerunning completed trials.
 
 Raw data lives under `evals/long_codex_ab/`, which is ignored by git. Durable
 public summaries must cite the computed `scorecard.json`, not hand-counted

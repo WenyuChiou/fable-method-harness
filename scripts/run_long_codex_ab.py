@@ -30,6 +30,19 @@ DEFAULT_TIMEOUT = 900
 
 ARMS = ("A_baseline", "B_harness", "C_pointer_control", "D_flat_dump")
 DEFAULT_SCENARIOS = ("LT1", "LT2", "LT3", "LT4")
+EXECUTOR = "codex exec"
+ISOLATION_POLICY = (
+    "Codex-only isolation: every trial is executed by this Codex process only; "
+    "Claude, Fable, Gemini, Hermes, web services, and other AI/model runtimes "
+    "are forbidden as executors or delegates."
+)
+ISOLATION_PREAMBLE = (
+    "Evaluation isolation: execute this trial using only this Codex process. "
+    "Do not call, invoke, delegate to, compare with, or rely on Claude, Fable, "
+    "Gemini, Hermes, web services, or any other AI/model runtime. "
+    "Do not read or import artifacts from other arms or trials; use only this "
+    "working directory and any explicitly named harness files.\n\n"
+)
 
 
 @dataclass(frozen=True)
@@ -401,6 +414,9 @@ def create_run(args: argparse.Namespace) -> Path:
         "status": "pre_registered_not_complete",
         "frozen_sha": current_sha(),
         "model": args.model,
+        "executor": EXECUTOR,
+        "isolation_policy": ISOLATION_POLICY,
+        "non_codex_ai_allowed": False,
         "raw_output_root": repo_relative_or_absolute(output_root),
         "raw_output_root_gitignored": output_root_ignored,
         "seed": args.seed,
@@ -424,6 +440,8 @@ def create_run(args: argparse.Namespace) -> Path:
 - run_id: `{args.run_id}`
 - frozen_sha: `{manifest['frozen_sha']}`
 - model: `{args.model}`
+- executor: `{EXECUTOR}`
+- isolation: `{ISOLATION_POLICY}`
 - seed: `{args.seed}`
 - scenarios: {', '.join(scenarios)}
 - arms: {', '.join(arms)}
@@ -450,7 +468,7 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool)
         shutil.rmtree(trial_dir)
     work.mkdir(parents=True)
     scenario.build(work)
-    prompt = activation_for_arm(row["arm"], work) + scenario.prompt
+    prompt = ISOLATION_PREAMBLE + activation_for_arm(row["arm"], work) + scenario.prompt
     write(trial_dir / "prompt.txt", prompt)
     final_path = trial_dir / "final_message.txt"
     events_path = trial_dir / "codex_events.jsonl"
@@ -459,6 +477,8 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool)
             **row,
             "trial_dir": str(trial_dir.relative_to(run_dir)),
             "scenario_name": scenario.name,
+            "executor": EXECUTOR,
+            "isolation_policy": ISOLATION_POLICY,
             "executed": False,
             "primary_pass": False,
             "false_done": False,
@@ -500,6 +520,8 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool)
         **row,
         "trial_dir": str(trial_dir.relative_to(run_dir)),
         "scenario_name": scenario.name,
+        "executor": EXECUTOR,
+        "isolation_policy": ISOLATION_POLICY,
         "executed": True,
         "exit_code": exit_code,
         "duration_seconds": duration,
@@ -528,8 +550,13 @@ def run_schedule(args: argparse.Namespace) -> dict:
         schedule = schedule[: args.limit]
     results = []
     for row in schedule:
+        result_path = run_dir / "trials" / trial_name(row) / "trial_result.json"
+        if args.resume and result_path.exists():
+            results.append(json.loads(result_path.read_text(encoding="utf-8")))
+            continue
         results.append(run_trial(run_dir, row, manifest["model"], manifest["timeout_seconds"], args.execute))
-    return write_scorecard(run_dir, manifest, results)
+    all_results = load_trial_results(run_dir)
+    return write_scorecard(run_dir, manifest, all_results if all_results else results)
 
 
 def load_trial_results(run_dir: Path) -> list[dict]:
@@ -620,6 +647,7 @@ def main(argv: list[str] | None = None) -> int:
     p_run = sub.add_parser("run")
     p_run.add_argument("--run-dir", type=Path, required=True)
     p_run.add_argument("--limit", type=int, default=0)
+    p_run.add_argument("--resume", action="store_true", help="skip trials that already have trial_result.json")
     p_run.add_argument("--execute", action="store_true", help="actually call codex exec; omit for dry-run fixtures only")
 
     def do_run(args: argparse.Namespace) -> int:

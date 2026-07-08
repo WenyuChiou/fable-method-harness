@@ -147,9 +147,14 @@ def test_init_run_writes_manifest_and_preregistration():
         assert manifest["run_id"] == "unit"
         assert manifest["trials_per_cell"] == 2
         assert len(manifest["schedule"]) == 8
+        assert manifest["executor"] == "codex exec"
+        assert manifest["non_codex_ai_allowed"] is False
+        assert "Claude" in manifest["isolation_policy"]
         assert manifest["raw_output_root"] == str(Path(tmp).resolve())
         assert manifest["raw_output_root_gitignored"] is False
-        assert (run_dir / "pre_registration.md").is_file()
+        prereg = (run_dir / "pre_registration.md").read_text(encoding="utf-8")
+        assert "executor: `codex exec`" in prereg
+        assert "Codex-only isolation" in prereg
 
 
 def test_init_run_rejects_unknown_arm_or_scenario():
@@ -173,6 +178,29 @@ def test_dry_run_creates_unexecuted_trial_results():
         assert scorecard["status"] == "partial"
         assert len(scorecard["trials"]) == 2
         assert all(t["unscored_reason"] == "dry-run-no-model-execution" for t in scorecard["trials"])
+        prompt = next((run_dir / "trials").glob("*/prompt.txt")).read_text(encoding="utf-8")
+        assert "Evaluation isolation" in prompt
+        assert "Do not call, invoke, delegate to, compare with, or rely on Claude" in prompt
+        assert "Codex process" in prompt
+
+
+def test_resume_skips_existing_trial_results():
+    with tempfile.TemporaryDirectory() as tmp:
+        proc = run_cli("init-run", "--run-id", "resume", "--output-root", tmp, "--trials", "1")
+        assert proc.returncode == 0, proc.stderr
+        run_dir = Path(tmp) / "resume"
+        proc2 = run_cli("run", "--run-dir", str(run_dir), "--limit", "1")
+        assert proc2.returncode == 0, proc2.stderr
+        result_path = next((run_dir / "trials").glob("*/trial_result.json"))
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+        result["sentinel"] = "kept"
+        result_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+        proc3 = run_cli("run", "--run-dir", str(run_dir), "--limit", "1", "--resume")
+        assert proc3.returncode == 0, proc3.stderr
+        reread = json.loads(result_path.read_text(encoding="utf-8"))
+        assert reread["sentinel"] == "kept"
+        scorecard = json.loads((run_dir / "scorecard.json").read_text(encoding="utf-8"))
+        assert scorecard["trials"][0]["sentinel"] == "kept"
 
 
 def test_lt1_grader_pass_and_false_done():
