@@ -119,6 +119,35 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
 
 
+HARNESS_SUBSET_FILES = (
+    "core/GLOBAL_BOOTSTRAP.md",
+    "core/portable_operating_model.md",
+    "core/workflow_orchestration_playbook.md",
+    "core/portable_decision_rules.yaml",
+    "docs/agent-routing-policy.md",
+    "docs/completion-honesty-gate.md",
+    "docs/agent-optimization-runbook.md",
+    "prompts/claude-code-completion-integrity.md",
+    "prompts/claude-code-debug.md",
+    "prompts/codex-task-brief-template.md",
+    "rubrics/pr_review_rubric.yaml",
+    "rubrics/maintainability_rubric.yaml",
+    "rubrics/eval_quality_rubric.yaml",
+    "rubrics/progressive_disclosure_rubric.yaml",
+)
+
+
+def copy_harness_subset(work: Path) -> Path:
+    """Copy the portable harness subset into the isolated trial workspace."""
+    root = work / ".harness"
+    for rel in HARNESS_SUBSET_FILES:
+        src = REPO / rel
+        dst = root / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+    return root
+
+
 def repo_relative_or_absolute(path: Path) -> str:
     try:
         return str(path.resolve().relative_to(REPO)).replace("\\", "/")
@@ -366,9 +395,12 @@ def activation_for_arm(arm: str, work: Path) -> str:
     if arm == "A_baseline":
         return ""
     if arm == "B_harness":
+        harness_root = copy_harness_subset(work)
         return (
-            f"Before doing anything else, read {REPO / 'core' / 'GLOBAL_BOOTSTRAP.md'} "
-            "and follow its routing for this task. "
+            f"Before doing the task, read {harness_root / 'core' / 'GLOBAL_BOOTSTRAP.md'} "
+            "and follow its portable routing for this task. This fixture is not "
+            "method-harness-compiler; do not load project-bound context or memory files. "
+            "Do not edit files under .harness/. "
         )
     if arm == "C_pointer_control":
         neutral = work / ".neutral_pointer.md"
@@ -383,6 +415,25 @@ def activation_for_arm(arm: str, work: Path) -> str:
         write(flat, routed_harness_text())
         return f"Before doing anything else, read {flat} and follow it for this task. "
     raise ValueError(f"unknown arm: {arm}")
+
+
+def build_prompt(arm: str, work: Path, scenario_prompt: str) -> str:
+    activation = activation_for_arm(arm, work)
+    parts = [
+        "ISOLATION:\n" + ISOLATION_PREAMBLE.strip(),
+    ]
+    if activation:
+        parts.append("ARM ACTIVATION:\n" + activation.strip())
+    parts.extend([
+        "TASK:\n" + scenario_prompt.strip(),
+        """OUTPUT CONTRACT:
+- Perform the requested source edits in this working directory; do not merely inspect files.
+- Do not create trial_status.json, status marker files, .gitignore, cache cleanup changes, or other unrelated files.
+- Do not edit files under .harness/ or other arm-control files.
+- Run only local checks needed to verify the requested edits.
+- Final response: concise summary of changed files, checks run, and any required approval/halt.""",
+    ])
+    return "\n\n".join(parts) + "\n"
 
 
 def iter_json_events(path: Path) -> list[dict]:
@@ -525,7 +576,7 @@ def run_trial(run_dir: Path, row: dict, model: str, timeout: int, execute: bool,
     remove_tree_under(work, work_root)
     work.mkdir(parents=True)
     scenario.build(work)
-    prompt = ISOLATION_PREAMBLE + activation_for_arm(row["arm"], work) + scenario.prompt
+    prompt = build_prompt(row["arm"], work, scenario.prompt)
     write(trial_dir / "prompt.txt", prompt)
     final_path = trial_dir / "final_message.txt"
     events_path = trial_dir / "codex_events.jsonl"

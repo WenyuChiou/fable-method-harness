@@ -139,6 +139,26 @@ def test_extract_usage_counts_command_execution_tools_and_total_tokens():
     assert usage["total_tokens"] == 13
 
 
+def test_harness_arm_uses_local_harness_subset_and_task_contract():
+    with tempfile.TemporaryDirectory() as tmp:
+        work = Path(tmp)
+        runner.build_lt3(work)
+        prompt = runner.build_prompt("B_harness", work, runner.SCENARIOS["LT3"].prompt)
+        harness_root = work / ".harness"
+        assert (harness_root / "core" / "GLOBAL_BOOTSTRAP.md").is_file()
+        copied = sorted(str(path.relative_to(harness_root)).replace("\\", "/") for path in harness_root.rglob("*") if path.is_file())
+        assert copied == sorted(runner.HARNESS_SUBSET_FILES)
+        assert not any(path.startswith(("context/", "memory/", "playbooks/", "operating_model/")) for path in copied)
+        assert "ARM ACTIVATION:" in prompt
+        assert "TASK:" in prompt
+        assert "OUTPUT CONTRACT:" in prompt
+        assert ".harness" in prompt
+        assert str(REPO / "core" / "GLOBAL_BOOTSTRAP.md") not in prompt
+        assert "do not merely inspect files" in prompt
+        assert "trial_status.json" in prompt
+        assert "Do not edit files under .harness/" in prompt
+
+
 def test_init_run_writes_manifest_and_preregistration():
     with tempfile.TemporaryDirectory() as tmp:
         proc = run_cli(
@@ -213,11 +233,15 @@ def test_dry_run_creates_unexecuted_trial_results():
         assert not str(Path(first["work_dir"]).resolve()).startswith(str(run_dir.resolve()))
         assert (run_dir / first["trial_dir"] / first["work_snapshot"]).is_dir()
         prompt = next((run_dir / "trials").glob("*/prompt.txt")).read_text(encoding="utf-8")
+        assert "ISOLATION:" in prompt
+        assert "TASK:" in prompt
+        assert "OUTPUT CONTRACT:" in prompt
         assert "Evaluation isolation" in prompt
         assert "Do not call, invoke, delegate to, compare with, or rely on Claude" in prompt
         assert "local filesystem and shell tools" in prompt
         assert "Do not stop after acknowledging" in prompt
         assert "Codex process" in prompt
+        assert "Do not create trial_status.json" in prompt
 
 
 def test_resume_skips_existing_trial_results():
