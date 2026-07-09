@@ -9,7 +9,7 @@
 # retrieval_keywords: [review report shape, report schema, shared review schema, ai review json, source mode metrics, issues found recommendations, next review trigger]
 # ---
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "fable-style-project-harness/schemas/review_report.schema.yaml"
+$id: "fable-method-harness/schemas/review_report.schema.yaml"
 title: Review report (AI-review / adaptive-harness shared contract)
 description: >-
   One review run's structured output. Producers: scripts/run_ai_review.py

@@ -53,7 +53,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SCHEMA_REF = "fable-style-project-harness/schemas/review_report.schema.yaml"
+SCHEMA_REF = "fable-method-harness/schemas/review_report.schema.yaml"
 
 MODES = {
     "standard_review": ["inventory", "index_integrity", "artifact_check", "home_telemetry"],

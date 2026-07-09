@@ -9,7 +9,7 @@
 # retrieval_keywords: [route entry shape, start required optional, expected_output, self_check, route schema]
 # ---
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "fable-style-project-harness/schemas/route.schema.yaml"
+$id: "fable-method-harness/schemas/route.schema.yaml"
 title: Route entry (ROUTES.yaml)
 description: >-
   Shape of a single route in ROUTES.yaml. start is the L0/L2/L3 context

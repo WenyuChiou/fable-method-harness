@@ -9,7 +9,7 @@
 # retrieval_keywords: [HARNESS.yaml shape, manifest schema, provenance, layers, routes list, constraints]
 # ---
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "fable-style-project-harness/schemas/harness_repo.schema.yaml"
+$id: "fable-method-harness/schemas/harness_repo.schema.yaml"
 title: Harness repo manifest (HARNESS.yaml)
 description: >-
   Shape of the top-level HARNESS.yaml manifest. Permissive by design

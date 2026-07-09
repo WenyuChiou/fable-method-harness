@@ -9,7 +9,7 @@
 # retrieval_keywords: [failure mode shape, FM record, symptom root_cause, detection prevention, real_instance]
 # ---
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "fable-style-project-harness/schemas/failure_mode.schema.yaml"
+$id: "fable-method-harness/schemas/failure_mode.schema.yaml"
 title: Failure mode record (FM-###)
 description: >-
   Pinned dataset shape. Records live under the failure_modes key of

@@ -86,8 +86,8 @@ hidden-failure task) — so the value remains cost and trust, not raw quality.
 ## If you want to verify any of this yourself
 
 ```bash
-git clone https://github.com/WenyuChiou/fable-style-project-harness
-cd fable-style-project-harness
+git clone https://github.com/WenyuChiou/fable-method-harness
+cd fable-method-harness
 python validation/integration_check.py     # 53 checks, ~3 min
 python validation/retrieval_probe.py       # retrieval surface probes
 python scripts/build_harness_graph.py --dry-run   # 0 broken dependencies

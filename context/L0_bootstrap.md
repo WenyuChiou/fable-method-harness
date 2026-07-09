@@ -11,7 +11,7 @@ retrieval_keywords: [start here, bootstrap, first read, orientation, session sta
 
 # L0 — Bootstrap
 
-You are inside **fable-style-project-harness**: an operating harness
+You are inside **fable-method-harness**: an operating harness
 distilled from the observable working method of the
 `method-harness-compiler` repo (docs, schemas, scripts, tests, example
 packages, git log — nothing hidden, nothing invented), plus an adaptive

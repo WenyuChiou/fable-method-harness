@@ -1,6 +1,8 @@
-# fable-style-project-harness
+# fable-method-harness
 
-**A discipline-and-cost layer for AI-assisted software work — not a capability booster.**
+**A portable operating harness distilled from Fable's working method — a
+discipline-and-cost layer for AI-assisted work, verified on Claude and Codex
+with reserved entry points for other agent runtimes. Not a capability booster.**
 
 It won't make the model smarter (we measured that — it doesn't). What it does is
 cut the cost of multi-step work, catch expensive mistakes before they ship, and
@@ -60,8 +62,8 @@ one-typo control added overhead with no quality gain).
 ## Quick start
 
 ```bash
-git clone https://github.com/WenyuChiou/fable-style-project-harness
-cd fable-style-project-harness
+git clone https://github.com/WenyuChiou/fable-method-harness
+cd fable-method-harness
 git config core.hooksPath scripts/hooks
 python validation/integration_check.py   # 53 checks, ~3 min
 ```

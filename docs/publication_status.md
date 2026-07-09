@@ -11,7 +11,7 @@ retrieval_keywords: [publication status, repo public, make public, public safety
 
 # Publication Status and Public-Safety Policy
 
-**Status: PUBLIC** — `github.com/WenyuChiou/fable-style-project-harness`,
+**Status: PUBLIC** — `github.com/WenyuChiou/fable-method-harness`,
 visibility verified via the GitHub API on 2026-07-06. This file supersedes
 the former `docs/private_repo_setup.md` ("private remote REQUIRED"), whose
 posture the repository's real state had outgrown; an agent must never again

@@ -71,7 +71,7 @@ line, and — if anything failed — the exact error. Then point them at
   commit them.
 - If your user asks "is this useful?", answer from `docs/evidence.md` —
   including its negative results — not from enthusiasm.
-- Pushes to the canonical remote (`WenyuChiou/fable-style-project-harness`) are
+- Pushes to the canonical remote (`WenyuChiou/fable-method-harness`) are
   blocked by a `scripts/hooks/pre-push` guard so an autonomous session cannot
   push by accident. For an intentional push, run
   `FABLE_HARNESS_ALLOW_PUSH=1 git push ...`. Pushing your own fork is unaffected.

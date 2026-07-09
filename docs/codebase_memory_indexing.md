@@ -19,7 +19,7 @@ as the index schema.
 ## 1. Initial indexing
 
 - Run `index_repository` on **this repo's root** (the standalone
-  `fable-style-project-harness/` repo), NOT on the `method-harness-compiler`
+  `fable-method-harness/` repo), NOT on the `method-harness-compiler`
   source repo. This harness no longer lives nested inside that repo (the
   old `agent_harness/` clone is retired); indexing the source repo will not
   pick these files up, and mixing the two corpora blurs provenance.
@@ -84,7 +84,7 @@ see `ROUTES.yaml` `entrypoints:`):
    auto-read at session start; the 8 rules there force the L0→L2→L3→ROUTES
    ladder before any work.
 3. **Anything else (incl. a bare model + this index):** paste one line —
-   *"Read `BOOTSTRAP.md` in the fable-style-project-harness repo and follow
+   *"Read `BOOTSTRAP.md` in the fable-method-harness repo and follow
    it"* — or let the codebase-memory search land on `BOOTSTRAP` via its
    `retrieval_keywords` (`start here`, `bootstrap`, `entrypoint`).
 

@@ -1,5 +1,5 @@
 ---
-name: fable-style-project-harness
+name: fable-method-harness
 description: >-
   Operating harness for working on the method-harness-compiler project (or
   reviewing its artifacts). Use when starting ANY task on that project —
@@ -22,7 +22,7 @@ tags: [entrypoint, skill, runtime-wrapper]
 retrieval_keywords: [skill entrypoint, launch harness, runtime wrapper, when to use]
 ---
 
-# SKILL: fable-style-project-harness
+# SKILL: fable-method-harness
 
 This file only **launches** the harness. The rules live in the routed files.
 

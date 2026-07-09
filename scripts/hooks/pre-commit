@@ -1,5 +1,5 @@
 #!/bin/sh
-# pre-commit — tier-0 overlay integrity gate for fable-style-project-harness.
+# pre-commit — tier-0 overlay integrity gate for fable-method-harness.
 #
 # Runs the offline artifact validator (no network, no LLM, standard-library only).
 # A nonzero exit blocks the commit — the overlay-local form of DR-011 no-silent-pass.

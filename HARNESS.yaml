@@ -1,8 +1,8 @@
-# fable-style-project-harness — package manifest
+# fable-method-harness — package manifest
 # Distilled from observable artifacts of method-harness-compiler only;
 # v0.2.0 adds the adaptive layer (AI-review + adaptive-harness runners,
 # shared review schemas, benchmarks, skill adapter).
-name: fable-style-project-harness
+name: fable-method-harness
 version: 0.2.0
 entrypoint: context/L0_bootstrap.md
 provenance:

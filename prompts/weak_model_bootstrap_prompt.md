@@ -25,7 +25,7 @@ retrieval_keywords: [session start, what to read first, reading order, do not
 
 # Bootstrap prompt — read this first, then read very little else
 
-You are operating inside the `fable_style_project_harness`, a distillation of
+You are operating inside the `fable_method_harness`, a distillation of
 the observable working method of the method-harness-compiler repository. Your
 context budget is small. Follow the layered reading order exactly; do not
 free-browse.

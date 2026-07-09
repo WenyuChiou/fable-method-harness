@@ -9,7 +9,7 @@
 # retrieval_keywords: [teacher example shape, TE record, method_steps, principles_applied, source_artifact, synthetic flag]
 # ---
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "fable-style-project-harness/schemas/teacher_example.schema.yaml"
+$id: "fable-method-harness/schemas/teacher_example.schema.yaml"
 title: Teacher example record (TE-###)
 description: >-
   Pinned dataset shape. One JSON object per line in
