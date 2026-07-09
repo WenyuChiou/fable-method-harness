@@ -60,6 +60,7 @@ Use the harness when failure is expensive:
 - long or multi-step work where state can drift;
 - multi-agent work where lane reports must be re-verified;
 - completion claims such as done, passing, fixed, ready, safe, or staged;
+- cost-sensitive multi-subtask work where a cheap model can safely do the mechanical majority and only honesty-critical parts need the expensive model;
 - benchmark, eval, release, governance, permissions, hooks, or routing changes;
 - maintenance of AI instructions, skills, hooks, AGENTS.md, or CLAUDE.md.
 
@@ -87,19 +88,20 @@ The longer operational guide is `docs/codex_harness_integration.md`.
 
 ## Evidence Summary
 
-This repo is not marketed as a model-capability booster. The measured value is process discipline, lower standing-instruction load, auditability, and safer stopping behavior.
+This repo is not marketed as a model-capability booster. The measured value is process discipline, cost routing, lower standing-instruction load, auditability, and safer stopping behavior.
 
 | Claim area | Current evidence | Artifact |
 |---|---|---|
 | Clone health | 53 deterministic checks | `python validation/integration_check.py` |
 | Runtime compatibility | Haiku 4/4, Sonnet 2/2, Codex 2/2 executed cases; Codex n=1 scoped edit honored file fence and no-commit rule | `benchmarks/model_compatibility_cases.yaml` |
 | Context economy | Routed file sets are far smaller than whole-repo loading | `docs/evidence.md` |
-| GPT-5.5 forced-activation pilot | No quality lift detected: A 4/5 pass, B 4/5 pass; false-done A 1/5, B 1/5; B used 1.58x tool calls and 2.84x input tokens | `docs/harness_ab_pilot_2026_07_07.md` |
+| Cost routing (2026-07-08) | Used as a cost router — cheap model on the mechanical subtasks, expensive model reserved for honesty-critical ones — it matched all-Opus quality and whole-workload stability (both 1.00 across 6 subtasks, k=5) at ~2.5x lower execution cost. The gain hinges on routing accuracy; it is *not* more stable than Opus, but far more stable than an all-cheap run, which every time misses the subtle-honesty subtask | `docs/evidence.md`, `evals/route_ab/` (local, gitignored) |
+| GPT-5.5 forced-activation pilot | No quality lift detected: A 4/5 pass, B 4/5 pass; false-done A 1/5, B 1/5. B used 1.58x tool calls and 2.84x input tokens — later traced to a broken activation (a fixed 4-file bulk load), fixed 2026-07-08 with classify-first lean loading; that is a fixed invocation cost, not an inherent harness tax | `docs/harness_ab_pilot_2026_07_07.md`, `docs/evidence.md` |
 | Long/multi-step gap found | T5 governance-sensitive fixture failed in both arms; this is a harness gap, not a win | `docs/harness_ab_pilot_2026_07_07.md` |
 | Post-fix governance regression | After adding the governance trigger to `core/GLOBAL_BOOTSTRAP.md`, one isolated Codex T5 run left destructive settings unchanged and requested approval/narrower allowlist | `docs/t5_codex_governance_regression.md` |
 | Codex long-task A/B | Formal runner and design exist; confirmatory run is not complete, so no long-task lift claim yet | `docs/codex_long_task_ab.md`, `scripts/run_long_codex_ab.py` |
 
-Interpretation: use the harness where process failure is plausible, not as a blanket prompt upgrade. The formal A/B protocol remains pre-registered future work in `docs/ab_skill_effect_protocol.md`.
+Interpretation: use the harness where process failure is plausible, not as a blanket prompt upgrade. The clearest positive lever measured so far is cost routing — comparable quality at ~2.5x lower cost when the routing is accurate. The formal A/B protocol remains pre-registered future work in `docs/ab_skill_effect_protocol.md`.
 
 ## Daily Usage
 
