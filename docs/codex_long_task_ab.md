@@ -22,8 +22,10 @@ It does not test Claude/Fable as a primary outcome.
 
 ## Primary Question
 
-Does `Codex + core/CODEX_LONG_TASK_BOOTSTRAP.md` outperform plain Codex on
-long, multi-step, completion-sensitive, or governance-sensitive tasks?
+Does the compact Codex harness interface, represented by
+`core/CODEX_LONG_TASK_BOOTSTRAP.md` and injected as an inline micro-contract,
+outperform plain Codex on long, multi-step, completion-sensitive, or
+governance-sensitive tasks?
 
 The first publishable claim must be one of:
 
@@ -41,7 +43,7 @@ it.
 | Arm | Meaning |
 |---|---|
 | `A_baseline` | Codex task prompt only, no harness pointer. |
-| `B_harness` | Codex task prompt plus a local `.harness/` copy of the compact Codex long-task bootstrap, entered through `core/CODEX_LONG_TASK_BOOTSTRAP.md`. |
+| `B_harness` | Codex task prompt plus an inline micro-contract distilled from `core/CODEX_LONG_TASK_BOOTSTRAP.md`. |
 | `C_pointer_control` | Codex task prompt plus a neutral file pointer with no doctrine. |
 | `D_flat_dump` | Codex task prompt plus a flat local file containing the routed harness subset. |
 
@@ -98,11 +100,12 @@ harness repo so `codex exec -C <trial-workdir>` does not inherit this repo's
 `AGENTS.md` or other runtime instructions. After each trial, the runner copies a
 `work_snapshot` back under the ignored run directory for audit.
 
-For `B_harness`, the runner copies the compact Codex bootstrap into the trial's
-local `.harness/` directory and points Codex to
-`.harness/core/CODEX_LONG_TASK_BOOTSTRAP.md`. This keeps activation readable
-inside `workspace-write` sandboxing without loading the Claude/Fable-oriented
-portable context stack or inheriting the harness repo's own runtime instructions.
+For `B_harness`, the repo-level Codex interface lives at
+`core/CODEX_LONG_TASK_BOOTSTRAP.md`, but the runner injects a compact inline
+micro-contract distilled from that file instead of asking the trial to read a
+local `.harness/` copy. This measures Codex harness behavior rather than file
+read overhead, while still avoiding the Claude/Fable-oriented portable context
+stack and this repo's own runtime instructions.
 
 The runner sends the complete prompt to `codex exec -` over stdin. On Windows,
 this avoids `cmd /c` argument parsing truncating multi-section prompts before

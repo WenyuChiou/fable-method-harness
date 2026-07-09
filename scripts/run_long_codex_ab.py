@@ -120,20 +120,17 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
 
 
-HARNESS_SUBSET_FILES = (
-    "core/CODEX_LONG_TASK_BOOTSTRAP.md",
+CODEX_MICRO_CONTRACT = (
+    "Codex harness micro-contract: work only in this workspace and do not inspect "
+    "parent repos, AGENTS.md, CLAUDE.md, or other runtime config. Read only the "
+    "evidence files needed for this task; canonical JSON/log evidence beats reports. "
+    "For rename or staging tasks, use rg and write the requested staging manifest if "
+    "git index writes are unavailable. For governance or destructive permissions, "
+    "complete safe edits only and state that approval or a narrower allowlist is "
+    "required. Preserve earlier requirements unless a later update overrides them. "
+    "Run one narrow local check that proves the edit; do not repeat a passing check "
+    "or create status marker/control files."
 )
-
-
-def copy_harness_subset(work: Path) -> Path:
-    """Copy the compact Codex harness files into the isolated trial workspace."""
-    root = work / ".harness"
-    for rel in HARNESS_SUBSET_FILES:
-        src = REPO / rel
-        dst = root / rel
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
-    return root
 
 
 def repo_relative_or_absolute(path: Path) -> str:
@@ -393,12 +390,7 @@ def activation_for_arm(arm: str, work: Path) -> str:
     if arm == "A_baseline":
         return ""
     if arm == "B_harness":
-        harness_root = copy_harness_subset(work)
-        return (
-            f"Before doing the task, read {harness_root / 'core' / 'CODEX_LONG_TASK_BOOTSTRAP.md'} "
-            "and follow its compact Codex long-task rules. "
-            "Do not edit files under .harness/. "
-        )
+        return CODEX_MICRO_CONTRACT
     if arm == "C_pointer_control":
         neutral = work / ".neutral_pointer.md"
         write(

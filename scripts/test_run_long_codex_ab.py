@@ -162,22 +162,20 @@ def test_extract_usage_counts_command_execution_tools_and_total_tokens():
     assert usage["total_tokens"] == 13
 
 
-def test_harness_arm_uses_local_harness_subset_and_task_contract():
+def test_harness_arm_uses_inline_micro_contract_and_task_contract():
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
         runner.build_lt3(work)
         prompt = runner.build_prompt("B_harness", work, runner.SCENARIOS["LT3"].prompt)
-        harness_root = work / ".harness"
-        assert (harness_root / "core" / "CODEX_LONG_TASK_BOOTSTRAP.md").is_file()
-        assert not (harness_root / "core" / "GLOBAL_BOOTSTRAP.md").exists()
-        copied = sorted(str(path.relative_to(harness_root)).replace("\\", "/") for path in harness_root.rglob("*") if path.is_file())
-        assert copied == sorted(runner.HARNESS_SUBSET_FILES)
-        assert not any(path.startswith(("context/", "memory/", "playbooks/", "operating_model/")) for path in copied)
+        assert not (work / ".harness").exists()
         assert "ARM ACTIVATION:" in prompt
         assert "TASK:" in prompt
         assert "OUTPUT CONTRACT:" in prompt
-        assert ".harness" in prompt
-        assert "CODEX_LONG_TASK_BOOTSTRAP.md" in prompt
+        assert "Codex harness micro-contract" in prompt
+        assert "canonical JSON/log evidence beats reports" in prompt
+        assert "do not repeat a passing check" in prompt
+        assert "Before doing the task, read" not in prompt
+        assert "CODEX_LONG_TASK_BOOTSTRAP.md" not in prompt
         assert str(REPO / "core" / "GLOBAL_BOOTSTRAP.md") not in prompt
         assert "do not merely inspect files" in prompt
         assert "trial_status.json" in prompt
@@ -195,7 +193,8 @@ def test_compact_codex_bootstrap_preserves_scenario_invariants():
         "explicit approval or a narrower allowlist is required",
         "preserve earlier requirements",
         "later update explicitly overrides",
-        "smallest local check",
+        "one narrow local check",
+        "do not repeat a passing check",
         "parent repos, remotes, worktrees, agents.md, claude.md",
     ]
     for fragment in required_fragments:

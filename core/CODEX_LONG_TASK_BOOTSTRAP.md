@@ -32,8 +32,8 @@ without loading the full Claude/Fable-oriented context stack.
    explicit approval or a narrower allowlist is required.
 6. Preserve earlier requirements unless a later update explicitly overrides
    them.
-7. Run the smallest local check that proves the edit. Prefer direct file/JSON/
-   AST checks over broad repo maintenance.
+7. Run one narrow local check that proves the edit. Prefer direct file/JSON/
+   AST checks over broad repo maintenance; do not repeat a passing check.
 
 ## Final Response
 
