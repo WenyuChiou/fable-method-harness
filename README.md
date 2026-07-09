@@ -4,16 +4,12 @@
 discipline-and-cost layer for AI-assisted work, verified on Claude and Codex
 with reserved entry points for other agent runtimes. Not a capability booster.**
 
-It won't make the model smarter (we measured that — it doesn't). What it does is
-cut the cost of multi-step work, catch expensive mistakes before they ship, and
-keep an honest audit trail. Its sharpest single lever is **cost routing — comparable
-quality at roughly 2.5× lower cost when the routing is accurate.**
+> **~2.5× cheaper** at equal quality (when routing is accurate) · **~4–5%** context per task · **~0** tokens for review reports · **~30** defects caught building itself · **0** capability lift, by design
 
 ## What we actually measured
 
-The numbers first — nothing here is aspirational, and each row re-runs from its
-named artifact. Full ledger, including every negative result, in
-**[`docs/evidence.md`](docs/evidence.md)**.
+Each row re-runs from its named artifact; full ledger — every negative result
+included — in **[`docs/evidence.md`](docs/evidence.md)**.
 
 | Measured | Result | Where |
 |---|---|---|
@@ -25,25 +21,16 @@ named artifact. Full ledger, including every negative result, in
 | **Review reports** | **~0 LLM output tokens** — rendered deterministically from JSON | `scripts/run_ai_review.py --dry-run` |
 | **Defects caught building itself** | **~30** confirmed, including two silent state-loss bugs | commit trailers `f55459d`→`0dd0cf2` |
 
-And the honest boundary: across eight experiments a frontier model was already at
-the ceiling with the harness off — so this is a **cost, discipline, and audit**
-layer, not a capability boost.
+Honest boundary: across eight experiments a frontier model was already at the
+ceiling with the harness off — this is a **cost, discipline, and audit** layer,
+not a capability boost.
 
 ## What you get
 
-- **💸 Cost routing** — put a cheap model on the mechanical majority of a job and
-  reserve the expensive one for the honesty-critical parts. Measured: the same
-  quality *and* stability as all-Opus (1.00 = 1.00 across 6 subtasks, k=5) at
-  ~40% of the cost — when the routing is accurate.
-- **🛑 Honest-failure discipline** — review gates, completion-honesty checks, and
-  a rule that an explicit "unknown / HALT" beats a confident guess. Measured:
-  caught ~30 real defects while building itself; refused an unsafe eval run
-  instead of faking a result.
-- **🪶 Context economy** — classify first, then load only the files a task needs
-  (~4–5% of the repo) instead of dumping everything into context.
-- **🔍 Audit trail** — every claim in `docs/evidence.md` cites a re-runnable
-  artifact, and negative results are published — including the measured fact
-  that it does *not* boost capability.
+- **💸 Cost routing** — cheap model on the mechanical bulk, the expensive one reserved for the honesty-critical parts.
+- **🛑 Honest-failure discipline** — review gates + completion-honesty checks; an explicit "unknown / HALT" beats a confident guess.
+- **🪶 Context economy** — classify first, then load only the files a task needs.
+- **🔍 Audit trail** — every claim cites a re-runnable artifact; negative results are published too.
 
 ## Before / after — what changes when you use it
 
