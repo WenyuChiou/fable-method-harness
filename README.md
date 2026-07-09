@@ -7,6 +7,26 @@ cut the cost of multi-step work, catch expensive mistakes before they ship, and
 keep an honest audit trail. Its sharpest single lever is **cost routing — comparable
 quality at roughly 2.5× lower cost when the routing is accurate.**
 
+## What we actually measured
+
+The numbers first — nothing here is aspirational, and each row re-runs from its
+named artifact. Full ledger, including every negative result, in
+**[`docs/evidence.md`](docs/evidence.md)**.
+
+| Measured | Result | Where |
+|---|---|---|
+| **Cost routing vs all-Opus** | Same quality (6/6 = 6/6) and same whole-workload stability (**1.00 = 1.00**, k=5) at **~40% of the cost (~2.5× cheaper)**, when routing is accurate | `docs/evidence.md`, `evals/route_ab/` |
+| **Naive all-cheap baseline** | all-Haiku scores **0.00** whole-workload — it misses the subtle-honesty subtask every single time (0/5). Routing, not the cheap model alone, is what buys the stability | same |
+| **Invocation fix** | activation over-load **2.84× → removed** (single-file default); the completion-honesty route self-triggered **0/10 → 4/5** | `docs/evidence.md` |
+| **Context per task** | **~4–5%** of the repo loaded (~12–16k of ~303k tokens) instead of bulk-reading | `ROUTES.yaml` + file sizes |
+| **Standing instructions** | a 215-line global instruction file slimmed to **96 lines (~55% less)** with identical gate behavior | dotfiles commit `ddf2872` |
+| **Review reports** | **~0 LLM output tokens** — rendered deterministically from JSON | `scripts/run_ai_review.py --dry-run` |
+| **Defects caught building itself** | **~30** confirmed, including two silent state-loss bugs | commit trailers `f55459d`→`0dd0cf2` |
+
+And the honest boundary: across eight experiments a frontier model was already at
+the ceiling with the harness off — so this is a **cost, discipline, and audit**
+layer, not a capability boost.
+
 ## What you get
 
 - **💸 Cost routing** — put a cheap model on the mechanical majority of a job and
@@ -22,20 +42,6 @@ quality at roughly 2.5× lower cost when the routing is accurate.**
 - **🔍 Audit trail** — every claim in `docs/evidence.md` cites a re-runnable
   artifact, and negative results are published — including the measured fact
   that it does *not* boost capability.
-
-## What we actually measured
-
-Nothing here is aspirational — each row re-runs from its named artifact.
-
-| Measured | Result | Where |
-|---|---|---|
-| **Cost routing vs all-Opus** | Same quality (6/6 = 6/6) and same whole-workload stability (**1.00 = 1.00**, k=5) at **~40% of the cost (~2.5× cheaper)**, when routing is accurate | `docs/evidence.md`, `evals/route_ab/` |
-| **Naive all-cheap baseline** | all-Haiku scores **0.00** whole-workload — it misses the subtle-honesty subtask every single time (0/5). Routing, not the cheap model alone, is what buys the stability | same |
-| **Invocation fix** | activation over-load **2.84× → removed** (single-file default); the completion-honesty route self-triggered **0/10 → 4/5** | `docs/evidence.md` |
-| **Context per task** | **~4–5%** of the repo loaded (~12–16k of ~303k tokens) instead of bulk-reading | `ROUTES.yaml` + file sizes |
-| **Standing instructions** | a 215-line global instruction file slimmed to **96 lines (~55% less)** with identical gate behavior | dotfiles commit `ddf2872` |
-| **Review reports** | **~0 LLM output tokens** — rendered deterministically from JSON | `scripts/run_ai_review.py --dry-run` |
-| **Defects caught building itself** | **~30** confirmed, including two silent state-loss bugs | commit trailers `f55459d`→`0dd0cf2` |
 
 ## When to use it
 
@@ -70,26 +76,31 @@ Then, for a real task:
 
 ## How agents enter it
 
-| Runtime | Entry |
-|---|---|
-| Claude Code | `SKILL.md` (auto-discovered) |
-| Codex / Cursor / AGENTS.md agents | `AGENTS.md` |
-| Any other model or shell | `BOOTSTRAP.md` (this project) · `core/GLOBAL_BOOTSTRAP.md` (any other project) |
-| Hermes / router surfaces | `docs/agent-routing-policy.md` — run deterministic scans, route judgment to a stronger model |
+Same harness, one portable pointer per runtime. The **Status** column is honest
+about what is actually verified versus what is wired but untested — reserved
+slots are placeholders, not compatibility claims.
+
+| Runtime | Entry | Status |
+|---|---|---|
+| Claude Code | `SKILL.md` (auto-discovered) | verified — Haiku + Sonnet cases (n=1 per case) |
+| Codex | `AGENTS.md` · `docs/codex_harness_integration.md` | verified — scoped-edit cases (n=1) |
+| Cursor · opencode · any AGENTS.md agent | `AGENTS.md` (convention) | enters by convention; not separately benchmarked |
+| Hermes · router surfaces | `docs/agent-routing-policy.md` | router only — deterministic scan, then route judgment onward |
+| Antigravity CLI · other agent CLIs | `core/GLOBAL_BOOTSTRAP.md` pointer | reserved — wiring defined, not yet verified |
+| Bare model or shell | `BOOTSTRAP.md` · `core/GLOBAL_BOOTSTRAP.md` | portable pointer |
 
 One rule for all of them: **classify the task, load only the routed files, do
 not bulk-read the repo.** `python scripts/setup_harness.py --print-wiring` prints
-the pointer to drop into another repo; `docs/codex_harness_integration.md` covers
-the Codex interface in depth.
+the pointer to drop into another repo.
 
 ## Is it actually useful? (the honest version)
 
 Yes — for **cost, discipline, and audit; not for capability.** We tried hard to
 show a capability lift and could not: across eight experiments a frontier model
 was already at the ceiling with the harness off. What survives measurement is the
-table above. The full ledger — every positive, every negative, and the artifact
-to re-run each one — is in **[`docs/evidence.md`](docs/evidence.md)**. Read it
-before adopting.
+table at the top. The full ledger — every positive, every negative, and the
+artifact to re-run each one — is in **[`docs/evidence.md`](docs/evidence.md)**.
+Read it before adopting.
 
 ## Repository map
 
