@@ -291,6 +291,7 @@ routes:
       # measured ~2.84x activation over-load at identical quality.
       - core/workflow_orchestration_playbook.md   # only when spawning 2+ subagents
       - core/model_routing_playbook.md             # only when routing 3+ subtasks across model tiers
+      - docs/multi_delegate_route.md               # only when coordinating 2+ delegate lanes via .coord/.ai contracts
       - core/portable_decision_rules.yaml          # only on a cited judgment call
       - rubrics/pr_review_rubric.yaml
       - rubrics/maintainability_rubric.yaml

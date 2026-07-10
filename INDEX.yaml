@@ -1327,6 +1327,13 @@ files:
     tags: ["doc", "codex", "delegation", "policy", "canonical"]
     read_when: "Deciding whether to delegate to Codex, running codex_delegation_review, or resolving conflicting delegation statements."
 
+  - path: docs/multi_delegate_route.md
+    id: DOC-multi-delegate-route
+    layer: doc
+    purpose: "ADAPTER for multi-delegate rounds - names the external .coord/.ai file contracts (plan.yml DAG, task/result files, reconciliation, acceptance) and the single-gate rule, replacing the ~16k-token external-skill prose load with a ~2k pointer."
+    tags: ["doc", "multi-delegate", "adapter", "contracts", "single-gate"]
+    read_when: "Coordinating 2+ delegate lanes through file contracts, or deciding which single gate to run after a delegate round."
+
   - path: benchmarks/ai_review_cases.yaml
     id: DATASET-ai-review-cases
     layer: dataset

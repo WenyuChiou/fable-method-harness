@@ -57,6 +57,8 @@ bulk-load the set:
 - Spawning 2+ subagents → `core/workflow_orchestration_playbook.md`.
 - Routing 3+ separable subtasks across model tiers (cheap bulk / strong
   judgment) → `core/model_routing_playbook.md`.
+- Coordinating 2+ delegate lanes through file contracts (.coord/.ai) →
+  `docs/multi_delegate_route.md` (adapter; includes the single-gate rule).
 - A cited judgment call → `core/portable_decision_rules.yaml`.
 - Self-checking a specific artifact type → the ONE matching rubric in `rubrics/`
   (`pr_review_rubric`, `maintainability_rubric`, `eval_quality_rubric`,

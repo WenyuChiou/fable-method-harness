@@ -55,6 +55,9 @@ PROBES = [
     # must keep the third-behavioral-gate prohibition; a future edit that
     # drops it must fail here, not silently narrow the Forbidden list.
     ("do not design or run a third behavioral gate", ["context/L2_current_phase.md"]),
+    # pins the Wave-3b multi-delegate adapter (2026-07-10): the contracts
+    # + single-gate rule must stay findable.
+    ("multi delegate route plan.yml contract single gate", ["docs/multi_delegate_route.md"]),
 ]
 
 SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace"}
