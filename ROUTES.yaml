@@ -53,6 +53,7 @@ routes:
       - examples/bad/bad_overengineered_plan.md
       - examples/critiques/critique_bad_overengineered_plan.md
       - memory/phase_history.jsonl
+      - context/L2_phase_history.md   # cold half of L2 (milestones, gate stories)
       - operating_model/decision_rules.yaml
     expected_output: >-
       A findings-table review of the phase/plan/spec with per-finding severity

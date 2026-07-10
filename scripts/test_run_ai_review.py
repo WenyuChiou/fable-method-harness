@@ -144,6 +144,16 @@ def test_write_outputs_and_history_append():
         assert not rar.validate_report(latest)
         md = (out / "latest.md").read_text(encoding="utf-8")
         assert latest["review_id"] in md, "MD twin must reference the same review_id"
+        # latest-brief.json (2026-07-09): the session-facing decision digest
+        # must exist, parse, carry the decision fields, and stay small.
+        brief_path = out / "latest-brief.json"
+        assert brief_path.is_file(), "latest-brief.json missing"
+        brief = json.loads(brief_path.read_text(encoding="utf-8"))
+        for key in ("issues", "recommendation_index", "next_review_trigger",
+                    "review_id", "issues_found", "recommendations"):
+            assert key in brief, f"brief missing key {key}"
+        assert brief["review_id"] == latest["review_id"]
+        assert brief_path.stat().st_size < (out / "latest.json").stat().st_size
 
 
 # --------------------------------------------------------------------------

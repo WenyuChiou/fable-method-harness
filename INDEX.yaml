@@ -89,6 +89,13 @@ files:
     tags: ["phase", "current-state", "scope", "allowed", "forbidden"]
     read_when: "Start of every task, immediately after L0 — before classifying or acting"
 
+  - path: context/L2_phase_history.md
+    id: L2-phase-history
+    layer: context
+    purpose: "The COLD half of L2 (split 2026-07-09) - full milestone table, both N=2 NULL gate narratives with per-arm scores, and the Phase-3 deliverable chronicle; not in any route's start ladder."
+    tags: ["phase", "history", "milestones", "gates", "cold-reference"]
+    read_when: "You need the full historical account - how a milestone shipped, exact gate arms/scores, or the Phase-3 build chronology."
+
   - path: context/L3_task_router.md
     id: L3-task-router
     layer: context
@@ -1386,7 +1393,7 @@ files:
   - path: benchmarks/harness_cases.yaml
     id: DATASET-harness-cases
     layer: dataset
-    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 9 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset, model-routing cost router, validator output economy, grep-entry vs wholesale read) complementing ai_review_cases.yaml without duplication."
+    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 11 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset, model-routing cost router, validator output economy, grep-entry vs wholesale read, L2 hot/cold split, report brief vs full) complementing ai_review_cases.yaml without duplication."
     tags: ["dataset", "benchmark", "ab-test", "adaptive-harness", "pre-registration"]
     read_when: "experiment_design mode, or when an adaptive-harness recommendation is classified Experiment."
 

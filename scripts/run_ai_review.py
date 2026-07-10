@@ -721,6 +721,27 @@ def write_outputs(report, out_dir, stem_suffix="ai-review"):
     }
     with (history / "review-log.jsonl").open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(summary, ensure_ascii=False) + "\n")
+    # latest-brief.json (2026-07-09, Wave 2c): the decision digest an LLM
+    # session should read INSTEAD of latest.json (~12.8k tokens measured) —
+    # counts, per-issue one-liners, recommendation ids/priorities, next
+    # trigger. Full prose fields and files_inspected stay in latest.json,
+    # which remains the runners' programmatic input (unchanged).
+    # Note: summary's issues_found/recommendations fields are COUNTS; the
+    # brief's issues/recommendation_index fields are the compact LISTS.
+    brief = dict(summary)
+    brief["issues"] = [
+        {"id": i.get("id"), "severity": i.get("severity"),
+         "category": i.get("category"), "file_path": i.get("file_path", ""),
+         "description": (i.get("description") or "")[:160]}
+        for i in report.get("issues_found", [])]
+    brief["recommendation_index"] = [
+        {"id": r.get("recommendation_id"), "priority": r.get("priority"),
+         "recommendation": r.get("recommendation"),
+         "component": r.get("component_name") or r.get("invocation_name", "")}
+        for r in report.get("recommendations", [])]
+    brief["next_review_trigger"] = report.get("next_review_trigger")
+    (out_dir / "latest-brief.json").write_text(
+        json.dumps(brief, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return out_dir / "latest.json"
 
 
@@ -814,7 +835,7 @@ def main(argv=None):
 
     out_dir = Path(args.output) if args.output else args.target / "reports" / "ai-review"
     latest = write_outputs(report, out_dir)
-    print(f"OK {report['review_id']}: wrote {latest} (+ latest.md, history/)")
+    print(f"OK {report['review_id']}: wrote {latest} (+ latest-brief.json, latest.md, history/)")
     print(f"   issues={len(report['issues_found'])} recommendations={len(report['recommendations'])} "
           f"unresolved={len(report['unresolved_questions'])}")
     return 0

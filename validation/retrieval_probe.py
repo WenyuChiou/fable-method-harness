@@ -48,6 +48,13 @@ PROBES = [
     # wholesale-read killers must stay findable.
     ("index diff tracked ghost unindexed duplicate mt-5", ["scripts/index_diff.py"]),
     ("route show one validated route entry grep", ["scripts/route_show.py"]),
+    # pins the Wave-2c hot/cold split (2026-07-09): the cold history must
+    # stay findable after leaving the start ladder.
+    ("phase history milestone table gate story cold reference", ["context/L2_phase_history.md"]),
+    # content-integrity pin (audit-mandated third-gate probe): the hot L2
+    # must keep the third-behavioral-gate prohibition; a future edit that
+    # drops it must fail here, not silently narrow the Forbidden list.
+    ("do not design or run a third behavioral gate", ["context/L2_current_phase.md"]),
 ]
 
 SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace"}

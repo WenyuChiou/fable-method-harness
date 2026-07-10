@@ -105,3 +105,23 @@ cases:
     manual_review_notes: "Criteria pre-registered in the 2026-07-09 audit round-1 token-cost P0 findings (INDEX 23.5k tok wholesale for ~350-tok lookups; ROUTES 5k tok for one ~407-tok entry). EXECUTED 2026-07-09, measured against the shipping files: route_show ROUTE-global-orchestration entry 2,742B vs 20,775B whole = 13.2% (PASS <=20%); 3-entry INDEX grep (grep -A6, entries: core/model_routing_playbook.md 557B + scripts/index_diff.py 547B + docs/evidence.md 615B = 1,719B) vs 98,596B whole = 1.7% (PASS <=10%); index_diff seeded ghost/unindexed/duplicate 3/3 detected, exit 1 each, clean restore exit 0, PLUS the review-found spaced-path case (a ghost entry whose path contains a space passed CLEAN under the original regex) fixed and re-verified with the reviewer's exact seed. Empirical inclusion rule verified before build: INDEX entries == git ls-files exactly (204=204 clean tree, no exceptions). Deviation from the audit fix-sketch, disclosed: the audit proposed a grep -A window for ROUTES; a fixed window truncates long entries, so route_show.py parses entry boundaries instead. index_diff also caught its own two unindexed script files live during development (self-referential validation). Purpose-string drift remains judgment - stated in the script docstring, INDEX header, and MT-5 self_check."
     status: completed
     linked_recommendation_id: REC-20260709-W2b
+
+  - case_name: l2_hot_cold_split
+    task_type: context_load_economy
+    variant_a: "L2_current_phase.md monolith (11,677B) in the start ladder of all 8 project routes - ~71% history per the audit"
+    variant_b: "Hot/cold split: L2 keeps state + allowed/forbidden + honesty anchors + Phase-3 obligations; full milestone table, N=2 gate narratives, and the deliverable chronicle move to context/L2_phase_history.md (not in any start ladder)"
+    expected_metrics: "hot-file bytes per task (every route pays it), zero loss of load-bearing constraints (allowed/forbidden verbatim, honesty anchors survive in compressed form), validators/probes parity"
+    success_criteria: "B ships iff hot L2 <= 60% of the monolith AND the allowed/forbidden section is byte-preserved AND the two-NULLs honesty anchor (claim NOT SUPPORTED, published-not-rerun) survives in the hot file AND all validators/probes pass"
+    manual_review_notes: "From the 2026-07-09 audit round-1 P1 (L2 71% cold history, ~2,044 tok/task). EXECUTED 2026-07-09: hot L2 6,086B = 52% of 11,677B (PASS <=60%; well above the audit's most-aggressive theoretical floor of 29% because the honesty anchors and the full allowed/forbidden block deliberately stay hot); allowed/forbidden verbatim; honesty anchor kept as a compressed bullet with pointer; history file 7,105B loads on demand only. Validators, probes, graph all green post-split."
+    status: completed
+    linked_recommendation_id: REC-20260709-W2c1
+
+  - case_name: report_brief_vs_full_json
+    task_type: report_load_economy
+    variant_a: "LLM sessions read reports/ai-review/latest.json whole (measured 12.8k tokens on a full run; 7,444B on a clean smoke run)"
+    variant_b: "write_outputs also emits latest-brief.json - counts, per-issue one-liners (description capped 160 chars), recommendation id/priority index, next trigger; latest.json unchanged as the runners' programmatic input"
+    expected_metrics: "brief bytes vs full bytes on the same run; brief carries every decision field (issue ids/severities, rec ids/priorities, next trigger); shared-writer contract intact (DR-020, one writer both runners); test suite parity"
+    success_criteria: "B ships iff brief <= 20% of full on the same run AND the decision fields enumerated above are all present AND pytest scripts/ stays green (no writer fork)"
+    manual_review_notes: "From the 2026-07-09 audit round-1 ai-review P1 (report-loading tax ~11k tok/load). EXECUTED 2026-07-09 on a standard_review --no-home smoke run: latest-brief.json 486B vs latest.json 7,444B = 6.5% (PASS <=20%); brief keys verified (issues, recommendation_index, next_review_trigger, counts); 66/66 scripts tests pass post-change. NOTE: the brief is emitted by the shared write_outputs (serves both runners per DR-020, not forked); the operator-side pointer flip (commands/ai-review.md telling sessions to read the brief) is a separate ~/.claude change, tracked for the operator batch."
+    status: completed
+    linked_recommendation_id: REC-20260709-W2c2
