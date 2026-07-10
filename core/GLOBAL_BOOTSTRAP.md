@@ -55,6 +55,8 @@ bulk-load the set:
   + `prompts/claude-code-completion-integrity.md` (REQUIRED; ROUTE-completion-integrity).
 - Governance / permissions / hooks / cron / CI / routing → `docs/agent-routing-policy.md`.
 - Spawning 2+ subagents → `core/workflow_orchestration_playbook.md`.
+- Routing 3+ separable subtasks across model tiers (cheap bulk / strong
+  judgment) → `core/model_routing_playbook.md`.
 - A cited judgment call → `core/portable_decision_rules.yaml`.
 - Self-checking a specific artifact type → the ONE matching rubric in `rubrics/`
   (`pr_review_rubric`, `maintainability_rubric`, `eval_quality_rubric`,

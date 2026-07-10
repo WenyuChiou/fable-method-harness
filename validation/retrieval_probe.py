@@ -41,6 +41,9 @@ PROBES = [
     # pins the invocation lean-load fix (2026-07-08): activation classifies
     # first and loads only the matching rule, not the full portable triad.
     ("global bootstrap portable load classify first lean default", ["core/GLOBAL_BOOTSTRAP.md"]),
+    # pins the Wave-1 cost-router operationalization (2026-07-09): the
+    # measured 2.5x split must be findable as an operational playbook.
+    ("model routing cost router cheap tier mechanical honesty critical strong", ["core/model_routing_playbook.md"]),
 ]
 
 SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace"}

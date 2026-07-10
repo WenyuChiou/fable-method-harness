@@ -8,6 +8,7 @@ depends_on:
   - ../operating_model/operating_model.md
   - ../memory/lessons_learned.jsonl
   - ../datasets/failure_modes.yaml
+  - ./model_routing_playbook.md
 used_by:
   - ROUTE-pr-review
   - ROUTE-repo-maintenance
@@ -42,6 +43,15 @@ accountability.
 
 ## 2. Allowed
 
+- **Model tier per lane — route, don't inherit.** Every lane silently
+  inheriting the orchestrator's strong model is the measured ~2.5x
+  overspend. At lane-design time classify each lane per
+  `core/model_routing_playbook.md`: mechanical lanes → cheap tier
+  (`model: 'haiku'` on Agent/Workflow calls; concurrency caps per
+  `docs/agent-optimization-runbook.md`);
+  honesty-critical / review / governance lanes → strong tier, always;
+  classification stays with the orchestrator. Measured basis + guardrails
+  live in that playbook — this section is the trigger, not the detail.
 - **Phase design**: parallel build lanes → an integrate step → an
   adversarial review PAIR → a conditional fixer. Observed at every scale:
   4 lanes (1c4a77f, 490470d), 5-7 (510b79f, bd32614, 9532648, e7f0fc6),

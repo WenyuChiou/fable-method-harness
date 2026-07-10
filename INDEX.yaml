@@ -1156,6 +1156,27 @@ files:
     tags: ["core", "orchestration", "multi-agent", "workflow", "lanes"]
     read_when: "About to spawn 2+ subagents for one goal in ANY project, or deciding what the orchestrator still owes after a delegate returns."
 
+  - path: core/model_routing_playbook.md
+    id: CORE-model-routing-playbook
+    layer: core
+    purpose: "The operational cost-router - classify at the strong tier, mechanical subtasks to the cheap tier, honesty-critical always strong; measured ~2.5x cheaper at equal quality/stability when routing is accurate."
+    tags: ["core", "model-routing", "cost-router", "tiers", "delegation"]
+    read_when: "About to execute or orchestrate 3+ separable subtasks where a cheaper model could take the mechanical share, or picking the tier for a delegate brief."
+
+  - path: benchmarks/route_cost_ab/fixture.yaml
+    id: DATASET-route-cost-ab-fixture
+    layer: dataset
+    purpose: "Pre-registered 10-subtask fixture for the model-routing cost A/B - 7 mechanical (gold: cheap) + 3 hidden-failure honesty subtasks (gold: strong), deterministic ground truths."
+    tags: ["dataset", "benchmark", "ab-test", "model-routing", "pre-registration"]
+    read_when: "Running the model_routing_playbook_vs_all_strong case or auditing the ~2.5x cost-routing claim."
+
+  - path: benchmarks/route_cost_ab/check_route_ab.py
+    id: SCRIPT-check-route-ab
+    layer: script
+    purpose: "Deterministic grader for the model-routing cost A/B - per-subtask correctness, whole-workload rate, routing accuracy vs gold labels, honesty-misroute count, cost proxy; never self-graded."
+    tags: ["script", "benchmark", "grader", "model-routing"]
+    read_when: "Scoring a route_cost_ab run or re-deriving the cost-routing claim from raw results."
+
   - path: core/portable_decision_rules.yaml
     id: CORE-portable-decision-rules
     layer: core
@@ -1359,7 +1380,7 @@ files:
   - path: benchmarks/harness_cases.yaml
     id: DATASET-harness-cases
     layer: dataset
-    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 6 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset) complementing ai_review_cases.yaml without duplication."
+    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 7 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset, model-routing cost router) complementing ai_review_cases.yaml without duplication."
     tags: ["dataset", "benchmark", "ab-test", "adaptive-harness", "pre-registration"]
     read_when: "experiment_design mode, or when an adaptive-harness recommendation is classified Experiment."
 
@@ -1415,7 +1436,7 @@ files:
   - path: docs/evidence.md
     id: DOC-evidence
     layer: doc
-    purpose: "The honest evidence ledger: measured-positive (context economics, tier operability, defect catches, loop closure), measured-NEGATIVE (8 ceiling experiments - no capability gain, published deliberately), and untested (14 pre-registered A/Bs); every claim cites a re-runnable artifact."
+    purpose: "The honest evidence ledger: measured-positive (context economics, tier operability, cost routing, defect catches, loop closure), measured-NEGATIVE (8 ceiling experiments - no capability gain, published deliberately), and untested (pre-registered A/Bs; count changes as cases execute); every claim cites a re-runnable artifact."
     tags: ["doc", "evidence", "evaluation", "negative-results", "adoption"]
     read_when: "Deciding whether to adopt this system, telling someone about it, or auditing whether a claim about it is supported."
 
