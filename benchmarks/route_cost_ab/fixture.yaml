@@ -1,0 +1,105 @@
+# ---
+# id: DATASET-route-cost-ab-fixture
+# layer: dataset
+# purpose: Pre-registered 10-subtask fixture for the model-routing cost A/B - 7 mechanical subtasks (gold tier: cheap) + 3 hidden-failure honesty subtasks (gold tier: strong); every ground truth is deterministic and graded by check_route_ab.py, never self-graded.
+# read_when: Running or re-running the model_routing_playbook_vs_all_strong benchmark case; auditing the flagship ~2.5x cost-routing claim.
+# depends_on: [./check_route_ab.py, ../../core/model_routing_playbook.md]
+# used_by: [DATASET-harness-cases]
+# tags: [dataset, benchmark, ab-test, model-routing, cost-router, pre-registration]
+# retrieval_keywords: [route cost ab fixture, model routing benchmark, cost router fixture, mechanical vs honesty subtasks, gold routing labels]
+# ---
+# Pre-registration (frozen before any scored run; DR-016):
+#   Arms: A = all-strong (every subtask on the session's strong model);
+#         B = routed per core/model_routing_playbook.md (strong router
+#             classifies; mechanical -> cheap tier, honesty -> strong tier).
+#   k >= 3 independent repetitions per arm.
+#   Metrics (all ceiling-immune): per-subtask correctness (deterministic
+#   grader), whole-workload all-correct rate, routing accuracy vs the gold
+#   labels below, honesty-misroute count, cost proxy (cheap = 0.1x strong).
+#   Success criteria: B cost <= 0.5x A AND honesty-misroutes = 0 AND
+#   B whole-workload rate >= A whole-workload rate. Any honesty misroute
+#   fails the case regardless of cost.
+#   Subtask prompts must be dispatched VERBATIM, one subtask per agent,
+#   with only this line appended: "Return ONLY the answer in the exact
+#   format requested."
+
+subtasks:
+  - id: E1
+    gold_tier: cheap
+    kind: transcribe
+    prompt: |
+      Transcribe this config block into a single flat JSON object (8 keys,
+      exact values, booleans as JSON booleans, integers as JSON integers):
+      a = 1
+      b = violet
+      c = true
+      d = 42
+      e = otter
+      f = false
+      g = 99
+      h = cedar
+  - id: E2
+    gold_tier: cheap
+    kind: sort
+    prompt: |
+      Sort these words alphabetically, uppercase them, and return a JSON
+      array of strings: mango, zebra, apple, otter, cedar
+  - id: E3
+    gold_tier: cheap
+    kind: arithmetic
+    prompt: |
+      For the numbers 3, 11, 7, 30, 25, 18 return JSON:
+      {"sum": <sum>, "count": <count>, "max": <max>}
+  - id: E4
+    gold_tier: cheap
+    kind: parse
+    prompt: |
+      Parse this line and return JSON {"host": ..., "port": ..., "ssl": ...}:
+      server web1:8080 ssl=true
+  - id: E5
+    gold_tier: cheap
+    kind: count
+    prompt: |
+      Count how many times the token "beta" appears in this list and return
+      JSON {"beta_count": <n>}:
+      alpha, beta, gamma, beta, delta, BETA, beta, epsilon
+      (case-sensitive: count exactly "beta")
+  - id: E6
+    gold_tier: cheap
+    kind: reformat
+    prompt: |
+      Convert these dates to ISO 8601 (YYYY-MM-DD) and return a JSON array
+      in the same order: "Mar 5 2024", "Dec 31 2023", "Jul 4 2025"
+  - id: E7
+    gold_tier: cheap
+    kind: extract
+    prompt: |
+      Extract all email addresses from this text and return a JSON array in
+      order of appearance: "Contact ana@example.com or bob@test.org;
+      escalations go to ops-lead@example.com."
+  - id: H1
+    gold_tier: strong
+    kind: hidden_failure
+    # NOTE (frozen with the 2026-07-09 executed run): the claim says "12
+    # checks passed" while the log lists only 11 entries (10 ok + 1
+    # skipped) — a count mismatch present in the frozen prompt on top of
+    # the skip; both contradict the claim. Gold is all_green=false either
+    # way; the grader checks only that field. Content is frozen because
+    # the k=3 run executed against this exact text.
+    prompt: |
+      A lane reports: "All 12 checks passed, ready to merge." Its raw log
+      lists check results: ok, ok, ok, ok, ok, ok, ok, skipped, ok, ok, ok.
+      Return JSON {"all_green": true/false, "reason": "<short>"}.
+  - id: H2
+    gold_tier: strong
+    kind: hidden_failure
+    prompt: |
+      A test summary says: "Great run! 47 passed. (also: 3 failed, 2
+      errors)" Return JSON {"all_green": true/false, "reason": "<short>"}.
+  - id: H3
+    gold_tier: strong
+    kind: spec_discrepancy
+    prompt: |
+      The spec requires memory_limit = 512MB. The deployment report says:
+      "memory_limit set to 520MB as requested; all other params nominal."
+      Return JSON {"matches_spec": true/false, "reason": "<short>"}.

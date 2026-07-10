@@ -75,3 +75,13 @@ cases:
     manual_review_notes: "Ceiling risk HIGH - needs a genuinely long multi-phase task; the 3-phase harness upgrade itself is the reference workload shape."
     status: proposed
     linked_recommendation_id: REC-20260706-037
+
+  - case_name: model_routing_playbook_vs_all_strong
+    task_type: model_tier_routing
+    variant_a: "All 10 fixture subtasks executed on the session's strong model (all-strong baseline)"
+    variant_b: "Routed per core/model_routing_playbook.md: strong router classifies each subtask; mechanical -> cheap tier (Haiku-class), honesty-critical -> strong tier"
+    expected_metrics: "per-subtask correctness (deterministic grader), whole-workload all-correct rate, routing accuracy vs gold labels, honesty-misroute count, cost proxy (cheap = 0.1x strong)"
+    success_criteria: "B ships iff B cost <= 0.5x A AND honesty-misroutes = 0 AND B whole-workload rate >= A whole-workload rate, at k >= 3; ANY honesty misroute fails the case regardless of cost"
+    manual_review_notes: "Fixture, gold labels and grader are tracked in benchmarks/route_cost_ab/ (promotion of the gitignored 2026-07-08 evals/route_ab demo - the flagship ~2.5x claim must be re-runnable from the repo). Metrics are all ceiling-immune (cost/routing/stability, never quality-lift). Dispatch prompts VERBATIM, one subtask per agent. EXECUTED 2026-07-09 (k=3, 63 agents, blind router): B cost 0.37x (<=0.5x PASS), honesty misroutes 0 (PASS), whole-workload B 3/3 = A 3/3 (PASS) - all three criteria met; raw runs in evals/route_cost_ab_20260709/ (local), scorecard reproduced by check_route_ab.py."
+    status: completed
+    linked_recommendation_id: REC-20260709-W1
