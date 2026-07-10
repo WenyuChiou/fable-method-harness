@@ -18,7 +18,7 @@ by stable ID — do not walk it top to bottom (L4 rule 1).
 |---|---|
 | `README.md` | What this repo is / is not; the reading order; privacy status. First contact only. |
 | `HARNESS.yaml` | Package manifest: name, version, entrypoint, provenance, layers, routes, portability targets, constraints. Use for machine consumption or provenance checks. |
-| `ROUTES.yaml` | The 8 route definitions with per-route file lists. Use after every L3 classification. |
+| `ROUTES.yaml` | The 8 route definitions with per-route file lists. Use after every L3 classification — load one entry via `scripts/route_show.py`, not the whole file. |
 | `context/` | L0–L5 progressive-disclosure layers (this directory). L0 bootstrap → L1 constitution → L2 current phase → L3 router → L4 disclosure policy → L5 this map. |
 | `operating_model/` | The distilled method skeleton: `operating_model.md` (the core loop), `decision_rules.yaml`, `phase_gates.md`, `review_protocol.md`, `model_routing_policy.yaml`, `project_memory_policy.yaml`. Use when a route file cites an operating-model section. |
 | `playbooks/` | Step-by-step per-phase procedures (`PLAYBOOK-*`): `phase0_static_package_standard.md` through `phase7_public_release.md` — how to run each phase's work the way the source repo demonstrably ran it. Use when executing, not deciding. |

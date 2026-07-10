@@ -39,9 +39,10 @@ survives model and session changes.
    right now, what is allowed, what is forbidden.
 3. Read `context/L3_task_router.md` — classify the task you were given into
    one of the 8 task types.
-4. Open `ROUTES.yaml` and resolve your route (`ROUTE-*`). Read its
-   `required` files in full. Open `optional` files only with a stated
-   one-line reason.
+4. Load your route's entry (`python scripts/route_show.py <task_type>`, or
+   grep `- id: ROUTE-<...>` in `ROUTES.yaml` — do not Read the file whole).
+   Read its `required` files in full. Open `optional` files only with a
+   stated one-line reason.
 
 ## Rules that are never optional
 

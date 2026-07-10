@@ -22,10 +22,14 @@ the identical discipline to itself.
    `context/L0_bootstrap.md`, then L2, then L3. Never begin a task by
    globbing or reading the repo tree wholesale.
 
-2. **Route-scoped loading only.** After L3 classification, open
-   `ROUTES.yaml` and load exactly the files listed for the chosen route.
-   A file not on the route list is presumed irrelevant until proven
-   otherwise.
+2. **Route-scoped loading only.** After L3 classification, load exactly
+   the files listed for the chosen route — via `scripts/route_show.py
+   <task_type>` or a grep of that route's `- id:` block, never a wholesale
+   Read of `ROUTES.yaml`. A file not on the route list is presumed
+   irrelevant until proven otherwise. The same grep-entry rule applies to
+   `INDEX.yaml`: grep the path or a retrieval keyword and read only the
+   matched entry; the whole-file read (~23.5k tokens) is reserved for
+   `scripts/index_diff.py`, which does the mechanical MT-5 sweep for ~0.
 
 3. **Escalate one layer at a time, with a stated reason.** Only open a
    deeper layer (rubric → playbook → example → dataset record) when the

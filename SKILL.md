@@ -45,13 +45,16 @@ repo but route to different file sets.
 ## 2. Required startup sequence
 
 Read, in order: `context/L0_bootstrap.md` → `context/L2_current_phase.md` →
-`context/L3_task_router.md` → `ROUTES.yaml`. (Same ladder as `BOOTSTRAP.md`.)
+`context/L3_task_router.md` → your route's entry only (`python
+scripts/route_show.py <task_type>`, or grep `- id: ROUTE-<...>` in
+`ROUTES.yaml` — do not read it whole). (Same ladder as `BOOTSTRAP.md`.)
 
 ## 3. Route selection
 
-Classify the task into one of the 8 task types (L3 table), resolve its
-`ROUTE-*` entry in `ROUTES.yaml`, read the `required` list in full,
-open `optional` only with a stated reason. Never bulk-load the repo.
+Classify the task into one of the 8 task types (L3 table), load its
+`ROUTE-*` entry via `scripts/route_show.py` (or a grep of that block),
+read the `required` list in full, open `optional` only with a stated
+reason. Never bulk-load the repo.
 
 ## 4. Required output style
 
