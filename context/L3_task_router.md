@@ -19,8 +19,12 @@ retrieval_keywords: [which route, classify task, task router, route table, ROUTE
 
 Classify the task FIRST (restate it in one sentence, name the phase it
 touches, check L2's allowed/forbidden list), THEN pick exactly one route
-below, THEN open `ROUTES.yaml` for that route's file list. Do not open
-rubric/playbook/example files the route does not list.
+below, THEN load ONLY that route's entry — `python scripts/route_show.py
+<task_type>` (add `--header` on first activation for the routing rules), or
+grep `- id: ROUTE-<...>` in `ROUTES.yaml` and read just that block. Do NOT
+Read `ROUTES.yaml` whole (measured: one entry is ~13% of the file; the rest
+is other routes' lists). Do not open rubric/playbook/example files the
+route does not list.
 
 ## Route table
 
@@ -52,6 +56,7 @@ rubric/playbook/example files the route does not list.
 
 ## After classifying
 
-Open `ROUTES.yaml`, load ONLY the files listed under your route, and follow
-`context/L4_progressive_disclosure_policy.md` for any escalation beyond
-that list.
+Load your route's entry (`python scripts/route_show.py <task_type>`, or
+grep the `- id:` block in `ROUTES.yaml`), load ONLY the files it lists, and
+follow `context/L4_progressive_disclosure_policy.md` for any escalation
+beyond that list.

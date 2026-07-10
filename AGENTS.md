@@ -30,7 +30,8 @@ retrieval_keywords: [agent instructions, AGENTS.md, repository rules, coding age
    - `context/L0_bootstrap.md`
    - `context/L2_current_phase.md`
    - `context/L3_task_router.md`
-   - `ROUTES.yaml`
+   - your route's entry only — `python scripts/route_show.py <task_type>`,
+     or grep `- id: ROUTE-<...>` in `ROUTES.yaml` (do not read it whole)
 
 3. **Classify the task type first.** Use the table in
    `context/L3_task_router.md`. If the task fits none of the 8 types, say so

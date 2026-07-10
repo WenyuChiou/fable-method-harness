@@ -8,8 +8,14 @@
 # tags: [index, inventory, retrieval]
 # retrieval_keywords: [file inventory, where does X live, index of files, path lookup, layer map]
 # ---
-# Regenerate check: every content file on disk must appear here exactly once
-# (a missing file in INDEX is a defect - see ROUTE-repo-maintenance self_check MT-5).
+# Regenerate check: every git-tracked file must appear here exactly once
+# (a missing file in INDEX is a defect - see ROUTE-repo-maintenance self_check
+# MT-5). The mechanical sweep is `python scripts/index_diff.py` (~0 tokens);
+# purpose-string drift is NOT covered by it - check touched entries by hand.
+# LOOKUP DISCIPLINE: grep this file for the path or a retrieval keyword and
+# read ONLY the matched entry (a few lines). Do not Read the whole file
+# (~23.5k tokens for what a 3-entry lookup answers); the wholesale read has
+# no remaining consumer now that index_diff.py does the drift sweep.
 
 files:
 
@@ -1380,7 +1386,7 @@ files:
   - path: benchmarks/harness_cases.yaml
     id: DATASET-harness-cases
     layer: dataset
-    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 8 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset, model-routing cost router, validator output economy) complementing ai_review_cases.yaml without duplication."
+    purpose: "A/B benchmark scaffold for the adaptive-harness system itself - 9 pre-registered cases (skill adapter value, rolling loop vs one-shot, cadence, invocation-path simplification, multi-delegate splitter pipeline, context reset, model-routing cost router, validator output economy, grep-entry vs wholesale read) complementing ai_review_cases.yaml without duplication."
     tags: ["dataset", "benchmark", "ab-test", "adaptive-harness", "pre-registration"]
     read_when: "experiment_design mode, or when an adaptive-harness recommendation is classified Experiment."
 
@@ -1390,6 +1396,20 @@ files:
     purpose: "Scripted retrieval smoke probes (computed form of docs/retrieval_smoke_test.md step 2) + INDEX ghost sweep - committed so smoke runs are re-runnable from the repo instead of reconstructed per session. Exit 0/1."
     tags: ["validation", "script", "smoke-test", "retrieval", "probes"]
     read_when: "After any edit round touching retrieval surface (frontmatter, INDEX, new content files); extend PROBES per round."
+
+  - path: scripts/index_diff.py
+    id: SCRIPT-index-diff
+    layer: validation
+    purpose: "MT-5 machine check: two-way set-diff of INDEX.yaml entries vs git ls-files (ghosts / unindexed / duplicates), prints only mismatches; replaces the ~23.5k-token wholesale INDEX read in repo-maintenance; purpose-string drift stays a judgment call, disclosed out of scope."
+    tags: ["validation", "script", "index", "drift", "repo-maintenance"]
+    read_when: "Running the MT-5 drift sweep, or verifying INDEX matches disk after adding/removing files."
+
+  - path: scripts/route_show.py
+    id: SCRIPT-route-show
+    layer: validation
+    purpose: "Prints ONE validated route entry from ROUTES.yaml (plus the header rules on --header) so sessions load ~13% of the file instead of Reading it whole; --list enumerates route ids."
+    tags: ["validation", "script", "routes", "grep-entry", "context-economy"]
+    read_when: "Loading a route's file list after L3 classification, or checking which routes exist."
 
   - path: scripts/build_harness_graph.py
     id: SCRIPT-build-harness-graph

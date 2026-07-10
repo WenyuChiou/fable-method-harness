@@ -44,6 +44,10 @@ PROBES = [
     # pins the Wave-1 cost-router operationalization (2026-07-09): the
     # measured 2.5x split must be findable as an operational playbook.
     ("model routing cost router cheap tier mechanical honesty critical strong", ["core/model_routing_playbook.md"]),
+    # pins the Wave-2b grep-entry discipline (2026-07-09): the two
+    # wholesale-read killers must stay findable.
+    ("index diff tracked ghost unindexed duplicate mt-5", ["scripts/index_diff.py"]),
+    ("route show one validated route entry grep", ["scripts/route_show.py"]),
 ]
 
 SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace"}

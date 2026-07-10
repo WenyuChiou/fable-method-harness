@@ -226,7 +226,10 @@ routes:
       - playbooks/repo_maintenance_playbook.md
       - rubrics/maintainability_rubric.yaml
       - docs/retrieval_smoke_test.md
-      - INDEX.yaml
+      # INDEX.yaml is NOT read whole here anymore (it was ~23.5k tokens, 67%
+      # of this route's cost): run `python scripts/index_diff.py` for the
+      # mechanical MT-5 sweep and grep INDEX only for the entries you touch.
+      - scripts/index_diff.py
     optional:
       - datasets/failure_modes.yaml
       - memory/project_state.md
@@ -234,12 +237,12 @@ routes:
       - schemas/route.schema.yaml
     expected_output: >-
       Drift-free repo state: docs/status lines match reality, renames are
-      grep-swept, INDEX.yaml matches disk, and the retrieval smoke test passes
-      after the edit round.
+      grep-swept, index_diff.py exits 0 (INDEX matches the tracked set), and
+      the retrieval smoke test passes after the edit round.
     self_check:
       - "MT-4 (clean_breaks): after any rename/move, the old value was grepped repo-wide and every stale reference fixed."
       - "MT-1 (friction_to_changelog_traceability): friction found during the sweep is recorded with a stable id."
-      - "MT-5 (scratch_hygiene): scratch/temp artifacts cleaned; INDEX.yaml matches disk exactly — no orphan or ghost entries."
+      - "MT-5 (scratch_hygiene): scratch/temp artifacts cleaned; `python scripts/index_diff.py` exits 0 — no ghost/unindexed/duplicate entries. Purpose-string drift of TOUCHED entries checked by grep-and-read, not a wholesale INDEX read."
       - "docs/retrieval_smoke_test.md executed after the edit round and passed."
 
   - id: ROUTE-ab-test-design
