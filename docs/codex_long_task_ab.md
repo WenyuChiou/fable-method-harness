@@ -14,9 +14,12 @@ retrieval_keywords: [Codex long task A/B, long-task harness benchmark, Codex har
 
 # Codex Long-Task A/B
 
-Status: Codex micro-contract A/B run complete (n=1 per cell — a directional
-signal, not an established lift); full C/D control rerun not yet complete after
-the inline-interface change.
+Status: CONFIRMATORY four-arm run complete (2026-07-10, 5 trials/cell, 80
+executed). Efficiency lift for the micro-contract arm is confirmed and
+robust; the correctness/false-done direction is positive but not
+statistically separable at the scored n (details in the 2026-07-10
+section — including a 41% arm-uniform infrastructure-attrition
+disclosure).
 
 This evaluation tests whether activating the harness improves Codex long-task
 stability and completion honesty enough to justify extra token and tool cost.
@@ -113,6 +116,50 @@ The runner sends the complete prompt to `codex exec -` over stdin. On Windows,
 this avoids `cmd /c` argument parsing truncating multi-section prompts before
 the `TASK:` block.
 
+## 2026-07-10 Confirmatory Four-Arm Run (5 trials/cell)
+
+Run id: `codex_confirmatory_20260710_t5`. Frozen sha: `b91526d`. 4 arms ×
+4 scenarios × 5 trials = 80 executed, 80/80 produced trial records.
+
+**Attrition disclosure (load-bearing):** 33/80 trials (41%) were UNSCORED
+with `codex_exit_1` — arm-uniform (A 7, B 9, C 7, D 10) and
+scenario-spread. Root cause was OPERATOR-ENVIRONMENT contamination, not
+trial content: the user's `~/.codex` config carried a Linear MCP server
+with an expired token (transport worker fatal → exit 1) plus a broken
+skill YAML in the codex plugin cache. Because the failures are uniform
+across arms they do not bias the comparison, but they shrink scored n to
+A 13 / B 11 / C 13 / D 10. Runner follow-up: per-trial clean `CODEX_HOME`
+isolation so user-global MCP/plugins cannot leak into trials.
+
+Computed outcome (scored trials; efficiency means over all 20 executed):
+
+| Arm | Scored pass | False done | Input tok/trial | Tool calls/trial | Sec/trial |
+|---|---:|---:|---:|---:|---:|
+| `A_baseline` | 11/13 (85%) | 2 | 110k | 8.4 | 72 |
+| `B_harness` | **11/11 (100%)** | **0** | **80k** | **3.5** | **48** |
+| `C_pointer_control` | 12/13 (92%) | 1 | 136k | 9.2 | 82 |
+| `D_flat_dump` | 9/10 (90%) | 1 | 179k | 8.8 | 87 |
+
+Interpretation, honestly bounded:
+
+- **Efficiency lift CONFIRMED and robust** (the ceiling-immune claim):
+  B used **27% fewer input tokens, 59% fewer tool calls, 34% less time**
+  than baseline — and against the decisive pointer confound C, B is
+  **41% cheaper on input and 62% on tool calls**, so the effect is the
+  micro-contract's content, not "any pointer" (C is in fact MORE
+  expensive than baseline). D (flat dump) costs **2.2× B's input** with
+  no correctness gain — progressive disclosure beats flat context
+  decisively.
+- **Correctness/honesty direction positive, NOT established:** B is the
+  only arm at zero false-done (A had 2) and 100% scored pass, consistent
+  with the 07-09 n=1 signal — but Fisher one-sided on B 11/11 vs A 11/13
+  gives p = 0.28: not separable at this n. Do not cite this run as a
+  correctness lift; cite it for efficiency and the zero-false-done
+  observation.
+- Scorecard artifact: `evals/long_codex_ab/codex_confirmatory_20260710_t5/`
+  (local, gitignored; regenerate the table with the `grade --markdown`
+  command above).
+
 ## 2026-07-09 Codex Micro-Contract A/B
 
 Run id: `codex_iso_ab4_20260708_v10`.
@@ -148,9 +195,10 @@ a signal to confirm, not an established lift. Do not generalize this to
 Claude/Fable or to full control-arm superiority until the `C_pointer_control`
 and `D_flat_dump` arms are rerun under the same post-`2c34067` treatment
 definition, and a multi-trial rerun establishes the effect is not sampling
-noise. This confidence level matches `docs/evidence.md`, which records Codex
-long-task improvement as *testable, not yet proven*; this run does not upgrade
-that status.
+noise. At the time of this run, this confidence level matched
+`docs/evidence.md`, which then recorded Codex long-task improvement as
+*testable, not yet proven*; the 2026-07-10 confirmatory section above is
+what later upgraded the efficiency half of that status.
 
 ## 2026-07-08 Runner Smoke
 
