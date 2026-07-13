@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "description": "Tracked source canaries for the codebase-memory freshness sentinel. The worktree AST is authoritative; this file never stores expected graph output.",
+  "probes": [
+    {
+      "id": "adaptive-outcome-scan",
+      "symbol": "scan_outcome_evidence",
+      "file": "scripts/run_adaptive_harness_review.py",
+      "expected_present": true
+    },
+    {
+      "id": "adaptive-rolling-state",
+      "symbol": "collect_rolling_state",
+      "file": "scripts/run_adaptive_harness_review.py",
+      "expected_present": true
+    },
+    {
+      "id": "hermes-live-runner",
+      "symbol": "run_live",
+      "file": "scripts/run_hermes_router_benchmark.py",
+      "expected_present": true
+    }
+  ]
+}
