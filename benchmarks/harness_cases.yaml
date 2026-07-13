@@ -125,3 +125,33 @@ cases:
     manual_review_notes: "From the 2026-07-09 audit round-1 ai-review P1 (report-loading tax ~11k tok/load). EXECUTED 2026-07-09 on a standard_review --no-home smoke run: latest-brief.json 486B vs latest.json 7,444B = 6.5% (PASS <=20%); brief keys verified (issues, recommendation_index, next_review_trigger, counts); 66/66 scripts tests pass post-change. NOTE: the brief is emitted by the shared write_outputs (serves both runners per DR-020, not forked); the operator-side pointer flip (commands/ai-review.md telling sessions to read the brief) is a separate ~/.claude change, tracked for the operator batch."
     status: completed
     linked_recommendation_id: none - wave-plan item W2c2 (2026-07 optimization program; no formal REC record minted)
+
+  - case_name: rolling_outcome_ledger_vs_commit_prose
+    task_type: dynamic_learning_integrity
+    variant_a: "Current rolling loop: resolution inferred from free-form applies/resolves grep; resolved outcomes exist only in the latest derived report"
+    variant_b: "Evidence-aware outcome ledger: exact commit subject or structured Harness-Outcome trailer; outcomes persist across later runs and stale current findings cannot erase them"
+    expected_metrics: "false closures on negated/partial prose; resolved-outcome survival across 3 subsequent runs; carried-open parity; runner wall-clock"
+    success_criteria: "B ships iff 0/5 adversarial commit messages falsely close, 2/2 valid evidence forms close, resolved outcomes survive 3/3 later rolling runs, carried-open behavior stays unchanged, and median dry-run wall-clock is <=1.2x A"
+    manual_review_notes: "Pre-registered from the 2026-07-12 Codex/Hermes optimization goal. Live evidence exposed both directions of drift: 20 stale recommendations repeat indefinitely, while commit b540484 contains 'applies REC-20260706-030 partial-evidence note' followed by 'no closure intended', which the current grep can match if that record disappears. No formal REC record minted."
+    status: proposed
+    linked_recommendation_id: none - user-requested Codex/Hermes adaptive-learning audit (2026-07-12)
+
+  - case_name: codex_clean_home_vs_inherited_operator_home
+    task_type: executor_isolation_efficiency
+    variant_a: "Codex A/B runner inherits the operator CODEX_HOME, MCP servers, plugin cache, and user config"
+    variant_b: "Per-trial clean CODEX_HOME containing only the minimum authenticated runtime state required by codex exec"
+    expected_metrics: "configuration-contamination failures; scored-trial yield; wasted wall-clock and tokens on non-task startup failures; auth continuity; cross-trial state leakage"
+    success_criteria: "B ships iff a deterministic contaminated-home fixture fails under A but is ignored under B, auth continuity is regression-tested without copying plugin/MCP config, cross-trial state leakage is 0/5, and a live smoke produces a scored trial; do not claim the earlier 41% attrition is eliminated without a multi-trial rerun"
+    manual_review_notes: "Pre-registered follow-up to codex_confirmatory_20260710_t5: 33/80 trials were UNSCORED from expired operator MCP auth plus broken plugin-cache YAML, arm-uniform but costly. The runner currently passes no env override to subprocess.Popen. No formal REC record minted."
+    status: proposed
+    linked_recommendation_id: none - user-requested Codex/Hermes adaptive-learning audit (2026-07-12)
+
+  - case_name: hermes_compact_route_receipt_vs_freeform_router
+    task_type: hermes_routing_economy
+    variant_a: "Current full prompts/hermes-router.md prompt block plus free-form internal routing decision"
+    variant_b: "Compact Hermes router micro-contract plus machine-parseable route receipt; details loaded only after escalation"
+    expected_metrics: "standing prompt bytes/tokens; route-receipt parse rate; route accuracy; honesty/governance misroutes; time to first executable action; unnecessary escalation count"
+    success_criteria: "B ships iff standing prompt bytes are <=60% of A, receipt parses 10/10, route accuracy is >=9/10 with 0 honesty/governance tasks routed to Hermes-direct or Codex, and median time-to-route does not regress by >10%; static fixture results alone prove contract economy, not live Hermes quality"
+    manual_review_notes: "Pre-registered because Hermes is named as the tier-1 router but has no tracked Hermes-specific benchmark, route receipt, or token/latency feedback path. Local runtime is Hermes Agent 0.16.0 and exposes one-shot mode, but live claims require raw transcripts and usage evidence. No formal REC record minted."
+    status: proposed
+    linked_recommendation_id: none - user-requested Codex/Hermes adaptive-learning audit (2026-07-12)
