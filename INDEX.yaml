@@ -439,6 +439,13 @@ files:
     tags: ["hermes", "routing", "benchmark", "evidence", "prompt-economy"]
     read_when: "Checking whether the Hermes compact router reduces standing context or improves route receipt quality and safety."
 
+  - path: docs/hermes_fair_baseline_2026_07_13.md
+    id: DOC-hermes-fair-baseline-2026-07-13
+    layer: doc
+    purpose: "Commit-bound fair semantic A/B evidence for adopting the compact Hermes receipt under quality, protected-route, provenance, and latency no-regression gates without claiming speed or token savings."
+    tags: ["hermes", "routing", "benchmark", "evidence", "fair-baseline", "semantic-grader"]
+    read_when: "Auditing the fair-baseline Hermes adoption decision, protected-task safety, or paired latency claim boundaries."
+
   - path: docs/codebase_memory_indexing.md
     id: DOC-codebase-memory-indexing
     layer: doc
@@ -1414,14 +1421,14 @@ files:
   - path: scripts/run_hermes_router_benchmark.py
     id: SCRIPT-run-hermes-router-benchmark
     layer: validation
-    purpose: "Deterministic Hermes compact-router benchmark: frozen prompt-byte comparison, ten route fixtures, JSON receipt validation, protected-task misroute gate, and disclosed host-side time proxy."
+    purpose: "Deterministic Hermes compact-router benchmark plus pre-registered 100-call fair semantic A/B runner with native/semantic grading, protected-task gates, runtime provenance, atomic partial evidence, and deterministic paired-latency bootstrap."
     tags: ["validation", "script", "hermes", "routing", "benchmark"]
     read_when: "After changing the Hermes standing contract, receipt schema, or surface-routing mappings."
 
   - path: scripts/test_run_hermes_router_benchmark.py
     id: TEST-run-hermes-router-benchmark
     layer: validation
-    purpose: "Regression tests for Hermes prompt economy, ten frozen route receipts, protected completion/governance routing, invalid receipt rejection, and evidence limitations."
+    purpose: "Regression tests for Hermes prompt economy and live runners, including fair schedule symmetry, stdout-only semantic isolation, protected routing, deterministic bootstrap, provenance drift, atomic partial evidence, and CLI compatibility."
     tags: ["validation", "test", "hermes", "routing", "benchmark"]
     read_when: "After changing run_hermes_router_benchmark.py or prompts/hermes-router.md."
 

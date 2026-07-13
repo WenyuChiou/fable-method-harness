@@ -16,8 +16,10 @@ retrieval_keywords: [Hermes compact router, route receipt, paired live benchmark
 
 # Hermes Compact Router Evidence
 
-Status: static economy gate passed; live B quality gate passed; the full paired
-experiment's hard gate failed because baseline A produced no canonical receipts.
+Status: static economy gate passed; live B quality gate passed; the initial
+strict paired experiment remains a hard FAIL. A later pre-registered fair
+semantic follow-up passed its adoption and latency no-regression gates, without
+supporting a speedup or live token-reduction claim.
 
 ## Change under test
 
@@ -121,4 +123,21 @@ reduction, B's 10/10 live route accuracy, parse yield improvement from 0% to
 100%, and protected-misroute improvement from 3 to 0 in the paired sample.
 
 Do **not** claim live token savings, a statistically established latency lift,
-broad Hermes reliability, or that the complete pre-registered gate passed.
+broad Hermes reliability, or that the earlier strict paired gate passed.
+
+## Pre-registered fair semantic follow-up
+
+The strict paired failure above is preserved. It motivated, but was not used to
+post-hoc tune, a new stdout-only semantic grader frozen in commit `f2761d0`.
+The committed runner `5a855e4` then executed 100 no-retry calls with 25 AB and
+25 BA pairs.
+
+Compact B scored 50/50 semantic targets and exact routes, parsed 50/50 native
+JSON receipts, and passed all 15 protected cases with zero unresolved,
+ambiguous, or misrouted outputs. The 50-pair median B/A ratio was 0.99075 and
+the pre-registered 95% bootstrap upper bound was 1.05007. Therefore B passed
+the `<1.1` no-regression gate and `adopt_B=true`, but it did not pass the `<1.0`
+speedup gate. Exact token usage remained unavailable and UNSCORED.
+
+Full design, hashes, gate results, and limits are in the
+[fair semantic follow-up](./hermes_fair_baseline_2026_07_13.md).
