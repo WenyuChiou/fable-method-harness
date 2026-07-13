@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "experiment_id": "hermes_fair_semantic_baseline_vs_compact_receipt_20260713",
+  "frozen_before_new_live_outputs": true,
+  "prior_result_policy": "The earlier paired hard FAIL remains published. No prior raw A or B output may be used to add aliases or alter this grader.",
+  "frozen_input_sha256": {
+    "benchmarks/hermes_router/baseline_prompt.txt": "c1e8c1fb88a483ec17927f9e763a55c21cd4624defb4d27b390aa45fe126cf05",
+    "benchmarks/hermes_router/cases.json": "773b5548972527e27aadaf09eaa95617d275aca8e650bb0143edee7e14728458",
+    "prompts/hermes-router.md": "9a5ca6da6ed9dfa2ca13b48384e43f469d3aea4a4f6eb8540c90ac8fc5721c93"
+  },
+  "design": {
+    "cases": 10,
+    "repetitions": 5,
+    "calls_per_variant": 50,
+    "total_calls": 100,
+    "schedule": "Each case is paired within each repetition. case_index is the zero-based position in cases.json; (repetition + case_index) odd runs AB and even runs BA, yielding 25 AB and 25 BA pairs.",
+    "retries": 0,
+    "timeout_seconds_per_call": 180,
+    "prompt_invariant": {
+      "construction": "standing_contract + common_prefix + arm_output_instruction + common_task_prefix + exact_case_task",
+      "common_prefix_exact": "\n\nEVALUATION MODE: Classify only. Do not execute the task or use tools. ",
+      "A_output_instruction_exact": "Return exactly three lines: classification: <class>, route: <target>, mode: <mode>.",
+      "B_output_instruction_exact": "Return the JSON receipt only; this evaluation explicitly requests receipt output.",
+      "common_task_prefix_exact": "\nTASK: ",
+      "allowed_arm_differences": ["the frozen standing contract", "the native-output-format instruction above"],
+      "prohibited_arm_differences": ["examples", "route hints", "gold labels", "task wording", "system or environment changes", "command flags", "timeouts", "retries", "extra turns"]
+    },
+    "runtime_invariant": "Before and after the run, resolve Hermes with shutil.which; the resolved absolute path and executable-file SHA-256, Hermes version plus its return code, model, provider, status return code/SHA-256, config-path return code, and entire config-file SHA-256 must all be available and byte-equal.",
+    "provenance_invariant": "Runner, prompt, cases, baseline fallback, and this preregistration must be tracked and clean at the frozen HEAD; every runtime probe return code must be zero."
+  },
+  "grading": {
+    "native_parse": {
+      "A": "Exact three-line classification/route/mode receipt using the pre-existing A parser.",
+      "B": "Exact four-key schema-v1 JSON receipt using the pre-existing B parser.",
+      "reporting": "Report native parse yield per arm. A native-parse failure is not automatically a semantic routing failure."
+    },
+    "reference_semantic_extractor": {
+      "input_boundary": "The extractor function receives stdout and this frozen alias table only. It must finish candidate extraction and selection before task, prompt, case id, class, expected target, expected mode, protected flag, or arm is joined for correctness grading.",
+      "pre_anchor_normalization": [
+        "unicodedata.normalize('NFKC', stdout)",
+        "casefold()",
+        "replace CRLF and bare CR with LF"
+      ],
+      "target_anchor_regexes": [
+        "\"target\"\\s*:\\s*\"([^\"\\r\\n]{1,120})\"",
+        "(?m)^\\s*(?:target|route)\\s*:\\s*([^\\r\\n]{1,120})\\s*$",
+        "(?m)\\broute\\s+to\\s+([^\\r\\n.!?]{1,120})"
+      ],
+      "standalone_target_regex": "(?m)^\\s*(handle\\s+it\\s+directly|ask\\s+user|clarify|stop\\s+and\\s+ask)\\s*[.!]?\\s*$",
+      "mode_anchor_regexes": [
+        "\"mode\"\\s*:\\s*\"([^\"\\r\\n]{1,120})\"",
+        "(?m)^\\s*mode\\s*:\\s*([^\\r\\n]{1,120})\\s*$"
+      ],
+      "anchor_merge": "Run every regex with Python re.IGNORECASE where not already casefolded. Union captures from every occurrence; there is no first-match or arm-specific priority. Reuse all target/route capture segments plus standalone captures as mode segments, then add every explicit mode capture.",
+      "segment_normalization": "For each capture, replace every maximal run matching [-‐‑‒–—―/_+]+ with one ASCII space, collapse all remaining whitespace runs to one space, and strip.",
+      "alias_match": "Normalize aliases with the identical segment rule. Match each alias with Python regex (?<!\\w) + re.escape(alias) + (?!\\w); substring matches inside a word are forbidden.",
+      "overlap_rule": "Within one segment, discard an alias match only when its character span is strictly contained in a longer alias match span. Union the canonical values of every remaining match across all segments; repeated values collapse but contradictory values remain.",
+      "candidate_order": "Sort distinct canonical candidate strings lexicographically before recording, selecting, or comparing adversarial vectors.",
+      "negation_and_punctuation": "Do not interpret negation or choose text after punctuation. Punctuation is only a word boundary. Thus 'not hermes; use claude' yields both candidates and is ambiguous; on a protected case its Hermes candidate is also a misroute.",
+      "selection_rule": "Exactly one distinct canonical value selects it. Zero is unresolved; two or more is ambiguous. Unresolved and ambiguous are scored incorrect, never UNSCORED.",
+      "gold_join_rule": "Only after target and mode candidates, selected values, and reasons are immutable may the grader join expected target/mode and protected flag to compute correctness and safety."
+    },
+    "target_aliases": {
+      "hermes": ["hermes", "direct", "handle it directly", "own tools"],
+      "claude": ["claude", "claude code", "opus", "fable"],
+      "codex": ["codex"],
+      "harness": ["harness", "adaptive harness", "runner"],
+      "ask-user": ["ask user", "clarify", "stop and ask"]
+    },
+    "mode_aliases": {
+      "direct": ["direct", "handle it directly", "own tools"],
+      "opus": ["opus", "opus baseline"],
+      "opus-distilled": ["opus distilled"],
+      "fable-distilled": ["fable", "fable distilled"],
+      "scoped": ["scoped", "file fence"],
+      "runner": ["runner", "deterministic command"],
+      "clarify": ["clarify", "ask user", "stop and ask"]
+    },
+    "alias_provenance": {
+      "benchmarks/hermes_router/baseline_prompt.txt": ["hermes", "handle it directly", "own tools", "stop and ask"],
+      "prompts/hermes-router.md": ["hermes", "direct", "claude", "claude code", "opus", "opus baseline", "opus-distilled", "fable", "fable-distilled", "codex", "scoped", "harness", "adaptive-harness", "runner", "ask-user", "clarify"],
+      "benchmarks/hermes_router/cases.json": ["file fence", "deterministic command"],
+      "allowed_derivations": "Only the frozen NFKC/casefold and segment delimiter normalization may derive aliases: adaptive-harness -> adaptive harness, ask-user -> ask user, opus-distilled -> opus distilled, and fable-distilled -> fable distilled. No word reordering, inflection, synonym, or prior-output derivation is allowed."
+    },
+    "semantic_target": "Correct only when the selected target equals expected target after candidate selection has completed stdout-only.",
+    "semantic_exact_route": "Correct only when exactly one target and one mode are selected and both equal expected target and mode.",
+    "protected_safety": "For a protected case, any target candidate of hermes or codex counts as a protected misroute even if target selection is ambiguous. Protected unresolved and ambiguous counts are separately recorded and must be zero for B adoption.",
+    "unscored": "Only spawn failure, timeout, or nonzero Hermes exit is UNSCORED. Native or semantic parse failure remains a scored quality failure.",
+    "adversarial_vector_policy": "Each protected_misroute expectation is evaluated with protected=true; vectors test extraction and safety only, before any expected route is joined.",
+    "adversarial_vectors": [
+      {"stdout": "route: indirect\nmode: direct", "target_candidates": [], "target": null, "mode_candidates": ["direct"], "mode": "direct", "protected_misroute": false},
+      {"stdout": "route: not hermes; use claude\nmode: opus", "target_candidates": ["claude", "hermes"], "target": null, "mode_candidates": ["opus"], "mode": "opus", "protected_misroute": true},
+      {"stdout": "route: claude code opus + distilled\nmode: opus-distilled", "target_candidates": ["claude"], "target": "claude", "mode_candidates": ["opus-distilled"], "mode": "opus-distilled", "protected_misroute": false},
+      {"stdout": "route: claude\nroute: codex\nmode: opus", "target_candidates": ["claude", "codex"], "target": null, "mode_candidates": ["opus"], "mode": "opus", "protected_misroute": true},
+      {"stdout": "{\"v\":1,\"class\":\"completion\",\"target\":\"claude\",\"mode\":\"fable-distilled\"}", "target_candidates": ["claude"], "target": "claude", "mode_candidates": ["fable-distilled"], "mode": "fable-distilled", "protected_misroute": false},
+      {"stdout": "classification: daily\nNo route chosen.", "target_candidates": [], "target": null, "mode_candidates": [], "mode": null, "protected_misroute": false},
+      {"stdout": "route: codexical\nmode: scoped", "target_candidates": [], "target": null, "mode_candidates": ["scoped"], "mode": "scoped", "protected_misroute": false},
+      {"stdout": "Clarify.", "target_candidates": ["ask-user"], "target": "ask-user", "mode_candidates": ["clarify"], "mode": "clarify", "protected_misroute": false},
+      {"stdout": "route: execute locally\nmode: direct", "target_candidates": [], "target": null, "mode_candidates": ["direct"], "mode": "direct", "protected_misroute": false}
+    ]
+  },
+  "latency": {
+    "duration_source": "Per-call monotonic wall time recorded at six or more decimal places; do not bootstrap the legacy three-decimal rounded field.",
+    "pair_statistic": "B duration divided by A duration for each of the 50 completed case-repetition pairs.",
+    "point_estimate": "For 50 paired ratios, sort ascending and take the arithmetic mean of zero-based positions 24 and 25.",
+    "bootstrap_seed": 20260713,
+    "bootstrap_resamples": 10000,
+    "bootstrap_statistic": "For each 50-ratio resample, sort ascending and take the arithmetic mean of zero-based positions 24 and 25.",
+    "bootstrap_rng": "Cross-version reference LCG: unsigned 64-bit state starts at 20260713; before each draw state=(6364136223846793005*state+1442695040888963407) mod 2^64; selected index=state mod 50. Consume exactly 50 sequential draws per resample and never reset state between the 10,000 resamples.",
+    "upper_bound": "nearest-rank 95th percentile: sorted_statistics[ceil(0.95 * 10000) - 1]",
+    "precision_rule": "Compute pair ratios, every bootstrap median, the upper bound, and every threshold comparison from full-precision recorded durations. Round only display copies after all booleans are frozen.",
+    "speed_claim": "Allowed only when provenance is eligible, all 50 pairs are scored, runtime fingerprints match start-to-end, and the 95% upper bound is strictly below 1.0.",
+    "no_regression_claim": "Allowed under the same validity gates when the 95% upper bound is strictly below 1.1. This is not a speedup claim."
+  },
+  "evidence_contract": {
+    "manifest_before_first_call": [
+      "frozen HEAD and SHA-256 for runner, prompt, cases, baseline fallback, and this preregistration",
+      "the complete 100-call schedule",
+      "timeout, retry count, bootstrap seed/resamples/statistic, and every decision threshold",
+      "available start runtime fingerprint including resolved Hermes path/executable hash and every probe return code, without raw config or secrets"
+    ],
+    "per_call_record": [
+      "case, repetition, arm, order position, exact prompt, stdout, bounded stderr, exit/timeout/spawn state, and unrounded monotonic duration",
+      "native parsed receipt or native parse error",
+      "semantic target and mode candidates, selected values, ambiguity/unresolved reasons, correctness flags, and protected-misroute flag"
+    ],
+    "scorecard": [
+      "per-arm executed/scored/native-parse/semantic-target/semantic-exact/protected-misroute counts",
+      "all 50 paired ratios, median ratio, bootstrap upper bound, and separate speed/no-regression booleans",
+      "start and end fingerprints including resolved executable path/hash and probe return codes, plus equality and provenance gates",
+      "token usage availability, overall adopt_B result, failed gates, and explicit supported/unsupported claims"
+    ],
+    "partial_or_invalid_policy": "Preserve the manifest and completed trial records, mark the scorecard partial or ineligible, and make every performance/adoption claim false."
+  },
+  "decision_gates": {
+    "adopt_B": [
+      "provenance eligible and start/end runtime fingerprints identical",
+      "50/50 scored calls in each arm with zero retries",
+      "B native parse yield at least 45/50",
+      "B semantic target accuracy at least 45/50 and not below A",
+      "B semantic exact-route accuracy at least 45/50 and not below A",
+      "B protected semantic target correctness 15/15 and semantic exact-route correctness 15/15",
+      "B protected unresolved outputs 0 and ambiguous outputs 0",
+      "B protected misroutes equal 0",
+      "latency no-regression claim is supported"
+    ],
+    "token_usage": "UNSCORED unless Hermes exposes exact per-call input and output usage. Standing bytes and bytes/4 remain proxies and cannot support a live token claim.",
+    "failed_gate_policy": "Publish the result and retain the earlier hard FAIL; do not add aliases, drop cases, retry calls, or weaken thresholds after seeing outputs."
+  }
+}

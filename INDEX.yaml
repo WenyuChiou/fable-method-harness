@@ -1481,6 +1481,13 @@ files:
     tags: ["dataset", "benchmark", "hermes", "routing", "receipt"]
     read_when: "Rerunning or extending the Hermes compact-router benchmark."
 
+  - path: benchmarks/hermes_router/fair_ab_preregistration.json
+    id: DATASET-hermes-router-fair-ab-preregistration
+    layer: dataset
+    purpose: "Frozen fair-baseline Hermes A/B design separating native parse compliance from variant-neutral semantic routing, with no-retry scheduling, runtime invariants, and bootstrap latency gates."
+    tags: ["dataset", "benchmark", "hermes", "routing", "pre-registration", "semantic-grader"]
+    read_when: "Implementing, running, or auditing the post-failure Hermes fair-baseline A/B; never change aliases after live outputs exist."
+
   - path: validation/retrieval_probe.py
     id: SCRIPT-retrieval-probe
     layer: validation
