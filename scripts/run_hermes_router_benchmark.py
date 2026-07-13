@@ -169,11 +169,34 @@ def route_once(task_class: str, contract: str, variant: str) -> str:
     return emit_receipt(decision_for_class(task_class), variant)
 
 
-def live_prompt(contract: str, task: str) -> str:
+def live_prompt(contract: str, task: str, variant: str = "B") -> str:
+    output_contract = (
+        "Return the JSON receipt only; this evaluation explicitly requests receipt output."
+        if variant == "B" else
+        "Return exactly three lines: classification: <class>, route: <target>, mode: <mode>."
+    )
     return (
         f"{contract}\n\nEVALUATION MODE: Classify only. Do not execute the task or use tools. "
-        "Return the JSON receipt only; this evaluation explicitly requests receipt output.\n"
-        f"TASK: {task}")
+        f"{output_contract}\nTASK: {task}")
+
+
+def decode_baseline_receipt(receipt: str) -> dict:
+    match = re.fullmatch(
+        r"\s*classification:\s*([^\r\n]+)\s*[\r\n]+route:\s*([^\r\n]+)\s*"
+        r"[\r\n]+mode:\s*([^\r\n]+)\s*", receipt, flags=re.IGNORECASE)
+    if not match:
+        raise ValueError("invalid baseline free-form receipt")
+    payload = {
+        "v": 1,
+        "class": match.group(1).strip().lower(),
+        "target": match.group(2).strip().lower(),
+        "mode": match.group(3).strip().lower(),
+    }
+    return payload
+
+
+def parse_baseline_receipt(receipt: str) -> dict:
+    return validate_receipt(decode_baseline_receipt(receipt))
 
 
 def as_text(value: str | bytes | None) -> str:
@@ -271,14 +294,58 @@ def live_provenance() -> dict:
         version_text = (version.stdout or version.stderr).strip()
     except (OSError, subprocess.TimeoutExpired) as exc:
         version_text = f"UNAVAILABLE:{type(exc).__name__}"
+    model = provider = "UNAVAILABLE"
+    status_sha256 = config_sha256 = "UNAVAILABLE"
+    try:
+        status = subprocess.run(
+            ["hermes", "status"], cwd=REPO, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=30)
+        status_text = (status.stdout or status.stderr)
+        status_sha256 = hashlib.sha256(status_text.encode("utf-8")).hexdigest()
+        model_match = re.search(r"^\s*Model:\s*(.+)$", status_text, flags=re.MULTILINE)
+        provider_match = re.search(r"^\s*Provider:\s*(.+)$", status_text, flags=re.MULTILINE)
+        model = model_match.group(1).strip() if model_match else "UNAVAILABLE"
+        provider = provider_match.group(1).strip() if provider_match else "UNAVAILABLE"
+        config_path = subprocess.run(
+            ["hermes", "config", "path"], cwd=REPO, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=30)
+        candidate = Path(config_path.stdout.strip())
+        if config_path.returncode == 0 and candidate.is_file():
+            config_sha256 = hashlib.sha256(candidate.read_bytes()).hexdigest()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
     return {
         "frozen_sha": head.stdout.strip() if head.returncode == 0 else "UNKNOWN",
         "runner_sha256": hashlib.sha256(runner_path.read_bytes()).hexdigest(),
         "prompt_sha256": hashlib.sha256(prompt_bytes).hexdigest(),
         "inputs_tracked_at_frozen_sha": tracked,
         "hermes_version": version_text,
+        "runtime_fingerprint": {
+            "model": model,
+            "provider": provider,
+            "status_sha256": status_sha256,
+            "config_sha256": config_sha256,
+            "config_hash_scope": "entire config.yaml bytes when available",
+            "raw_config_or_secrets_stored": False,
+        },
         "live_command_policy": ["hermes", "--ignore-rules", "--oneshot", "<prompt>"],
     }
+
+
+def provenance_eligible(provenance: dict) -> bool:
+    fingerprint = provenance.get("runtime_fingerprint", {})
+    required = (
+        fingerprint.get("model"), fingerprint.get("provider"),
+        fingerprint.get("status_sha256"), fingerprint.get("config_sha256"),
+    )
+    hashes_valid = all(
+        re.fullmatch(r"[0-9a-f]{64}", value or "")
+        for value in (fingerprint.get("status_sha256"), fingerprint.get("config_sha256")))
+    return bool(
+        provenance.get("inputs_tracked_at_frozen_sha") is True
+        and not str(provenance.get("hermes_version", "UNAVAILABLE")).startswith("UNAVAILABLE")
+        and all(value and value != "UNAVAILABLE" for value in required)
+        and hashes_valid)
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -288,22 +355,77 @@ def write_json(path: Path, payload: dict) -> None:
         handle.write("\n")
 
 
+def execute_live_case(case: dict, contract: str, variant: str, timeout: int) -> tuple[dict, dict]:
+    prompt = live_prompt(contract, case["task"], variant)
+    spawn_error = ""
+    try:
+        stdout, stderr, exit_code, timeout_reason, duration = run_hermes_process(prompt, timeout)
+    except OSError as exc:
+        stdout, stderr, exit_code, timeout_reason, duration = "", str(exc), None, "", 0.0
+        spawn_error = f"hermes_spawn_{type(exc).__name__}"
+    raw_object = None
+    decoded = None
+    parsed = None
+    parse_error = ""
+    if not timeout_reason and not spawn_error and exit_code == 0:
+        try:
+            if variant == "B":
+                raw_object = decode_json_object(stdout.strip())
+                decoded = decode_receipt(stdout.strip())
+            else:
+                raw_object = decode_baseline_receipt(stdout)
+                decoded = raw_object
+            parsed = validate_receipt(decoded)
+        except (json.JSONDecodeError, ValueError) as exc:
+            parse_error = f"{type(exc).__name__}:{exc}"
+    correct = bool(parsed) and all(
+        parsed[key] == value for key, value in case["expected"].items())
+    protected_misroute = bool(case["protected"] and is_forbidden_protected_target(raw_object))
+    unscored_reason = (
+        timeout_reason or spawn_error or (f"hermes_exit_{exit_code}" if exit_code != 0 else ""))
+    result = {
+        "id": case["id"],
+        "variant": variant,
+        "expected": case["expected"],
+        "protected": case["protected"],
+        "exit_code": exit_code,
+        "duration_seconds": round(duration, 3),
+        "raw_json_object": raw_object,
+        "decoded_receipt": decoded,
+        "parsed_receipt": parsed,
+        "parse_error": parse_error,
+        "correct": correct,
+        "protected_misroute": protected_misroute,
+        "unscored_reason": unscored_reason,
+    }
+    raw = {**result, "prompt": prompt, "stdout": stdout, "stderr": stderr}
+    return result, raw
+
+
 def run_live(run_id: str, timeout: int = 180, limit: int | None = None,
-             output_root: Path = DEFAULT_LIVE_ROOT) -> dict:
+             output_root: Path = DEFAULT_LIVE_ROOT, variant: str = "B") -> dict:
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", run_id) or run_id in {".", ".."}:
         raise ValueError(f"invalid live run_id: {run_id!r}")
     if timeout < 1:
         raise ValueError("live timeout must be positive")
     if limit is not None and not 1 <= limit <= 10:
         raise ValueError("live limit must be between 1 and 10")
+    if variant not in {"A", "B"}:
+        raise ValueError("live variant must be A or B")
     run_dir = (output_root.resolve() / run_id).resolve()
     if run_dir.parent != output_root.resolve():
         raise ValueError("live run directory escaped output root")
     run_dir.mkdir(parents=True, exist_ok=False)
     cases = load_cases()[:limit] if limit is not None else load_cases()
-    contract = extract_compact_contract()
+    if variant == "B":
+        contract, contract_source = extract_compact_contract(), "current-compact"
+    else:
+        contract, contract_source = extract_baseline_contract()
     manifest = {
         "run_id": run_id,
+        "variant": variant,
+        "contract_source": contract_source,
+        "contract_sha256": hashlib.sha256(contract.encode("utf-8")).hexdigest(),
         "status": "pre_registered_not_complete",
         "case_ids": [case["id"] for case in cases],
         "timeout_seconds": timeout,
@@ -315,50 +437,14 @@ def run_live(run_id: str, timeout: int = 180, limit: int | None = None,
     write_json(run_dir / "manifest.json", manifest)
     results = []
     for case in cases:
-        prompt = live_prompt(contract, case["task"])
-        spawn_error = ""
-        try:
-            stdout, stderr, exit_code, timeout_reason, duration = run_hermes_process(prompt, timeout)
-        except OSError as exc:
-            stdout, stderr, exit_code, timeout_reason, duration = "", str(exc), None, "", 0.0
-            spawn_error = f"hermes_spawn_{type(exc).__name__}"
-        raw_object = None
-        decoded = None
-        parsed = None
-        parse_error = ""
-        if not timeout_reason and not spawn_error and exit_code == 0:
-            try:
-                raw_object = decode_json_object(stdout.strip())
-                decoded = decode_receipt(stdout.strip())
-                parsed = validate_receipt(decoded)
-            except (json.JSONDecodeError, ValueError) as exc:
-                parse_error = f"{type(exc).__name__}:{exc}"
-        correct = bool(parsed) and all(
-            parsed[key] == value for key, value in case["expected"].items())
-        protected_misroute = bool(case["protected"] and is_forbidden_protected_target(raw_object))
-        unscored_reason = (
-            timeout_reason or spawn_error or (f"hermes_exit_{exit_code}" if exit_code != 0 else ""))
-        result = {
-            "id": case["id"],
-            "expected": case["expected"],
-            "protected": case["protected"],
-            "exit_code": exit_code,
-            "duration_seconds": round(duration, 3),
-            "raw_json_object": raw_object,
-            "decoded_receipt": decoded,
-            "parsed_receipt": parsed,
-            "parse_error": parse_error,
-            "correct": correct,
-            "protected_misroute": protected_misroute,
-            "unscored_reason": unscored_reason,
-        }
-        write_json(run_dir / "trials" / f"{case['id']}.json", {
-            **result, "prompt": prompt, "stdout": stdout, "stderr": stderr})
+        result, raw = execute_live_case(case, contract, variant, timeout)
+        write_json(run_dir / "trials" / f"{case['id']}.json", raw)
         results.append(result)
     scored = [row for row in results if not row["unscored_reason"]]
     durations = [row["duration_seconds"] for row in scored]
     scorecard = {
         "run_id": run_id,
+        "variant": variant,
         "frozen_sha": manifest["frozen_sha"],
         "status": "complete" if len(results) == 10 else "partial",
         "executed": len(results),
@@ -381,6 +467,120 @@ def run_live(run_id: str, timeout: int = 180, limit: int | None = None,
         "results": results,
     }
     manifest["status"] = "complete" if len(results) == 10 else "partial"
+    write_json(run_dir / "manifest.json", manifest)
+    write_json(run_dir / "scorecard.json", scorecard)
+    return scorecard
+
+
+def run_paired_live(run_id: str, repetitions: int = 2, timeout: int = 180,
+                    output_root: Path = DEFAULT_LIVE_ROOT) -> dict:
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", run_id) or run_id in {".", ".."}:
+        raise ValueError(f"invalid paired live run_id: {run_id!r}")
+    if not 1 <= repetitions <= 5:
+        raise ValueError("paired repetitions must be between 1 and 5")
+    if timeout < 1:
+        raise ValueError("paired timeout must be positive")
+    run_dir = (output_root.resolve() / run_id).resolve()
+    if run_dir.parent != output_root.resolve():
+        raise ValueError("paired live run directory escaped output root")
+    run_dir.mkdir(parents=True, exist_ok=False)
+    cases = load_cases()
+    baseline, baseline_source = extract_baseline_contract()
+    compact = extract_compact_contract()
+    contracts = {"A": baseline, "B": compact}
+    schedule = []
+    for repetition in range(1, repetitions + 1):
+        for case_index, case in enumerate(cases):
+            order = ("A", "B") if (repetition + case_index) % 2 else ("B", "A")
+            for position, variant in enumerate(order, start=1):
+                schedule.append({
+                    "repetition": repetition, "case_id": case["id"],
+                    "variant": variant, "position": position})
+    provenance = live_provenance()
+    eligible_provenance = provenance_eligible(provenance)
+    manifest = {
+        "run_id": run_id,
+        "status": "pre_registered_not_complete",
+        "design": "case-paired A/B with alternating order",
+        "repetitions": repetitions,
+        "timeout_seconds": timeout,
+        "baseline_source": baseline_source,
+        "contract_sha256": {
+            "A": hashlib.sha256(baseline.encode("utf-8")).hexdigest(),
+            "B": hashlib.sha256(compact.encode("utf-8")).hexdigest(),
+        },
+        "schedule": schedule,
+        "success_thresholds": {
+            "both_fully_scored_and_parseable": True,
+            "B_route_accuracy": 0.90,
+            "B_protected_misroutes": 0,
+            "median_case_paired_B_over_A_time": 1.10,
+        },
+        "model_usage_available": False,
+        "limitations": "Wall time is live and paired; Hermes one-shot does not expose token usage.",
+        "provenance_eligible": eligible_provenance,
+        **provenance,
+    }
+    write_json(run_dir / "manifest.json", manifest)
+    case_by_id = {case["id"]: case for case in cases}
+    results = []
+    for item in schedule:
+        case = case_by_id[item["case_id"]]
+        result, raw = execute_live_case(
+            case, contracts[item["variant"]], item["variant"], timeout)
+        result.update(repetition=item["repetition"], position=item["position"])
+        raw.update(repetition=item["repetition"], position=item["position"])
+        filename = (
+            f"R{item['repetition']:02d}_{case['id']}_{item['variant']}_P{item['position']}.json")
+        write_json(run_dir / "trials" / filename, raw)
+        results.append(result)
+    summaries = {}
+    for variant in ("A", "B"):
+        rows = [row for row in results if row["variant"] == variant]
+        scored = [row for row in rows if not row["unscored_reason"]]
+        summaries[variant] = {
+            "executed": len(rows),
+            "scored": len(scored),
+            "parsed": sum(bool(row["parsed_receipt"]) for row in scored),
+            "correct": sum(row["correct"] for row in scored),
+            "protected_misroutes": sum(row["protected_misroute"] for row in scored),
+            "median_seconds": round(statistics.median(
+                row["duration_seconds"] for row in scored), 3) if scored else None,
+        }
+    pair_ratios = []
+    for repetition in range(1, repetitions + 1):
+        for case in cases:
+            pair = {
+                row["variant"]: row for row in results
+                if row["repetition"] == repetition and row["id"] == case["id"]
+            }
+            if set(pair) == {"A", "B"} and pair["A"]["duration_seconds"] > 0:
+                pair_ratios.append(pair["B"]["duration_seconds"] / pair["A"]["duration_seconds"])
+    expected_per_variant = len(cases) * repetitions
+    both_complete = all(
+        summaries[variant]["scored"] == expected_per_variant
+        and summaries[variant]["parsed"] == expected_per_variant
+        for variant in ("A", "B"))
+    median_ratio = statistics.median(pair_ratios) if len(pair_ratios) == expected_per_variant else None
+    passed = bool(
+        eligible_provenance and both_complete
+        and summaries["B"]["correct"] / expected_per_variant >= 0.90
+        and summaries["B"]["protected_misroutes"] == 0
+        and median_ratio is not None and median_ratio <= 1.10)
+    scorecard = {
+        "run_id": run_id,
+        "frozen_sha": provenance["frozen_sha"],
+        "status": "complete" if len(results) == len(schedule) else "partial",
+        "repetitions": repetitions,
+        "variant_summaries": summaries,
+        "pair_count": len(pair_ratios),
+        "median_case_paired_B_over_A_time": round(median_ratio, 4) if median_ratio else None,
+        "both_fully_scored_and_parseable": both_complete,
+        "provenance_eligible": eligible_provenance,
+        "passed": passed,
+        "results": results,
+    }
+    manifest["status"] = scorecard["status"]
     write_json(run_dir / "manifest.json", manifest)
     write_json(run_dir / "scorecard.json", scorecard)
     return scorecard
@@ -487,7 +687,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--live-run-id")
     parser.add_argument("--live-timeout", type=int, default=180)
     parser.add_argument("--live-limit", type=int)
+    parser.add_argument("--live-variant", choices=("A", "B"), default="B")
     parser.add_argument("--live-output-root", type=Path, default=DEFAULT_LIVE_ROOT)
+    parser.add_argument("--live-paired-run-id")
+    parser.add_argument("--live-repetitions", type=int, default=2)
     args = parser.parse_args(argv)
     if args.iterations < 1:
         parser.error("--iterations must be positive")
@@ -495,9 +698,24 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--live-timeout must be positive")
     if args.live_limit is not None and not 1 <= args.live_limit <= 10:
         parser.error("--live-limit must be between 1 and 10")
+    if not 1 <= args.live_repetitions <= 5:
+        parser.error("--live-repetitions must be between 1 and 5")
+    if args.live_run_id and args.live_paired_run_id:
+        parser.error("choose either --live-run-id or --live-paired-run-id")
+    if args.live_paired_run_id:
+        report = run_paired_live(
+            args.live_paired_run_id, args.live_repetitions,
+            args.live_timeout, args.live_output_root)
+        print(json.dumps(report, indent=2, ensure_ascii=False) if args.json else (
+            f"paired live: A {report['variant_summaries']['A']['scored']} scored; "
+            f"B {report['variant_summaries']['B']['scored']} scored; "
+            f"paired B/A {report['median_case_paired_B_over_A_time']}; "
+            f"passed {report['passed']}"))
+        return 0 if report["passed"] else 1
     if args.live_run_id:
         report = run_live(
-            args.live_run_id, args.live_timeout, args.live_limit, args.live_output_root)
+            args.live_run_id, args.live_timeout, args.live_limit,
+            args.live_output_root, args.live_variant)
         print(json.dumps(report, indent=2, ensure_ascii=False) if args.json else (
             f"live: scored {report['scored']}/{report['executed']}; parsed {report['parsed']}; "
             f"correct {report['correct']}; protected misroutes {report['protected_misroutes']}; "

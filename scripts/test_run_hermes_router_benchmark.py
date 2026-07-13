@@ -138,6 +138,26 @@ def test_live_prompt_requests_receipt_without_task_execution():
     assert "Do not execute the task or use tools" in prompt
     assert "Return the JSON receipt only" in prompt
     assert prompt.endswith("TASK: fixture task")
+    baseline = runner.live_prompt("baseline", "fixture task", "A")
+    assert "Return exactly three lines" in baseline
+    assert "JSON receipt" not in baseline
+
+
+def test_baseline_freeform_receipt_parser():
+    parsed = runner.parse_baseline_receipt(
+        "classification: debug\nroute: claude\nmode: opus\n")
+    assert parsed == {"v": 1, "class": "debug", "target": "claude", "mode": "opus"}
+
+
+def test_baseline_protected_misroute_cannot_false_pass():
+    case = next(case for case in runner.load_cases() if case["id"] == "H05")
+    response = "classification: daily\nroute: hermes\nmode: direct\n"
+    with mock.patch.object(
+            runner, "run_hermes_process", return_value=(response, "", 0, "", 0.01)):
+        result, _raw = runner.execute_live_case(case, "baseline", "A", 30)
+    assert result["parsed_receipt"]["target"] == "hermes"
+    assert result["correct"] is False
+    assert result["protected_misroute"] is True
 
 
 def test_live_runner_grades_ten_strict_receipts_and_writes_raw_trials():
@@ -218,6 +238,104 @@ def test_live_runner_rejects_invalid_limit_and_timeout():
                 pass
             else:
                 raise AssertionError(f"invalid live args accepted: {kwargs}")
+
+
+def test_paired_live_runner_alternates_and_gates_case_paired_time():
+    cases = runner.load_cases()
+
+    def fake_process(prompt, timeout):
+        case = next(case for case in cases if prompt.endswith("TASK: " + case["task"]))
+        expected = case["expected"]
+        if "Return the JSON receipt only" in prompt:
+            output = json.dumps({"v": 1, **expected}, separators=(",", ":"))
+            duration = 1.05
+        else:
+            output = (
+                f"classification: {expected['class']}\nroute: {expected['target']}\n"
+                f"mode: {expected['mode']}\n")
+            duration = 1.0
+        return output, "", 0, "", duration
+
+    provenance = {
+        "frozen_sha": "paired-fixture", "runner_sha256": "a" * 64,
+        "prompt_sha256": "b" * 64, "inputs_tracked_at_frozen_sha": True,
+        "hermes_version": "Hermes fixture",
+        "runtime_fingerprint": {
+            "model": "fixture", "provider": "fixture",
+            "status_sha256": "d" * 64, "config_sha256": "c" * 64},
+        "live_command_policy": [],
+    }
+    with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
+            runner, "run_hermes_process", fake_process), mock.patch.object(
+            runner, "live_provenance", return_value=provenance):
+        root = Path(tmp)
+        report = runner.run_paired_live("paired-unit", repetitions=2, output_root=root)
+        manifest = json.loads((root / "paired-unit" / "manifest.json").read_text(encoding="utf-8"))
+    assert report["variant_summaries"]["A"]["scored"] == 20
+    assert report["variant_summaries"]["B"]["scored"] == 20
+    assert report["both_fully_scored_and_parseable"] is True
+    assert report["pair_count"] == 20
+    assert report["median_case_paired_B_over_A_time"] == 1.05
+    assert report["provenance_eligible"] is True
+    assert report["passed"] is True
+    assert manifest["repetitions"] == 2
+    assert manifest["runtime_fingerprint"]["model"] == "fixture"
+    first_orders = [
+        (row["variant"], row["position"]) for row in manifest["schedule"]
+        if row["case_id"] == "H01"]
+    assert first_orders == [("A", 1), ("B", 2), ("B", 1), ("A", 2)]
+
+
+def test_paired_live_runner_fails_closed_on_ineligible_provenance():
+    cases = runner.load_cases()
+
+    def fake_process(prompt, timeout):
+        case = next(case for case in cases if prompt.endswith("TASK: " + case["task"]))
+        expected = case["expected"]
+        if "Return the JSON receipt only" in prompt:
+            output = json.dumps({"v": 1, **expected}, separators=(",", ":"))
+        else:
+            output = (
+                f"classification: {expected['class']}\nroute: {expected['target']}\n"
+                f"mode: {expected['mode']}\n")
+        return output, "", 0, "", 1.0
+
+    ineligible = {
+        "frozen_sha": "dirty", "runner_sha256": "a" * 64,
+        "prompt_sha256": "b" * 64, "inputs_tracked_at_frozen_sha": False,
+        "hermes_version": "UNAVAILABLE:TimeoutExpired",
+        "runtime_fingerprint": {
+            "model": "UNAVAILABLE", "provider": "UNAVAILABLE",
+            "status_sha256": "UNAVAILABLE", "config_sha256": "UNAVAILABLE"},
+        "live_command_policy": [],
+    }
+    with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
+            runner, "run_hermes_process", fake_process), mock.patch.object(
+            runner, "live_provenance", return_value=ineligible):
+        report = runner.run_paired_live(
+            "paired-ineligible", repetitions=1, output_root=Path(tmp))
+    assert report["both_fully_scored_and_parseable"] is True
+    assert report["provenance_eligible"] is False
+    assert report["passed"] is False
+
+
+def test_paired_live_runner_rejects_invalid_args_before_writes():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        bad = [
+            ("../../escape", 2, 30),
+            ("bad-reps-zero", 0, 30),
+            ("bad-reps-high", 6, 30),
+            ("bad-timeout", 2, 0),
+        ]
+        for run_id, repetitions, timeout in bad:
+            try:
+                runner.run_paired_live(run_id, repetitions, timeout, root)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"invalid paired args accepted: {run_id}")
+        assert list(root.iterdir()) == []
 
 
 def test_repeated_timeout_with_bytes_returns_bounded_diagnostics():
