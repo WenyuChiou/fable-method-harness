@@ -14,8 +14,8 @@ retrieval_keywords: [integration test matrix, phase 3 validation, pass fail part
 
 # Integration test matrix - executed 2026-07-13
 
-**Instrument:** `python validation/integration_check.py` -> **54/54 PASS**
-(exit 0 on 2026-07-13 with the Hermes router benchmark working tree). Re-run
+**Instrument:** `python validation/integration_check.py` -> **59/59 PASS**
+(exit 0 on 2026-07-13 after the codebase-memory freshness sentinel landed). Re-run
 the instrument instead of trusting this snapshot.
 Model-tier rows come from workflow `wf_5f117689-bad` (5 real executions) +
 the session evidence; they are graded per `docs/model_compatibility_test_plan.md`.
@@ -25,7 +25,7 @@ the session evidence; they are graded per `docs/model_compatibility_test_plan.md
 
 | Layer | Checks | Status | Evidence |
 |---|---|---|---|
-| CLI surface (both runners `--help`) | 2 | PASS | exit 0 |
+| CLI surface (both review runners + freshness sentinel `--help`) | 3 | PASS | exit 0 |
 | Runner modes (7 ai-review + 10 adaptive, dry-run -> valid JSON, right `source`) | 17 | PASS | schema-core validation per mode |
 | Dry-run safety (zero mutation across all 17 dry-runs) | 1 | PASS | `git status --porcelain` byte-identical |
 | Data flow E2E (AI-review real run -> latest.json+md -> history append -> ingest -> adaptive `--read-ai-review` -> harness latest+history) | 5 | PASS | hermetic temp-dir run |
@@ -35,8 +35,8 @@ the session evidence; they are graded per `docs/model_compatibility_test_plan.md
 | Validators (overlay + adaptive/posture) | 2 | PASS | both exit 0 |
 | Retrieval probes + INDEX ghosts | 1 | PASS | 13/13 probes, 0 ghosts |
 | Knowledge graph (build, 0 broken deps) | 1 | PASS | 0 broken depends_on (157 nodes / 789 edges at snapshot; counts grow with the tree - the criterion is the zero, not the counts) |
-| Test suites (6 suites incl. Codex long-task A/B runner and Hermes router benchmark) | 6 | PASS | all exit 0 |
-| Artifact inventory (14 Phase-1/2/long-task artifacts + no-CI check) | 15 | PASS | on disk |
+| Test suites (7 suites incl. Codex long-task A/B, Hermes router, and freshness sentinel) | 7 | PASS | all exit 0 |
+| Artifact inventory (17 Phase-1/2/long-task/freshness artifacts + no-CI check) | 18 | PASS | on disk |
 
 ## Posture (section 2 - judged in context, not just grepped)
 
@@ -64,6 +64,6 @@ the session evidence; they are graded per `docs/model_compatibility_test_plan.md
 
 ## Summary
 
-PASS 54 deterministic + 10 model rows (Codex live compliance executed
+PASS 59 deterministic + 10 model rows (Codex live compliance executed
 2026-07-07) - FAIL 0 - remaining UNVERIFIED: the multi-delegate splitter
 efficiency A/B (pre-registered, not yet run).

@@ -21,7 +21,7 @@ destructive. Do these steps in order and report each result to your user.
 python scripts/setup_harness.py
 ```
 
-This enables the repo's pre-commit gates and runs the 54-check integration
+This enables the repo's pre-commit gates and runs the 59-check integration
 verification. All-PASS = the clone works on this machine. If Python ≥3.8 is
 missing, stop and tell the user — that is the only prerequisite.
 

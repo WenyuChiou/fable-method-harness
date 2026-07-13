@@ -23,11 +23,33 @@ as the index schema.
   source repo. This harness no longer lives nested inside that repo (the
   old `agent_harness/` clone is retired); indexing the source repo will not
   pick these files up, and mixing the two corpora blurs provenance.
-- Verify with `index_status` / a probe query, but do NOT trust a bare
-  `"ready"` status as proof of freshness — confirm with one known-ID
-  lookup (e.g. search `L2-current-phase` and check the returned path).
+- Verify with `index_status`, then run the fail-closed sentinel below. A bare
+  `"ready"` status, a successful incremental index, or one name-only hit is
+  not proof of freshness.
 
-## 2. Re-index after edits — always
+## 2. Prove freshness before relying on the graph
+
+Run from the repository root:
+
+```text
+python scripts/check_codebase_memory_freshness.py --repetitions 1 --output evals/codebase_memory_freshness/current/scorecard.json
+```
+
+The checker compares Git-tracked worktree functions with `search_graph` and
+`get_code_snippet` using exact file, decorator-inclusive line span, and source
+hash. Its contract is deliberately fail-closed:
+
+- exit 0 / `FRESH`: every configured probe matches; graph discovery may be used;
+- exit 1 / `STALE`: fall back to direct file reads and ripgrep;
+- exit 2 / `UNSCORED`: the CLI is missing, timed out, or returned malformed
+  evidence; use the same fallback.
+
+Only a scorecard with `sentinel_evidence_valid=true` is citable. Generated
+scorecards stay under gitignored `evals/`; durable summaries belong in
+`docs/evidence.md`. See `docs/codebase_memory_freshness_2026_07_13.md` for the
+first commit-bound run and the still-unresolved stale local graph.
+
+## 3. Re-index after edits — always
 
 The index is stale-by-default. **Re-index after every edit round before
 querying**, especially after:
@@ -38,7 +60,7 @@ querying**, especially after:
   don't exist in the old index);
 - route-list changes in `ROUTES.yaml`.
 
-## 3. How to search — prefer stable IDs and retrieval_keywords
+## 4. How to search — prefer stable IDs and retrieval_keywords
 
 Priority order:
 
@@ -54,7 +76,7 @@ Priority order:
    file, since semantic matches can land on prose that merely mentions a
    term.
 
-## 4. Results are advisory
+## 5. Results are advisory
 
 Index results are ADVISORY, never authoritative (known failure modes:
 stale-by-default, parse degradation, CJK/cp950 mojibake). For any
@@ -64,14 +86,14 @@ load-bearing decision:
 - for dataset records, confirm the `source_artifact` field resolves;
 - when index and file disagree, the file wins — then re-index.
 
-## 5. Fallback without the MCP
+## 6. Fallback without the MCP
 
 Plain `grep`/ripgrep over this repo is fully sufficient (the repo is
 small by design): grep the stable ID, or grep `retrieval_keywords` lines.
 `ROUTES.yaml` + frontmatter were written so that no semantic index is
 strictly required — the MCP is an accelerator, not a dependency.
 
-## 5a. Entry files — how a session actually starts
+## 6a. Entry files — how a session actually starts
 
 For a large task, wire the harness into the session through whichever
 entry the runtime supports (all three converge on the same startup ladder;
@@ -102,7 +124,7 @@ sessions resolve `ROUTE-global-orchestration` (the `core/` files plus the
 portable rubrics it names) and never load the project-bound layers
 (`context/L1`/`L2`, `playbooks/phase*`, `memory/`).
 
-## 6. Smoke-test the retrieval surface
+## 7. Smoke-test the retrieval surface
 
 After any indexing or frontmatter change, run the procedure in
 `docs/retrieval_smoke_test.md`. A probe query that misses its expected

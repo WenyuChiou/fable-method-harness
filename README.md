@@ -69,7 +69,7 @@ one-typo control added overhead with no quality gain).
 git clone https://github.com/WenyuChiou/fable-method-harness
 cd fable-method-harness
 git config core.hooksPath scripts/hooks
-python validation/integration_check.py   # 54 checks, ~3 min
+python validation/integration_check.py   # 59 checks, ~3 min
 ```
 
 Or hand the repo to an agent:

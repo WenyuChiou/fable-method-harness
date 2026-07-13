@@ -5,7 +5,7 @@ Executes the full deterministic verification matrix for the AI-review +
 adaptive-harness system: CLI surface, all modes dry-run, JSON validity,
 dry-run zero-mutation, the E2E data flow (AI-review -> rolling loop ->
 REC-id linkage), scheduled report-only invariants, validators, posture,
-graph build, and all five test suites. Emits one PASS/FAIL row per check
+graph build, and all seven test suites. Emits one PASS/FAIL row per check
 plus a JSON blob; docs/integration_test_matrix.md records executed
 snapshots of this output (computed, never hand-written).
 
@@ -89,7 +89,8 @@ def main():
     FAIL_ONLY = args.quiet
 
     # 1. CLI surface
-    for script in ("scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py"):
+    for script in ("scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py",
+                   "scripts/check_codebase_memory_freshness.py"):
         rc, out, err = run([PY, script, "--help"])
         row(f"{script} --help", "CLI", rc == 0, err or "exit 0",
             f"python {script} --help")
@@ -206,7 +207,8 @@ def main():
     for suite in ("scripts/test_run_ai_review.py", "scripts/test_run_adaptive_harness_review.py",
                   "scripts/test_build_harness_graph.py", "scripts/test_check_agent_artifacts.py",
                   "scripts/test_run_long_codex_ab.py",
-                  "scripts/test_run_hermes_router_benchmark.py"):
+                  "scripts/test_run_hermes_router_benchmark.py",
+                  "scripts/test_check_codebase_memory_freshness.py"):
         rc, out, err = run([PY, suite])
         last = out.strip().splitlines()[-1] if out.strip() else err[:100]
         row(f"suite {suite}", "tests", rc == 0, last, f"python {suite}")
@@ -215,8 +217,11 @@ def main():
     for path in (".claude/skills/adaptive-harness/SKILL.md", "SKILL.md",
                  "scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py",
                  "scripts/run_long_codex_ab.py",
+                 "scripts/check_codebase_memory_freshness.py",
+                 "scripts/test_check_codebase_memory_freshness.py",
                  "schemas/review_report.schema.yaml", "schemas/recommendation.schema.yaml",
                  "benchmarks/ai_review_cases.yaml", "benchmarks/harness_cases.yaml",
+                 "benchmarks/codebase_memory_freshness/cases.json",
                  "benchmarks/retrieval_cases.yaml", "docs/codex-delegation-policy.md",
                  "docs/ai_review_adaptive_harness_integration.md",
                  "docs/publication_status.md", "prompts/ai-review-modes.md"):

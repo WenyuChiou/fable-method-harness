@@ -446,6 +446,13 @@ files:
     tags: ["indexing", "retrieval", "mcp", "codebase-memory", "search"]
     read_when: "Setting up retrieval for a new session, after an edit round, or when grep feels too slow"
 
+  - path: docs/codebase_memory_freshness_2026_07_13.md
+    id: DOC-codebase-memory-freshness-2026-07-13
+    layer: doc
+    purpose: "Commit-bound evidence for the fail-closed freshness sentinel and the unresolved ready-but-stale local code graph."
+    tags: ["codebase-memory", "freshness", "sentinel", "evidence", "negative-result"]
+    read_when: "Deciding whether MCP graph discovery is current enough to trust or auditing why direct-file fallback was selected."
+
   - path: docs/codebase_memory_assessment.md
     id: DOC-codebase-memory-assessment
     layer: doc
@@ -1150,7 +1157,7 @@ files:
   - path: scripts/setup_harness.py
     id: SCRIPT-setup-harness
     layer: validation
-    purpose: "Idempotent stdlib post-clone setup: enables pre-commit gates, runs the 54-check verification, optionally installs the global Claude Code skill stub (path baked at install), wires the CLAUDE.md pointer (duplicate-safe), registers the weekly report-only scan, and prints per-runtime wiring for Codex/Cursor/Hermes/cron."
+    purpose: "Idempotent stdlib post-clone setup: enables pre-commit gates, runs the 59-check verification, optionally installs the global Claude Code skill stub (path baked at install), wires the CLAUDE.md pointer (duplicate-safe), registers the weekly report-only scan, and prints per-runtime wiring for Codex/Cursor/Hermes/cron."
     tags: ["validation", "script", "setup", "onboarding", "idempotent"]
     read_when: "Right after clone (any agent), or when the clone moves and the global stub needs re-pointing."
 
@@ -1418,6 +1425,27 @@ files:
     tags: ["validation", "test", "hermes", "routing", "benchmark"]
     read_when: "After changing run_hermes_router_benchmark.py or prompts/hermes-router.md."
 
+  - path: scripts/check_codebase_memory_freshness.py
+    id: SCRIPT-check-codebase-memory-freshness
+    layer: validation
+    purpose: "Fail-closed codebase-memory sentinel comparing tracked worktree AST spans and hashes with graph search/snippet evidence; emits canonical FRESH, STALE, or UNSCORED scorecards."
+    tags: ["validation", "codebase-memory", "freshness", "sentinel", "fallback"]
+    read_when: "Before relying on MCP graph discovery after edits, or when index_status says ready but source alignment is uncertain."
+
+  - path: scripts/test_check_codebase_memory_freshness.py
+    id: TEST-check-codebase-memory-freshness
+    layer: validation
+    purpose: "Regression tests for stale/fresh graph classification, fail-closed CLI errors, decorator-inclusive hashes, provenance, and safe atomic evidence output."
+    tags: ["validation", "test", "codebase-memory", "freshness", "security"]
+    read_when: "After changing the freshness sentinel, its cases, or codebase-memory CLI handling."
+
+  - path: benchmarks/codebase_memory_freshness/cases.json
+    id: DATASET-codebase-memory-freshness-cases
+    layer: dataset
+    purpose: "Three tracked live probes that freeze expected symbols and files for the codebase-memory freshness sentinel."
+    tags: ["dataset", "codebase-memory", "freshness", "benchmark", "probes"]
+    read_when: "Auditing or extending which tracked source symbols prove graph freshness."
+
   - path: scripts/summarize_harness_ab_pilot.py
     id: SCRIPT-summarize-harness-ab-pilot
     layer: validation
@@ -1498,7 +1526,7 @@ files:
   - path: validation/integration_check.py
     id: SCRIPT-integration-check
     layer: validation
-    purpose: "Phase-3 re-runnable integration instrument: 54 deterministic checks - CLI surface, all 17 runner modes dry-run to valid JSON, dry-run zero-mutation, E2E data flow with REC-id traceability, scheduled report-only (tree + ledger untouched), validators, probes, graph build, all 6 test suites, artifact inventory. Exit 0/1."
+    purpose: "Phase-3 re-runnable integration instrument: 59 deterministic checks - CLI surface, all 17 runner modes dry-run to valid JSON, dry-run zero-mutation, E2E data flow with REC-id traceability, scheduled report-only (tree + ledger untouched), validators, probes, graph build, all 7 test suites, artifact inventory. Exit 0/1."
     tags: ["validation", "script", "integration", "phase3", "matrix"]
     read_when: "Re-validating the whole adaptive harness system after any change; refreshing docs/integration_test_matrix.md."
 
@@ -1526,6 +1554,6 @@ files:
   - path: docs/integration_test_matrix.md
     id: DOC-integration-test-matrix
     layer: doc
-    purpose: "Executed Phase-3 matrix snapshot: 54/54 instrument checks + posture context judgments + model-tier rows (8 PASS, 2 UNVERIFIED Codex) with per-row evidence; the readiness record behind the CONDITIONAL_READY->READY verdict."
+    purpose: "Executed Phase-3 matrix snapshot: 59/59 instrument checks + posture context judgments + model-tier rows with per-row evidence."
     tags: ["doc", "integration", "test-matrix", "phase3"]
     read_when: "Judging system usability or refreshing the snapshot after re-running the instrument."
