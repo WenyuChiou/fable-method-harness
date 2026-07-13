@@ -232,8 +232,7 @@ def test_ingest_deduped_against_rolling_recommendations():
 
 
 def test_resolved_requires_application_verb():
-    """Review finding (2026-07-06 pair): bare mentions / rejection notes /
-    reverts must not mark a recommendation resolved."""
+    """Only exact subjects or structured trailers create outcome evidence."""
     with tempfile.TemporaryDirectory() as tmp:
         repo = Path(tmp)
         def g(*args):
@@ -246,12 +245,226 @@ def test_resolved_requires_application_verb():
         (repo / "a.md").write_text("x", encoding="utf-8")
         g("add", "-A"); g("commit", "-m", "docs: record decision to REJECT REC-20260706-501 as wontfix")
         (repo / "b.md").write_text("y", encoding="utf-8")
-        g("add", "-A"); g("commit", "-m", "fix: applies REC-20260706-502 (merge dispatcher)")
+        g("add", "-A"); g("commit", "-m", "test: partial evidence", "-m",
+                            "applies REC-20260706-502 partial-evidence note\n\nCorrection: no closure intended")
         (repo / "c.md").write_text("z", encoding="utf-8")
         g("add", "-A"); g("commit", "-m", "revert: reverts REC-20260706-503")
-        assert ahr.resolved_by_commit(repo, "REC-20260706-501") is None, "rejection note must not resolve"
-        assert ahr.resolved_by_commit(repo, "REC-20260706-503") is None, "revert must not resolve"
-        assert ahr.resolved_by_commit(repo, "REC-20260706-502") is not None, "applies-verb must resolve"
+        (repo / "d.md").write_text("d", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "docs: mention REC-20260706-504 for later")
+        (repo / "e.md").write_text("e", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "fix: does not apply REC-20260706-505")
+        (repo / "f.md").write_text("f", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "fix: resolves REC-20260706-506")
+        (repo / "g.md").write_text("g", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "bench: validate outcome", "-m",
+                            "Harness-Outcome: REC-20260706-507 validated; evidence=g.md")
+        (repo / "h.md").write_text("h", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "fix: applies REC-20260706-508")
+        (repo / "i.md").write_text("i", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "bench: validate then reopen", "-m",
+                            "Harness-Outcome: REC-20260706-509 validated; evidence=i.md")
+        (repo / "j.md").write_text("j", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "fix: reopen after regression", "-m",
+                            "Harness-Outcome: REC-20260706-509 reopened; evidence=j.md")
+        (repo / "k.md").write_text("k", encoding="utf-8")
+        g("add", "-A"); g("commit", "-m", "bench: invalid evidence pointer", "-m",
+                            "Harness-Outcome: REC-20260706-510 validated; evidence=missing.json")
+        (repo / "untracked.json").write_text('{"pass": true}', encoding="utf-8")
+        (repo / "l.md").write_text("l", encoding="utf-8")
+        g("add", "l.md"); g("commit", "-m", "bench: untracked evidence pointer", "-m",
+                              "Harness-Outcome: REC-20260706-511 validated; evidence=untracked.json")
+        (repo / "m.md").write_text("m", encoding="utf-8")
+        g("add", "m.md"); g("commit", "-m",
+                              "fix: resolves REC-20260706-512 (not actually resolved)")
+        (repo / "n.md").write_text("n", encoding="utf-8")
+        g("add", "n.md"); g("commit", "-m", "bench: premature validation", "-m",
+                              "Harness-Outcome: REC-20260706-513 validated; evidence=late.json")
+        (repo / "late.json").write_text('{"pass": true}', encoding="utf-8")
+        g("add", "late.json"); g("commit", "-m", "bench: add late evidence")
+        (repo / "proof.json").write_text('{"pass": true}', encoding="utf-8")
+        (repo / "regression.json").write_text('{"failed": true}', encoding="utf-8")
+        (repo / "o.md").write_text("o", encoding="utf-8")
+        g("add", "proof.json", "regression.json", "o.md")
+        g("commit", "-m", "bench: conflicting outcomes", "-m",
+          "Harness-Outcome: REC-20260706-514 validated; evidence=proof.json", "-m",
+          "Harness-Outcome: REC-20260706-514 reopened; evidence=regression.json")
+
+        outcomes = ahr.collect_outcome_evidence(
+            repo, [f"REC-20260706-{n:03d}" for n in range(501, 515)])
+        for n in range(501, 506):
+            assert f"REC-20260706-{n:03d}" not in outcomes, outcomes
+        assert outcomes["REC-20260706-506"]["outcome"] == "validated"
+        assert outcomes["REC-20260706-507"]["outcome"] == "validated"
+        assert outcomes["REC-20260706-507"]["evidence"] == "g.md"
+        assert outcomes["REC-20260706-508"]["outcome"] == "applied"
+        assert outcomes["REC-20260706-509"]["outcome"] == "reopened"
+        assert ahr.resolved_by_commit(repo, "REC-20260706-509") is None
+        assert outcomes["REC-20260706-510"]["outcome"] == "unverified"
+        assert outcomes["REC-20260706-510"]["claimed_outcome"] == "validated"
+        assert outcomes["REC-20260706-510"]["evidence_error"] == "evidence file is missing from the outcome commit"
+        assert outcomes["REC-20260706-511"]["outcome"] == "unverified"
+        assert outcomes["REC-20260706-511"]["evidence_error"] == "evidence file is missing from the outcome commit"
+        assert "REC-20260706-512" not in outcomes
+        assert outcomes["REC-20260706-513"]["outcome"] == "unverified"
+        assert outcomes["REC-20260706-513"]["evidence_error"] == "evidence file is missing from the outcome commit"
+        assert outcomes["REC-20260706-514"]["outcome"] == "unverified"
+        assert outcomes["REC-20260706-514"]["claimed_outcomes"] == ["validated", "reopened"]
+        assert outcomes["REC-20260706-514"]["evidence_error"] == (
+            "multiple outcome declarations for one recommendation in the same commit")
+        for rec_id in ("REC-20260706-510", "REC-20260706-511",
+                       "REC-20260706-513", "REC-20260706-514"):
+            assert ahr.resolved_by_commit(repo, rec_id) is None
+
+        latest = make_ai_review_fixture(tmp, [rec(508, "implemented")])
+        rolling = ahr.collect_rolling_state({
+            "target": repo, "read_ai_review": latest, "output": repo / "harness",
+        })
+        assert rolling["resolved_total_count"] == 0
+        assert rolling["applied_unvalidated_count"] == 1
+        assert rolling["new"][0]["status"] == "applied_unvalidated"
+
+
+def test_outcome_ledger_survives_three_later_runs_with_stale_finding():
+    """A validated outcome persists even when stale AI-review keeps reporting it."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp) / "repo"
+        repo.mkdir()
+        def g(*args):
+            return subprocess.run(["git"] + list(args), cwd=str(repo),
+                                  capture_output=True, text=True, encoding="utf-8")
+        assert g("init").returncode == 0
+        g("config", "user.email", "t@t"); g("config", "user.name", "t")
+        (repo / "result.json").write_text('{"pass": true}', encoding="utf-8")
+        g("add", "result.json")
+        committed = g("commit", "-m", "bench: validated learning change", "-m",
+                      "Harness-Outcome: REC-20260706-601 validated; evidence=result.json")
+        assert committed.returncode == 0, committed.stderr
+
+        latest = make_ai_review_fixture(tmp, [rec(601, "stale-current-finding")])
+        out = repo / "reports" / "harness"
+        args = ("--mode", "rolling_improvement_review", "--no-home",
+                "--target", str(repo), "--read-ai-review", str(latest),
+                "--output", str(out))
+        first = run_runner(*args)
+        assert first.returncode == 0, first.stderr
+        report = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+        assert report["metrics"]["rolling"]["resolved_count"] == 1
+        assert report["metrics"]["rolling"]["resolved_total_count"] == 1
+        assert report["metrics"]["rolling"]["outcome_scan"] == "git_scan"
+        assert not report["recommendations"]
+
+        for _ in range(3):
+            later = run_runner(*args)
+            assert later.returncode == 0, later.stderr
+            report = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+            assert report["metrics"]["rolling"]["resolved_count"] == 0
+            assert report["metrics"]["rolling"]["resolved_total_count"] == 1
+            assert report["metrics"]["rolling"]["outcome_scan"] == "cache_hit"
+            assert not report["recommendations"]
+            state = json.loads((out / "rolling_state.json").read_text(encoding="utf-8"))
+            assert len(state["outcomes"]) == 1
+            assert len(state["recommendation_archive"]) == 1
+
+        (repo / "regression.log").write_text("effect regressed", encoding="utf-8")
+        g("add", "regression.log")
+        reopened_commit = g("commit", "-m", "fix: reopen learning item", "-m",
+                            "Harness-Outcome: REC-20260706-601 reopened; evidence=regression.log")
+        assert reopened_commit.returncode == 0, reopened_commit.stderr
+        reopened = run_runner(*args)
+        assert reopened.returncode == 0, reopened.stderr
+        report = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+        assert report["metrics"]["rolling"]["reopened_count"] == 1
+        assert report["metrics"]["rolling"]["resolved_total_count"] == 0
+        assert report["metrics"]["rolling"]["outcome_scan"] == "git_scan"
+        assert report["recommendations"][0]["status"] == "reopened"
+
+
+def test_outcome_cache_invalidates_when_recommendation_set_grows():
+    """Same HEAD must rescan when AI-review introduces an older, unseen REC id."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp) / "repo"
+        repo.mkdir()
+        def g(*args):
+            return subprocess.run(["git"] + list(args), cwd=str(repo),
+                                  capture_output=True, text=True, encoding="utf-8")
+        assert g("init").returncode == 0
+        g("config", "user.email", "t@t"); g("config", "user.name", "t")
+        (repo / "proof701.json").write_text('{"pass": true}', encoding="utf-8")
+        (repo / "proof702.json").write_text('{"pass": true}', encoding="utf-8")
+        g("add", "proof701.json", "proof702.json")
+        committed = g(
+            "commit", "-m", "bench: validate two outcomes", "-m",
+            "Harness-Outcome: REC-20260706-701 validated; evidence=proof701.json", "-m",
+            "Harness-Outcome: REC-20260706-702 validated; evidence=proof702.json")
+        assert committed.returncode == 0, committed.stderr
+        head_sha = g("rev-parse", "HEAD").stdout.strip()
+        assert ahr._read_head_sha(repo) == head_sha
+        assert g("checkout", "--detach", head_sha).returncode == 0
+        assert ahr._read_head_sha(repo) == head_sha
+
+        latest = make_ai_review_fixture(tmp, [rec(701, "first")])
+        out = repo / "reports" / "harness"
+        args = ("--mode", "rolling_improvement_review", "--no-home",
+                "--target", str(repo), "--read-ai-review", str(latest),
+                "--output", str(out))
+        first = run_runner(*args)
+        assert first.returncode == 0, first.stderr
+        first_report = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+        assert first_report["metrics"]["rolling"]["resolved_total_count"] == 1
+
+        ai_report = json.loads(latest.read_text(encoding="utf-8"))
+        ai_report["recommendations"] = [rec(701, "first"), rec(702, "late-arriving")]
+        latest.write_text(json.dumps(ai_report), encoding="utf-8")
+        second = run_runner(*args)
+        assert second.returncode == 0, second.stderr
+        second_report = json.loads((out / "latest.json").read_text(encoding="utf-8"))
+        rolling = second_report["metrics"]["rolling"]
+        assert rolling["outcome_scan"] == "git_scan"
+        assert rolling["resolved_count"] == 1
+        assert rolling["resolved_total_count"] == 2
+        state = json.loads((out / "rolling_state.json").read_text(encoding="utf-8"))
+        assert state["last_scanned_rec_ids"] == ["REC-20260706-701", "REC-20260706-702"]
+
+
+def test_failed_outcome_scan_does_not_advance_cache_key():
+    """A transient Git failure remains visible and retryable on the next run."""
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "harness"
+        out.mkdir()
+        recommendation = rec(801, "retryable")
+        (out / "rolling_state.json").write_text(json.dumps({
+            "recommendations": [recommendation],
+            "recommendation_archive": [recommendation],
+            "outcomes": [],
+            "last_scanned_head": "old-head",
+            "last_scanned_rec_ids": ["REC-20260706-801"],
+        }), encoding="utf-8")
+        latest = make_ai_review_fixture(tmp, [recommendation])
+        original_git = ahr.rar.git
+        original_read_head = ahr._read_head_sha
+
+        def failing_git(args, cwd):
+            if args and args[0] == "log":
+                return 1, "", "transient git failure"
+            return original_git(args, cwd)
+
+        ahr.rar.git = failing_git
+        ahr._read_head_sha = lambda target: "new-head"
+        try:
+            rolling = ahr.collect_rolling_state({
+                "target": Path(tmp), "read_ai_review": latest, "output": out,
+            })
+        finally:
+            ahr.rar.git = original_git
+            ahr._read_head_sha = original_read_head
+        assert rolling["status"] == "ok"
+        assert rolling["outcome_scan"] == "unavailable"
+        assert "transient git failure" in rolling["outcome_scan_error"]
+        assert rolling["last_scanned_head"] == "old-head"
+        assert rolling["last_scanned_rec_ids"] == ["REC-20260706-801"]
+        issues = ahr.derive_issues({"rolling_state": rolling})
+        assert any(i["severity"] == "P1" and i["category"] == "rolling_outcome_scan"
+                   for i in issues)
 
 
 def test_history_stem_no_same_second_collision():
