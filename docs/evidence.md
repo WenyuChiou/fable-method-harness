@@ -53,6 +53,7 @@ publishing it is the feature.
 | **Hermes live token reduction and paired speedup are still not established.** | The initial strict paired run remains `passed=false`. Its pre-registered fair successor supports adoption and latency no-regression, but not speedup: the 50-pair median was 0.99075 and the bootstrap 95% upper bound was 1.05007, above the required 1.0. Hermes one-shot exposed no exact per-call usage, so token usage is UNSCORED; standing bytes/4 is only a proxy. | `docs/hermes_fair_baseline_2026_07_13.md`; prior failure in `docs/hermes_compact_router_2026_07_13.md` |
 | **The local codebase-memory graph was not repaired by the attempted rebuild.** | `delete_project` returned permission denied; the subsequent full index still reported the same 1,650 nodes / 2,207 edges and the commit-bound sentinel found all three probes stale. `ready` remains advisory and direct-file fallback remains mandatory until a later valid FRESH scorecard exists. | `docs/codebase_memory_freshness_2026_07_13.md` |
 | **The Codex micro-contract's CORRECTNESS lift is still not established** (its efficiency lift IS — see the positive table). | Confirmatory run 2026-07-10 (4 arms x 4 scenarios x 5 trials): the micro-contract arm was the only one at zero false-done and 100% scored pass, but Fisher one-sided vs baseline gives p = 0.28 at the scored n (13 vs 11 after arm-uniform infrastructure attrition, disclosed in the doc) — direction positive, not separable. Do not cite a correctness lift. | `docs/codex_long_task_ab.md` §2026-07-10; raw run local in `evals/long_codex_ab/codex_confirmatory_20260710_t5/` |
+| **The rolling loop's REC-linkage machinery does not out-track manual re-derivation — the load-bearing Phase-2 A/B came back B-LOSES (2026-07-14).** | Frozen replay pre-registration executed same-day: k=3 sonnet agents re-derived new/repeated/resolved from linkage-stripped sequences of the 5 real rolling reports and scored repeated-finding recall **1.00/1.00/1.00** on 85 instances (1.00 even on strict first-seen matching; 0 false-repeated, 0 false-resolved) vs the frozen <0.90 bar — the linkage's mechanical recall advantage does not exist at the history's actual shape (recs carried verbatim). What DOES survive is the emitter economics: manual re-derivation cost **11.3x** the per-run brief read (marginal content basis; 66x full-transcript) — the value sits in the deterministic report+brief emitter, not the ledger linkage. Resolved-detection was untestable (zero resolved events in the window; the outcome ledger has fired live 0 times). Disclosed threats: verbatim-carry makes replay matching easier than a fresh-LLM-text counterfactual; 5 runs/8 days; k=3 sonnet, one fixture family. Consequence per frozen criteria: simplification REC opened, human decides. | `benchmarks/harness_cases.yaml` case `ai_review_only_vs_ai_review_plus_adaptive_harness` (EXECUTED notes); REC: `docs/rolling_loop_simplification_rec_2026_07_14.md`; fixture, deterministic grader + grades operator-side in `audits/harness-optimization-2026-07/rolling-loop-ab-round4/` |
 
 Consequence, stated plainly: **use this for discipline, economy, and audit
 trail — not for capability.** Its own routing guidance says to skip the
@@ -70,10 +71,12 @@ hidden-failure task) — so the value remains cost and trust, not raw quality.
 
 - The remaining pre-registered A/B benchmark cases (`benchmarks/*.yaml`;
   count changes as cases execute — `model_routing_playbook_vs_all_strong`
-  completed 2026-07-09), including the load-bearing
-  one: does the rolling loop justify its complexity vs standalone review
-  (`ai_review_only_vs_ai_review_plus_adaptive_harness`)? All carry
-  pre-stated success criteria and known ceiling-risk warnings.
+  completed 2026-07-09). ~~The load-bearing one: does the rolling loop
+  justify its complexity vs standalone review
+  (`ai_review_only_vs_ai_review_plus_adaptive_harness`)?~~ — EXECUTED
+  2026-07-14, **B-loses** (see the what-it-does-NOT-do table above;
+  simplification REC opened). All remaining cases carry pre-stated success
+  criteria and known ceiling-risk warnings.
 - ~~Codex live scoped-edit compliance (mc08/mc09)~~ — EXECUTED 2026-07-07,
   both PASS n=1 (fence honored incl. an out-of-fence decoy; HEAD/staging
   untouched); see `benchmarks/model_compatibility_cases.yaml`. Still

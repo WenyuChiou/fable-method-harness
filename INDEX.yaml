@@ -425,6 +425,13 @@ files:
     tags: ["adaptive", "learning-loop", "outcomes", "benchmark", "evidence"]
     read_when: "Checking whether adaptive-review recommendations close only on evidence and remain resolved or reopen correctly across later runs."
 
+  - path: docs/rolling_loop_simplification_rec_2026_07_14.md
+    id: DOC-rolling-loop-simplification-rec-2026-07-14
+    layer: doc
+    purpose: "Propose-only REC-20260714-001 from the executed B-loses round-4 A/B: keep the report+brief emitter, replace the REC-linkage machinery with grep-history; human decides."
+    tags: ["adaptive", "learning-loop", "simplification", "benchmark", "evidence", "proposal"]
+    read_when: "Deciding whether to simplify or keep the rolling improvement loop's linkage machinery, or re-running the rolling-loop A/B on drifted (non-verbatim) review text."
+
   - path: docs/codex_long_task_ab.md
     id: DOC-codex-long-task-ab
     layer: doc

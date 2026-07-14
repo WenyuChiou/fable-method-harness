@@ -119,12 +119,18 @@ table at the top. The full ledger — every positive, every negative, and the
 artifact to re-run each one — is in **[`docs/evidence.md`](docs/evidence.md)**.
 Read it before adopting.
 
-One load-bearing claim is still **unmeasured and scheduled**: whether the
-rolling improvement loop justifies its complexity versus plain ai-review
-(pre-registered as `ai_review_only_vs_ai_review_plus_adaptive_harness` in
-[`benchmarks/harness_cases.yaml`](benchmarks/harness_cases.yaml); frozen
-operationalization dated 2026-07-14, next optimization round). If the loop
-loses, it gets simplified — that result will ship here too.
+The load-bearing rolling-loop claim was **measured on 2026-07-14 and the
+loop LOST**: replaying the real 5-run history with linkage stripped, k=3
+agents re-derived every repeated finding at recall 1.00 (vs the frozen
+<0.90 bar the linkage machinery needed to justify itself), so the
+REC-linkage complexity is not earning its keep — though manual
+re-derivation cost 11–66x the brief read per run, so the deterministic
+report + brief **emitter** is what carries the value. As promised, the
+negative result ships: see the case's EXECUTED notes in
+[`benchmarks/harness_cases.yaml`](benchmarks/harness_cases.yaml), the row
+in [`docs/evidence.md`](docs/evidence.md), and the propose-only
+simplification REC in
+[`docs/rolling_loop_simplification_rec_2026_07_14.md`](docs/rolling_loop_simplification_rec_2026_07_14.md).
 
 ## Repository map
 
