@@ -25,3 +25,12 @@ if ! "$py" scripts/check_adaptive_harness.py --quiet >&2; then
   echo "            Fix the reported gap, or 'git commit --no-verify' to bypass." >&2
   exit 1
 fi
+
+# INDEX.yaml drift gate: index_diff.py exits 1 on entry-vs-tracked drift,
+# 2 on parse errors, one summary line on success. Previously convention-only
+# (manual MT-5 sweeps) — INDEX grew +21% in 4 days with nothing enforcing sync.
+if ! "$py" scripts/index_diff.py >&2; then
+  echo "pre-commit: BLOCKED — INDEX.yaml out of sync with tracked files (see above)." >&2
+  echo "            Fix INDEX.yaml entries, or 'git commit --no-verify' to bypass." >&2
+  exit 1
+fi

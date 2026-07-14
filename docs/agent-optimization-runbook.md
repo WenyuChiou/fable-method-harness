@@ -188,8 +188,11 @@ After **any** edit to this overlay (a doc, a prompt, or a cross-reference),
 run the on-disk verifier before you consider the change done:
 
 ```bash
-python scripts/check_agent_artifacts.py
+python scripts/check_agent_artifacts.py --quiet
 ```
+
+(`--quiet` = FAIL lines plus the one-line N/N summary, exit 0 on green —
+same flags the pre-commit hook uses; drop it for verbose per-file diagnostics.)
 
 - For each overlay file it checks: the file exists, it contains its `must_contain`
   literals, and every `depends_on:` path in its frontmatter resolves on disk — the
@@ -250,7 +253,8 @@ judgment call at step 2.
 **Required changes:** none to existing harness doctrines — this overlay only
 cross-references them.
 
-**Next actions:** (1) run `python scripts/check_agent_artifacts.py` after this
-file and its sibling overlay files land, and confirm exit 0; (2) confirm the
+**Next actions:** (1) run `python scripts/check_agent_artifacts.py --quiet` after this
+file and its sibling overlay files land, and confirm exit 0 (prints only the
+one-line N/N summary on green); (2) confirm the
 five sibling prompt files and the two sibling docs exist so every `depends_on`
 resolves.

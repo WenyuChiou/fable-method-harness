@@ -172,9 +172,10 @@ that supersedes the old one and cites it. Holds for every *.jsonl and every
   doc/route, are governance edits — full author-agnostic review round
   (adversarial orthogonal-lens reviewer + independent re-verification), not
   self-approval. Capture a green baseline first: run
-  `python scripts/check_agent_artifacts.py` (expect 8/8 + ROUTES-resolve line +
-  protocol-exists line), and re-run after landing any new file so depends_on +
-  ROUTES stay green.
+  `python scripts/check_agent_artifacts.py --quiet` (expect exit 0; prints only
+  the one-line N/N summary on green — drop --quiet for the verbose per-file +
+  ROUTES-resolve diagnostics), and re-run after landing any new file so
+  depends_on + ROUTES stay green.
 
 ## Output
 For each candidate trait: the six-field record, its LABEL, and — for

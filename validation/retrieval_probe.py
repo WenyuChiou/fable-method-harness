@@ -60,7 +60,11 @@ PROBES = [
     ("multi delegate route plan.yml contract single gate", ["docs/multi_delegate_route.md"]),
 ]
 
-SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace"}
+# "evals" is gitignored machine-local debris (measured 1,292 files / 4.3 MB
+# on the dev machine): including it made probe diagnostics machine-dependent
+# and tripled the scanned corpus vs a fresh clone.
+SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace",
+              "evals"}
 
 
 def searchable_files():

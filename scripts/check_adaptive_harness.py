@@ -115,12 +115,17 @@ def check_artifacts(quiet=False):
 
 
 def posture_files():
+    # "worktrees" exclusion: .claude/worktrees/<name>/ holds full repo
+    # copies whose nested files inherit none of the top-level posture
+    # exemptions — scanning them produced false-positive POSTURE blocks
+    # at commit time (2026-07-11 incident; recurs with any linked worktree).
     files = [repo_root / p for p in POSTURE_SURFACES]
     for d in POSTURE_DIRS:
         base = repo_root / d
         if base.is_dir():
             files.extend(p for p in base.rglob("*")
-                         if p.is_file() and p.suffix in (".md", ".yaml", ".yml"))
+                         if p.is_file() and p.suffix in (".md", ".yaml", ".yml")
+                         and "worktrees" not in p.parts)
     return files
 
 

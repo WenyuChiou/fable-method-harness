@@ -43,8 +43,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+# "evals" parity with validation/retrieval_probe.py: the git-unavailable
+# fallback walk below is not gitignore-aware, so local eval debris would
+# leak into the graph on machines without git.
 SKIP_PARTS = {".git", "__pycache__", "reports", "fable_ultracode_phase_workspace",
-              ".codebase-memory", "scratch", "tmp", "local", "private"}
+              ".codebase-memory", "scratch", "tmp", "local", "private", "evals"}
 CONTENT_SUFFIXES = (".md", ".yaml", ".yml")
 
 
