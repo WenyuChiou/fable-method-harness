@@ -1400,16 +1400,30 @@ files:
   - path: scripts/run_adaptive_harness_review.py
     id: SCRIPT-run-adaptive-harness-review
     layer: validation
-    purpose: "Adaptive-harness rolling-review runner - 10 modes; imports the AI-review engine (collectors/validators/writers) instead of forking it; links findings new/repeated/resolved-by-commit; renders patch proposals; never edits harness files; scheduled mode report-only by code."
-    tags: ["validation", "script", "adaptive-harness", "rolling-improvement", "report-only"]
-    read_when: "Running any adaptive-harness mode, wiring the rolling loop, or extending its collectors."
+    purpose: "Adaptive-harness review runner - 9 modes; imports the AI-review engine (collectors/validators/writers) instead of forking it; renders patch proposals; never edits harness files; scheduled mode report-only by code. Stateful rolling linkage retired per REC-20260714-001 (grep_history.py replaces it)."
+    tags: ["validation", "script", "adaptive-harness", "report-only"]
+    read_when: "Running any adaptive-harness mode or extending its collectors."
 
   - path: scripts/test_run_adaptive_harness_review.py
     id: TEST-run-adaptive-harness-review
     layer: validation
-    purpose: "Regression tests pinning the adaptive-harness contract: all 10 modes dry-run valid, scheduled report-only, rolling new/repeated/carried-open linkage, patch proposals render high-risk only, tier-0 validator green. Dual-runnable: standalone or pytest."
+    purpose: "Regression tests pinning the adaptive-harness contract: all 9 modes dry-run valid, the retired rolling mode stays retired, scheduled report-only, patch proposals render high-risk only (incl. legacy rolling_state read-not-write), tier-0 validator green. Dual-runnable: standalone or pytest."
     tags: ["validation", "test", "regression", "adaptive-harness"]
     read_when: "After changing run_adaptive_harness_review.py or check_adaptive_harness.py; run to confirm the contract holds."
+
+  - path: scripts/grep_history.py
+    id: SCRIPT-grep-history
+    layer: validation
+    purpose: "Read-only cross-run linkage queries over the append-only report history + git log (--rec appearances/closure, --repeats, --open); the rolling loop's replacement (applies REC-20260714-001). Closure = applies/resolves commit verb or Harness-Outcome trailer; bare mentions never close."
+    tags: ["validation", "script", "adaptive-harness", "linkage", "read-only"]
+    read_when: "Asking whether a finding repeats across runs, is still open, or was applied - instead of re-reading full reports."
+
+  - path: scripts/test_grep_history.py
+    id: TEST-grep-history
+    layer: validation
+    purpose: "Regression tests pinning grep_history semantics: application verb closes, bare mention does not, trailer closes, revert reopens, --repeats/--open correctness, read-only invariant. Dual-runnable: standalone or pytest."
+    tags: ["validation", "test", "regression", "adaptive-harness"]
+    read_when: "After changing grep_history.py; run to confirm the closure-convention semantics hold."
 
   - path: scripts/run_long_codex_ab.py
     id: SCRIPT-run-long-codex-ab

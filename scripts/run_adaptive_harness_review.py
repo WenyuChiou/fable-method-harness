@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
-"""Adaptive-harness runner - the rolling-improvement half of the review system.
+"""Adaptive-harness runner - the harness-review half of the review system.
 
 Division of labor (docs/ai_review_adaptive_harness_integration.md is the
 contract): AI-review (scripts/run_ai_review.py) reviews the CURRENT state and
-produces structured findings; THIS runner manages how those findings evolve
-over time - reading AI-review's latest report + history, linking repeated
-findings across runs, detecting resolved ones from commit citations, and
-rendering patch proposals for the human. Same shared schemas
-(schemas/review_report.schema.yaml + recommendation.schema.yaml), same
-writer, same safety posture. This is ONE system with two runners, not two
-systems: every collector, validator, and writer here is IMPORTED from
+produces structured findings; THIS runner runs the harness-shaped review
+modes over them (inventory, integration wiring, diff impact, scheduled
+report-only scans) and renders patch proposals for the human. Same shared
+schemas (schemas/review_report.schema.yaml + recommendation.schema.yaml),
+same writer, same safety posture. This is ONE system with two runners, not
+two systems: every collector, validator, and writer here is IMPORTED from
 run_ai_review.py (DR-020 single-source), never forked.
+
+Cross-run finding LINKAGE (new/repeated/resolved tagging + rolling_state.json
+carry + the outcome-evidence ledger) was retired by REC-20260714-001 after the
+pre-registered round-4 A/B measured no recall advantage over on-demand
+re-derivation (benchmarks/harness_cases.yaml case
+ai_review_only_vs_ai_review_plus_adaptive_harness, executed 2026-07-14 -
+B lost). Linkage questions are now answered read-only by
+scripts/grep_history.py over the append-only history + git log; the
+`applies REC-YYYYMMDD-NNN` closure convention is unchanged and greppable.
 
 Safety invariants (identical to the AI-review runner):
   - never edits harness files; only writes under --output;
@@ -21,7 +29,6 @@ Safety invariants (identical to the AI-review runner):
     markdown for a human), never applied changes.
 
 Run:
-    python scripts/run_adaptive_harness_review.py --mode rolling_improvement_review
     python scripts/run_adaptive_harness_review.py --mode harness_inventory --dry-run
     python scripts/run_adaptive_harness_review.py --mode patch_proposal --read-ai-review reports/ai-review/latest.json
 
@@ -32,8 +39,6 @@ import argparse
 import importlib.util
 import json
 import os
-import re
-import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -47,7 +52,7 @@ _spec.loader.exec_module(rar)
 REPO_ROOT = _HERE.parent
 
 # Mode -> deterministic collectors (names resolve in rar.COLLECTORS plus the
-# local ROLLING_COLLECTORS below).
+# LOCAL_COLLECTORS below).
 MODES = {
     "harness_inventory": ["inventory", "index_integrity", "artifact_check"],
     "harness_cleanup_review": ["inventory", "index_integrity", "artifact_check",
@@ -60,9 +65,6 @@ MODES = {
                                  "deprecated_markers", "ai_review_input"],
     "experiment_design": ["experiments"],
     "patch_proposal": ["ai_review_input"],
-    "rolling_improvement_review": ["inventory", "index_integrity", "diff",
-                                   "ai_review_input", "rolling_state",
-                                   "graph_impact"],
 }
 
 MODE_PROMPTS = "prompts/ai-review-modes.md"
@@ -132,322 +134,6 @@ def _rec_key(rec):
         rec.get("component_name", ""), rec.get("file_path", ""), rec.get("recommendation", ""))
 
 
-OUTCOME_TRAILER_RE = re.compile(
-    r"^Harness-Outcome:\s+(?P<rec>REC-\d{8}-\d{3})\s+"
-    r"(?P<outcome>applied|validated|rejected|reopened);\s*evidence=(?P<evidence>\S.*)$",
-    re.IGNORECASE,
-)
-LEGACY_OUTCOME_SUBJECT_RE = re.compile(
-    r"^(?:[A-Za-z0-9_.-]+(?:\([^\n)]+\))?:\s+)?"
-    r"(?P<verb>applies|resolves)\s+(?P<rec>REC-\d{8}-\d{3})$",
-    re.IGNORECASE,
-)
-CLOSED_OUTCOMES = {"validated", "rejected"}
-
-
-def _read_head_sha(target):
-    """Read HEAD without forking Git; supports normal repos and worktrees."""
-    dot_git = Path(target) / ".git"
-    try:
-        if dot_git.is_dir():
-            git_dir = dot_git
-        elif dot_git.is_file():
-            marker = dot_git.read_text(encoding="utf-8", errors="replace").strip()
-            if not marker.lower().startswith("gitdir:"):
-                return ""
-            git_dir = Path(marker.split(":", 1)[1].strip())
-            if not git_dir.is_absolute():
-                git_dir = (Path(target) / git_dir).resolve()
-        else:
-            return ""
-        head = (git_dir / "HEAD").read_text(encoding="ascii").strip()
-        if not head.startswith("ref:"):
-            return head if re.fullmatch(r"[0-9a-fA-F]{40,64}", head) else ""
-        ref = head.split(":", 1)[1].strip()
-        common_dir = git_dir
-        commondir = git_dir / "commondir"
-        if commondir.is_file():
-            common_dir = (git_dir / commondir.read_text(encoding="utf-8").strip()).resolve()
-        for base in (git_dir, common_dir):
-            ref_path = base / Path(ref)
-            if ref_path.is_file():
-                value = ref_path.read_text(encoding="ascii").strip()
-                if re.fullmatch(r"[0-9a-fA-F]{40,64}", value):
-                    return value
-        for base in (common_dir, git_dir):
-            packed = base / "packed-refs"
-            if not packed.is_file():
-                continue
-            for line in packed.read_text(encoding="ascii", errors="replace").splitlines():
-                if line.startswith(("#", "^")):
-                    continue
-                parts = line.split(" ", 1)
-                if len(parts) == 2 and parts[1] == ref:
-                    return parts[0]
-    except OSError:
-        return ""
-    return ""
-
-
-def _evidence_path_error(evidence):
-    path = Path(evidence)
-    if path.is_absolute() or ".." in path.parts or "\n" in evidence or "\r" in evidence:
-        return "evidence path must stay relative to the target repository"
-    return ""
-
-
-def _batch_commit_evidence_errors(target, candidates):
-    """Check every structured evidence path against its outcome commit tree."""
-    errors = {}
-    specs, positions = [], []
-    for index, candidate in enumerate(candidates):
-        if candidate["source"] != "structured-trailer" or candidate.get("pre_error"):
-            continue
-        path_error = _evidence_path_error(candidate["evidence"])
-        if path_error:
-            errors[index] = path_error
-            continue
-        specs.append(f"{candidate['commit_sha']}:{Path(candidate['evidence']).as_posix()}")
-        positions.append(index)
-    if not specs:
-        return errors, ""
-    try:
-        proc = subprocess.run(
-            ["git", "cat-file", "--batch-check"], cwd=str(target),
-            input="\n".join(specs) + "\n", capture_output=True, text=True,
-            encoding="utf-8", errors="replace", timeout=30,
-        )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        return errors, f"evidence verification failed: {exc}"
-    lines = proc.stdout.splitlines()
-    if proc.returncode != 0 or len(lines) != len(specs):
-        return errors, "evidence verification returned an incomplete result"
-    for index, line in zip(positions, lines):
-        if line.endswith(" missing"):
-            errors[index] = "evidence file is missing from the outcome commit"
-        elif " blob " not in line:
-            errors[index] = "evidence path in the outcome commit is not a file"
-    return errors, ""
-
-
-def scan_outcome_evidence(target, rec_ids, since_days=180):
-    """Return the newest machine-checkable outcome for each recommendation.
-
-    Free-form body prose is deliberately ignored. A legacy exact commit subject
-    remains supported, while new commits can use a structured Harness-Outcome
-    trailer with an evidence pointer. The newest event wins, so a later
-    ``reopened`` trailer restores a recommendation to the active queue.
-    """
-    wanted = set(rec_ids)
-    if not wanted:
-        return {"status": "ok", "outcomes": {}}
-    rc, out, err = rar.git([
-        "log", f"--since={since_days} days ago",
-        "--format=%H%x1f%h%x1f%cI%x1f%s%x1f%b%x1e",
-    ], cwd=target)
-    if rc != 0:
-        return {"status": "unavailable", "reason": f"git log failed: {err.strip()[:200]}"}
-    if not out.strip():
-        return {"status": "ok", "outcomes": {}}
-    candidates = []
-    for raw in out.split("\x1e"):
-        fields = raw.strip("\r\n").split("\x1f", 4)
-        if len(fields) != 5:
-            continue
-        sha, short_sha, commit_date, subject, body = fields
-        commit_candidates = []
-        for line in body.splitlines():
-            match = OUTCOME_TRAILER_RE.fullmatch(line.strip())
-            if match:
-                evidence = match.group("evidence").strip()
-                commit_candidates.append({
-                    "rec_id": match.group("rec"),
-                    "outcome": match.group("outcome").lower(),
-                    "evidence": evidence,
-                    "source": "structured-trailer",
-                })
-        legacy = LEGACY_OUTCOME_SUBJECT_RE.fullmatch(subject.strip())
-        if legacy:
-            outcome = "applied" if legacy.group("verb").lower() == "applies" else "validated"
-            commit_candidates.append({
-                "rec_id": legacy.group("rec"),
-                "outcome": outcome,
-                "evidence": "legacy-exact-subject",
-                "source": "legacy-subject",
-            })
-        grouped = {}
-        for candidate in commit_candidates:
-            grouped.setdefault(candidate["rec_id"], []).append(candidate)
-        for rec_id, grouped_candidates in grouped.items():
-            candidate = dict(grouped_candidates[0])
-            candidate.update({
-                "commit_sha": sha, "short_sha": short_sha,
-                "commit_date": commit_date, "subject": subject,
-            })
-            if len(grouped_candidates) > 1:
-                candidate["pre_error"] = "multiple outcome declarations for one recommendation in the same commit"
-                candidate["claimed_outcomes"] = [c["outcome"] for c in grouped_candidates]
-            candidates.append(candidate)
-
-    evidence_errors, batch_error = _batch_commit_evidence_errors(target, candidates)
-    if batch_error:
-        return {"status": "unavailable", "reason": batch_error}
-    found = {}
-    for index, candidate in enumerate(candidates):
-        rec_id = candidate["rec_id"]
-        if rec_id in wanted and rec_id not in found:
-            evidence_error = candidate.get("pre_error") or evidence_errors.get(index, "")
-            found[rec_id] = {
-                "recommendation_id": rec_id,
-                "outcome": "unverified" if evidence_error else candidate["outcome"],
-                "claimed_outcome": candidate["outcome"],
-                "resolving_commit": f"{candidate['short_sha']} {candidate['subject']}",
-                "commit_sha": candidate["commit_sha"],
-                "commit_date": candidate["commit_date"],
-                "evidence": candidate["evidence"],
-                "evidence_source": candidate["source"],
-            }
-            if candidate.get("claimed_outcomes"):
-                found[rec_id]["claimed_outcomes"] = candidate["claimed_outcomes"]
-            if evidence_error:
-                found[rec_id]["evidence_error"] = evidence_error
-    return {"status": "ok", "outcomes": found}
-
-
-def collect_outcome_evidence(target, rec_ids, since_days=180):
-    """Compatibility wrapper returning only successfully scanned outcomes."""
-    result = scan_outcome_evidence(target, rec_ids, since_days)
-    return result.get("outcomes", {}) if result.get("status") == "ok" else {}
-
-
-def resolved_by_commit(target, rec_id, since_days=180):
-    """Backward-compatible commit lookup; rolling logic uses outcome states."""
-    outcome = collect_outcome_evidence(target, [rec_id], since_days).get(rec_id)
-    if not outcome or outcome["outcome"] not in (CLOSED_OUTCOMES | {"applied"}):
-        return None
-    return outcome["resolving_commit"]
-
-
-def collect_rolling_state(ctx):
-    """Link the current AI-review findings against the previous adaptive-harness
-    report: new / repeated / resolved-by-commit. The rolling loop's memory."""
-    target = ctx["target"]
-    ai = collect_ai_review_input(ctx)
-    if ai["status"] != "ok":
-        return {"status": "unavailable", "reason": ai.get("reason", "no AI-review input")}
-    current = {str(_rec_key(r)): r for r in ai["recommendations"]}
-    # Rolling state lives in its own file, written ONLY by
-    # rolling_improvement_review runs - latest.json is overwritten by every
-    # mode, so reading it here would reset the loop whenever another mode ran
-    # in between (found in Phase-2 dogfooding).
-    prev_path = (Path(ctx["output"]) if ctx["output"] else target / "reports" / "harness") / "rolling_state.json"
-    previous = {}
-    previous_archive = {}
-    previous_outcomes = {}
-    previous_scanned_head = ""
-    previous_scanned_rec_ids = set()
-    if prev_path.is_file():
-        try:
-            prev_state = json.loads(prev_path.read_text(encoding="utf-8"))
-            previous = {str(_rec_key(r)): r for r in prev_state.get("recommendations", [])}
-            archived = prev_state.get("recommendation_archive", prev_state.get("recommendations", []))
-            previous_archive = {str(_rec_key(r)): r for r in archived}
-            previous_outcomes = {
-                r.get("recommendation_id"): r for r in prev_state.get("outcomes", [])
-                if r.get("recommendation_id")
-            }
-            previous_scanned_head = prev_state.get("last_scanned_head", "")
-            previous_scanned_rec_ids = set(prev_state.get("last_scanned_rec_ids", []))
-        except (OSError, json.JSONDecodeError) as exc:
-            # An EXISTING but unreadable state file must not silently reset
-            # the loop's memory (2026-07-06 review pair, correctness finding 1):
-            # refuse, so the state write guard keeps the corrupt file for a
-            # human to inspect instead of overwriting it.
-            return {"status": "unavailable",
-                    "reason": f"rolling_state.json exists but is unreadable ({exc}) - "
-                              f"fix or delete it explicitly; refusing to reset loop memory"}
-    archive = dict(previous_archive)
-    archive.update(current)
-    rec_ids = {r.get("recommendation_id") for r in archive.values() if r.get("recommendation_id")}
-    current_head = _read_head_sha(target)
-    if not current_head:
-        head_rc, head_out, _ = rar.git(["rev-parse", "HEAD"], cwd=target)
-        current_head = head_out.strip() if head_rc == 0 else ""
-    outcomes = dict(previous_outcomes)
-    last_scanned_head = previous_scanned_head
-    last_scanned_rec_ids = set(previous_scanned_rec_ids)
-    outcome_scan_error = ""
-    if (current_head and current_head == previous_scanned_head
-            and rec_ids.issubset(previous_scanned_rec_ids)):
-        outcome_scan = "cache_hit"
-    else:
-        scan = (scan_outcome_evidence(target, rec_ids) if current_head else
-                {"status": "unavailable", "reason": "target HEAD is unavailable"})
-        if scan.get("status") == "ok":
-            outcomes.update(scan["outcomes"])
-            outcome_scan = "git_scan"
-            last_scanned_head = current_head
-            last_scanned_rec_ids = set(rec_ids)
-        else:
-            outcome_scan = "unavailable"
-            outcome_scan_error = scan.get("reason", "outcome scan failed")
-    newly_resolved, newly_reopened = [], []
-    for rec_id, outcome in outcomes.items():
-        previous_outcome = previous_outcomes.get(rec_id, {}).get("outcome")
-        if outcome.get("outcome") in CLOSED_OUTCOMES and previous_outcome not in CLOSED_OUTCOMES:
-            newly_resolved.append(outcome)
-        if outcome.get("outcome") == "reopened" and previous_outcome in CLOSED_OUTCOMES:
-            newly_reopened.append(outcome)
-
-    new, repeated, still_open = [], [], []
-    for key, rec in current.items():
-        outcome = outcomes.get(rec.get("recommendation_id"), {})
-        if outcome.get("outcome") in CLOSED_OUTCOMES:
-            continue
-        rec = dict(rec)
-        if outcome.get("outcome") == "applied":
-            rec["status"] = "applied_unvalidated"
-        elif outcome.get("outcome") == "reopened":
-            rec["status"] = "reopened"
-        elif outcome.get("outcome") == "unverified":
-            rec["status"] = "outcome_unverified"
-        if key in previous:
-            rec.setdefault("status", "repeated")
-            repeated.append(rec)
-        else:
-            new.append(rec)
-    for key, rec in archive.items():
-        if key in current:
-            continue
-        outcome = outcomes.get(rec.get("recommendation_id"), {})
-        if outcome.get("outcome") in CLOSED_OUTCOMES:
-            continue
-        rec = dict(rec)
-        rec["status"] = ("applied_unvalidated" if outcome.get("outcome") == "applied"
-                         else "reopened" if outcome.get("outcome") == "reopened"
-                         else "outcome_unverified" if outcome.get("outcome") == "unverified"
-                         else "open")
-        still_open.append(rec)  # absent from the new review but unproven-resolved: carried, not dropped
-    return {"status": "ok", "new_count": len(new), "repeated_count": len(repeated),
-            "resolved_count": len(newly_resolved),
-            "resolved_total_count": sum(1 for r in outcomes.values()
-                                        if r.get("outcome") in CLOSED_OUTCOMES),
-            "reopened_count": len(newly_reopened),
-            "applied_unvalidated_count": sum(1 for r in outcomes.values()
-                                             if r.get("outcome") == "applied"),
-            "unverified_outcome_count": sum(1 for r in outcomes.values()
-                                            if r.get("outcome") == "unverified"),
-            "carried_open_count": len(still_open),
-            "new": new, "repeated": repeated, "resolved": newly_resolved,
-            "reopened": newly_reopened, "outcomes": list(outcomes.values()),
-            "recommendation_archive": list(archive.values()),
-            "last_scanned_head": last_scanned_head,
-            "last_scanned_rec_ids": sorted(last_scanned_rec_ids),
-            "outcome_scan": outcome_scan,
-            "outcome_scan_error": outcome_scan_error,
-            "carried_open": still_open, "source_review_id": ai.get("review_id")}
-
-
 def collect_graph_impact(ctx):
     """Changed-files -> impacted files/routes via the explicit harness graph
     (scripts/build_harness_graph.py, overlay 04). Subprocess reuse, dry-run
@@ -481,7 +167,6 @@ def collect_graph_impact(ctx):
 LOCAL_COLLECTORS = {
     "integration_wiring": collect_integration_wiring,
     "ai_review_input": collect_ai_review_input,
-    "rolling_state": collect_rolling_state,
     "graph_impact": collect_graph_impact,
 }
 
@@ -514,14 +199,6 @@ def derive_issues(collected):
     if ai.get("history_rows_skipped"):
         add("P3", "ai_review_input",
             f"{ai['history_rows_skipped']} unparseable row(s) skipped in AI-review history JSONL.")
-    rolling = collected.get("rolling_state", {})
-    if rolling.get("status") == "unavailable":
-        add("P1", "rolling_state",
-            f"Rolling loop did NOT run: {rolling.get('reason', '')} - state preserved, not reset.")
-    elif rolling.get("outcome_scan") == "unavailable":
-        add("P1", "rolling_outcome_scan",
-            f"Outcome evidence scan failed and its cache key was not advanced: "
-            f"{rolling.get('outcome_scan_error', '')}")
     graph = collected.get("graph_impact", {})
     if graph.get("status") == "unavailable":
         add("P2", "graph_integrity",
@@ -553,8 +230,8 @@ def render_patch_proposals(recommendations, review_id):
     nothing is applied."""
     lines = [f"# Patch proposals - {review_id}", "",
              "Every entry is a PROPOSAL. A human applies or rejects it; commits",
-             "that apply one MUST cite its recommendation_id so the rolling loop",
-             "can mark it resolved.", ""]
+             "that apply one MUST cite its recommendation_id so closure stays",
+             "greppable (scripts/grep_history.py --rec REC-...).", ""]
     for rec in recommendations:
         lines += [f"## {rec.get('recommendation_id', '?')} - {rec.get('recommendation')} {rec.get('component_name')}",
                   "",
@@ -567,7 +244,8 @@ def render_patch_proposals(recommendations, review_id):
                   f"- **requires human approval**: {rec.get('requires_human_approval', False)}",
                   f"- **apply convention**: the applying commit message MUST say "
                   f"'applies {rec.get('recommendation_id', '?')}' (or 'resolves ...') - "
-                  f"that exact verb closes the rolling loop; bare mentions do not.",
+                  f"that exact verb is what grep_history.py treats as closure; "
+                  f"bare mentions do not close anything.",
                   f"- **rollback**: single-commit revert whose message says "
                   f"'reverts {rec.get('recommendation_id', '?')}' (a revert must NOT say applies/resolves).",
                   ""]
@@ -592,8 +270,7 @@ def next_trigger_for(mode):
         "diff_only_review": "after each harness-touching commit",
         "scheduled_harness_review": "next scheduled run (report-only); weekly light cadence",
         "experiment_design": "when a recommendation is classified Experiment without a case",
-        "patch_proposal": "when rolling review surfaces new high-risk recommendations",
-        "rolling_improvement_review": "weekly light; after every AI-review ingest run",
+        "patch_proposal": "when a review surfaces new high-risk recommendations",
     }[mode]
 
 
@@ -602,23 +279,10 @@ def assemble_report(mode, args, collected, ingest, started):
     source = "scheduled_runner" if mode == "scheduled_harness_review" else "adaptive_harness"
     inventory = collected.get("inventory", {})
     counts = inventory.get("counts", {})
-    rolling = collected.get("rolling_state", {})
     recommendations = list(ingest.get("recommendations", []))
-    if rolling.get("status") == "ok":
-        # The rolling loop's merged view: new + repeated + carried-open records,
-        # plus ingest records deduped by key (same semantics as
-        # merge_experiments - the same finding must never appear twice).
-        rolled = rolling["new"] + rolling["repeated"] + rolling["carried_open"]
-        seen = {str(_rec_key(r)) for r in rolled}
-        recommendations = rolled + [r for r in recommendations
-                                    if str(_rec_key(r)) not in seen]
     ai = collected.get("ai_review_input", {})
     unresolved = list(ingest.get("unresolved_questions", []))
     unresolved += [q for q in ai.get("unresolved_questions", []) if q not in unresolved]
-    if rolling.get("outcome_scan") == "unavailable":
-        unresolved.append(
-            "Outcome evidence scan unavailable; cache key was NOT advanced and the next run will retry: "
-            f"{rolling.get('outcome_scan_error', 'unknown error')}")
     semantic_keys = ("recommendations", "obsolete_scaffolding",
                      "inefficient_invocations", "codex_delegation_findings")
     empty_semantic = [k for k in semantic_keys if not ingest.get(k)]
@@ -661,14 +325,6 @@ def assemble_report(mode, args, collected, ingest, started):
             "total_code_invocations": counts.get("scripts", 0) + counts.get("hooks", 0),
             "source_reports_read": [p for p in [ai.get("path")] if p],
             "ai_review_history_runs": ai.get("history_runs", 0),
-            "rolling": {k: rolling.get(k) for k in
-                        ("new_count", "repeated_count", "resolved_count",
-                         "resolved_total_count", "reopened_count",
-                         "applied_unvalidated_count", "unverified_outcome_count",
-                         "carried_open_count", "outcome_scan", "outcome_scan_error")
-                        } if rolling.get("status") == "ok" else {"status": rolling.get("status", "not_run")},
-            "resolved_issues": rolling.get("resolved", []),
-            "outcome_ledger": rolling.get("outcomes", []),
             "graph": ({"node_count": collected["graph_impact"].get("node_count"),
                        "edge_count": collected["graph_impact"].get("edge_count"),
                        "stale_edge_count": collected["graph_impact"].get("stale_edge_count"),
@@ -685,9 +341,10 @@ def assemble_report(mode, args, collected, ingest, started):
 def build_arg_parser():
     p = argparse.ArgumentParser(
         prog="run_adaptive_harness_review.py",
-        description="Adaptive-harness rolling-review runner. Reads AI-review structured "
-                    "output, links findings across runs, renders patch proposals. "
-                    "Never edits harness files; scheduled mode is report-only.")
+        description="Adaptive-harness review runner. Reads AI-review structured "
+                    "output, runs harness-shaped review modes, renders patch "
+                    "proposals. Never edits harness files; scheduled mode is "
+                    "report-only. Cross-run linkage queries: scripts/grep_history.py.")
     p.add_argument("--mode", required=True, choices=sorted(MODES))
     p.add_argument("--target", default=str(REPO_ROOT))
     p.add_argument("--output", default=None,
@@ -756,8 +413,10 @@ def main(argv=None):
     proposals_md = None
     if args.mode == "patch_proposal":
         # Union of every pending source, deduped by key - a non-empty ingest
-        # must not mask high-risk items sitting in the rolling state
-        # (2026-07-06 review pair, correctness nit).
+        # must not mask high-risk items pending elsewhere (2026-07-06 review
+        # pair, correctness nit). A LEGACY rolling_state.json (written by the
+        # loop retired per REC-20260714-001) is still read so its pending
+        # items never vanish from proposal sheets; nothing writes it anymore.
         pool = list(report["recommendations"])
         pool += collected.get("ai_review_input", {}).get("recommendations", [])
         state_path = (Path(args.output) if args.output
@@ -787,21 +446,6 @@ def main(argv=None):
 
     out_dir = Path(args.output) if args.output else args.target / "reports" / "harness"
     latest = rar.write_outputs(report, out_dir, stem_suffix="harness-review")
-    if (args.mode == "rolling_improvement_review"
-            and collected.get("rolling_state", {}).get("status") == "ok"):
-        # Guarded write: when the rolling collector could not run (AI-review
-        # input missing, corrupt prior state), the previous state file is
-        # PRESERVED - overwriting it with an empty list would silently drop
-        # every carried-open finding (2026-07-06 review pair, posture finding 1).
-        (out_dir / "rolling_state.json").write_text(json.dumps({
-            "review_id": report["review_id"],
-            "review_date": report["review_date"],
-            "recommendations": report["recommendations"],
-            "recommendation_archive": collected["rolling_state"].get("recommendation_archive", []),
-            "outcomes": collected["rolling_state"].get("outcomes", []),
-            "last_scanned_head": collected["rolling_state"].get("last_scanned_head", ""),
-            "last_scanned_rec_ids": collected["rolling_state"].get("last_scanned_rec_ids", []),
-        }, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     if proposals_md is not None:
         pdir = out_dir / "proposals"
         pdir.mkdir(parents=True, exist_ok=True)
@@ -809,13 +453,6 @@ def main(argv=None):
         pfile.write_text(proposals_md, encoding="utf-8")
         print(f"   patch proposals: {pfile}")
     print(f"OK {report['review_id']}: wrote {latest} (+ latest.md, history/)")
-    rolling = report["metrics"].get("rolling", {})
-    if rolling and "new_count" in rolling:
-        print(f"   rolling: new={rolling['new_count']} repeated={rolling['repeated_count']} "
-              f"resolved={rolling['resolved_count']} total_resolved={rolling['resolved_total_count']} "
-              f"applied_unvalidated={rolling['applied_unvalidated_count']} "
-              f"unverified_outcomes={rolling['unverified_outcome_count']} "
-              f"carried_open={rolling['carried_open_count']}")
     return 0
 
 

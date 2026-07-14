@@ -42,7 +42,7 @@ cases:
     variant_b: "Weekly light rolling loop (diff_only + rolling_improvement) + quarterly deep"
     expected_metrics: "drift caught per month, mean staleness age of caught drift, total review token cost per quarter"
     success_criteria: "B wins if drift staleness age drops >=50% at <=1.5x quarterly token cost; else keep quarterly-only"
-    manual_review_notes: "Use the deterministic issue counts (index_drift, deprecated markers) as the objective drift signal."
+    manual_review_notes: "Use the deterministic issue counts (index_drift, deprecated markers) as the objective drift signal. PARTIALLY MOOTED 2026-07-14 by REC-20260714-001: the rolling_improvement half of variant B was retired (linkage machinery removed after the round-4 B-loses A/B); the still-live question is weekly light scheduled/diff_only scans + grep_history vs quarterly-only deep review - re-scope variant B before running."
     status: proposed
     linked_recommendation_id: REC-20260706-035
 

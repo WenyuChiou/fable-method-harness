@@ -62,9 +62,11 @@ properties:
       diff_review, experiment_review. Adaptive-harness modes (Phase 2):
       harness_inventory, harness_cleanup_review, code_invocation_review,
       ai_review_integration, skill_fit_review, diff_only_review,
-      scheduled_harness_review, experiment_design, patch_proposal,
-      rolling_improvement_review. Open string so Phase-2+ modes need no
-      schema change; unknown modes are a runner-level error, not a schema one.
+      scheduled_harness_review, experiment_design, patch_proposal
+      (rolling_improvement_review retired per REC-20260714-001; historical
+      reports carrying it stay schema-valid). Open string so Phase-2+ modes
+      need no schema change; unknown modes are a runner-level error, not a
+      schema one.
   target:
     type: string
     description: Repo/directory the review inspected.

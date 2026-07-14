@@ -18,6 +18,15 @@ retrieval_keywords: [Harness-Outcome, rolling outcome ledger, false closure, reo
 Status: the pre-registered integrity and overhead gate passed at commit
 `d8fe0e85ebd5ecf6c2cbf1402a7312a3ae731a9d`.
 
+> **RETIRED 2026-07-14** (applies REC-20260714-001): the outcome-ledger
+> CODE this document validated was removed together with the rolling
+> linkage machinery after the round-4 A/B came back B-loses — it had fired
+> live 0 times. The `Harness-Outcome:` trailer + applies/resolves verb
+> CONVENTION survives as a dormant convention: `scripts/grep_history.py`
+> honors both as closure without any stateful runner. This document is
+> retained as the historical evidence record for the gates that passed at
+> the commit above.
+
 ## Problem under test
 
 The old rolling review searched free-form commit prose for `applies` or

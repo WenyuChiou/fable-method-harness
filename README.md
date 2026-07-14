@@ -80,13 +80,19 @@ Then, for a real task:
 
 > Read `core/GLOBAL_BOOTSTRAP.md` and follow its routing for this task.
 
-And to make it improve with use — the rolling improvement loop is in the
-repo, portable, and propose-only (you disposition, agents never
-self-approve):
+And to make it improve with use — the improvement loop is in the repo,
+portable, and propose-only (you disposition, agents never self-approve).
+Run reviews, and answer cross-run questions on demand:
 
 ```bash
-python scripts/run_adaptive_harness_review.py --mode rolling_improvement_review --no-home
+python scripts/run_ai_review.py --mode scheduled_review        # report-only scan
+python scripts/grep_history.py --repeats                       # what keeps coming back
+python scripts/grep_history.py --rec REC-YYYYMMDD-NNN          # is it applied yet?
 ```
+
+(The stateful rolling-linkage runner mode was retired 2026-07-14 after its
+own pre-registered A/B came back B-loses — `applies REC-20260714-001`;
+`docs/evidence.md` has the row.)
 
 `SETUP.md` §4 covers day-1 usage plus this loop, including the honest
 boundary between what the repo ships and what stays a documented pattern.
