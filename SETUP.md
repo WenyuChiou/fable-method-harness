@@ -56,7 +56,43 @@ Windows: registers the weekly Mon 09:05 report-only scan. Other OS: prints
 the crontab line for your user to approve. This scan is report-only BY CODE
 — it structurally cannot modify anything.
 
-## 4. Verify and report
+## 4. Day-1 usage + your own improvement loop
+
+Two things your user gets from the first session onward:
+
+**Efficiency (day 1).** For any real task, classify it first, then load the
+route bundle in ONE call — `python scripts/route_pack.py <task_type>` —
+never the repo wholesale (live A/B 2026-07-11: 0.72x total cost vs free
+orientation on its met, pre-registered bar; `docs/evidence.md` has the full
+series including the two rounds that missed their bars). Model-tier
+savings: `core/model_routing_playbook.md` (0.37x, confirmed). Codex
+delegation savings: evidence in `docs/codex_long_task_ab.md` §2026-07-10
+(−27% input tokens, confirmed); the operational wrapper it validates is
+`core/CODEX_LONG_TASK_BOOTSTRAP.md`.
+
+**Continuous optimization (week 1+, on YOUR project).** The improvement
+loop is in this repo, not in anyone's personal setup:
+
+```bash
+python scripts/run_adaptive_harness_review.py \
+  --mode rolling_improvement_review --no-home
+```
+
+Run it on a cadence (the §3 schedule covers the report-only heartbeat).
+Findings are tracked with never-silently-lost semantics (measured: 37
+findings → 17 auto-resolved with the resolving commit sha attached, 20
+carried, 0 lost); a finding closes only when a commit says
+`applies REC-YYYYMMDD-NNN`. The loop is propose-only by design — your
+user dispositions, agents never self-approve.
+
+Honest portability note: the maintainer's own setup adds a personal layer
+on top — correction-phrase mining hooks and a curated incident-rule vault
+(personal tooling, NOT documented in this repo and not required), plus a
+weekly /ai-review command whose sequencing with this loop IS documented in
+`docs/ai_review_adaptive_harness_integration.md`. The in-repo loop above
+works without any of them.
+
+## 5. Verify and report
 
 Tell your user, honestly: which steps ran, the integration-check result
 line, and — if anything failed — the exact error. Then point them at

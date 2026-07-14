@@ -80,6 +80,17 @@ Then, for a real task:
 
 > Read `core/GLOBAL_BOOTSTRAP.md` and follow its routing for this task.
 
+And to make it improve with use — the rolling improvement loop is in the
+repo, portable, and propose-only (you disposition, agents never
+self-approve):
+
+```bash
+python scripts/run_adaptive_harness_review.py --mode rolling_improvement_review --no-home
+```
+
+`SETUP.md` §4 covers day-1 usage plus this loop, including the honest
+boundary between what the repo ships and what stays a documented pattern.
+
 ## How agents enter it
 
 Same harness, one portable pointer per runtime. The **Status** column is honest
