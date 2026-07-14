@@ -29,8 +29,11 @@ anywhere (e.g. older skill snippets) are stale and should be corrected to
 point here. Catching yourself reclassifying clearly-mechanical bulk as
 "judgment" to keep it IS the delegation signal.
 
-Measured reality (dogfood data, codex-delegate skill): single-file < 50
-lines ≈ 1× (don't bother); 8-file mirror sync = 17-22×; > 10-file rename
+Directional dogfood ratios (codex-delegate skill; treatment arm measured
+via byte proxy, control arm ESTIMATED — the control condition was never
+run, per measured-benefits.md's own methodology note): single-file < 50
+lines ≈ 1× (don't bother); 8-file mirror sync ≈ 17-22× (produced on the
+since-retired gemini lane, not re-measured on Codex); > 10-file rename
 ≈ 3×; > 20-file sweep ≈ 7×. The 3-5 file band is unmeasured — treat the
 tripwire as a floor for *mandatory* delegation, not a claim of measured
 speedup at exactly 3 files (benchmark case
@@ -43,7 +46,7 @@ speedup at exactly 3 files (benchmark case
 - Boilerplate / scaffold: test skeletons, config files, doc templates,
   migrations with a clear pattern.
 - Bulk mechanical CJK: find-replace, byte-stable mirror edits, multi-locale
-  mirror sync (measured 17-22× saving).
+  mirror sync (directional 17-22× — estimated-control dogfood, see above).
 - Adding type hints / docstrings / logging en masse; generating unit tests
   from existing implementations.
 - Data-pipeline or analysis scripts from precise specs (input path, output,
