@@ -38,13 +38,23 @@ contracts are the interface; the skills are the implementation.
 
 | Artifact | Writer | Contract |
 |---|---|---|
-| `.coord/plan.yml` | splitter (orchestrator session) | The DAG: tasks with `id` (T1..), `agent` (`codex` / `claude` / `claude-cheap`; `gemini` parse-only legacy), optional `model`, `slug`, `depends_on`, `files_in_scope` / `files_out_of_scope` (disjoint partition), `success_criteria` (runnable checks) |
+| `.coord/plan.yml` | splitter (orchestrator session) | The DAG: tasks with `id` (T1..), `agent` (`codex` / `claude` / `claude-cheap`; `gemini` parse-only legacy — per the splitter's own §2/§3 schema tables), optional `model`, `slug`, `depends_on`, `files_in_scope` / `files_out_of_scope` (disjoint partition), `success_criteria` (runnable checks) |
 | `.ai/codex_task_<NNN>_<slug>.md` | splitter | Codex brief: scope-confirmation block first, acceptance checks, result path |
 | `.ai/claude_task_<NNN>_<slug>.md` | splitter | Cheap-Claude brief (same shape as codex briefs); executed via `Agent(model="haiku")` per `core/model_routing_playbook.md` guardrails |
 | `.ai/<agent>_result_<NNN>_<slug>.md` | the delegate | ≤250-word summary; raw logs stay in `.ai/*_log_*` capped at 10 MB |
 | `.ai/<agent>_log_<NNN>_<slug>.txt.result.json` | the delegate wrapper | machine fields (status / risks / files_changed / tests_run); double extension BY DESIGN — appended to the LOG path, not the result-md path (the reconciler and gate look for exactly this name) |
 | `.coord/reconciliation_<NNN>.md` | reconciler | Per-task summaries, cross-task conflict section, aggregated risks, recommended action |
 | `.coord/acceptance_<NNN>.md` | the single gate (below) | PASS / CONDITIONAL / FAIL against plan.yml `success_criteria` |
+
+**Antigravity (`agy`) status:** promoted to orchestrator-routed 2026-07-11
+(mc12 k=5 gate, 5/5) and invocable directly via `antigravity-delegate`'s
+own SKILL.md contract. As of splitter 0.3.1 it is *not yet* a
+splitter-emitted `plan.yml agent:` value — the splitter's reroute-table
+prose calls it "routable … like codex / claude-cheap" but the promotion
+commit (`f3c4097`) was scoped evidence-row-only and did not touch the
+schema/classification tables. Treat `antigravity` as available-by-policy
+(direct invocation), not a DAG-declared lane, until the splitter's schema
+is updated to match.
 
 Routing WITHIN the round follows `core/model_routing_playbook.md`:
 mechanical → cheap tiers, honesty-critical → strong, classification

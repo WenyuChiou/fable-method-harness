@@ -109,7 +109,7 @@ slots are placeholders, not compatibility claims.
 | Codex | `AGENTS.md` · `docs/codex_harness_integration.md` | verified — scoped-edit cases (n=1) |
 | Cursor · opencode · any AGENTS.md agent | `AGENTS.md` (convention) | enters by convention; not separately benchmarked |
 | Hermes · router surfaces | `docs/agent-routing-policy.md` | router only — deterministic scan, then route judgment onward |
-| Antigravity CLI · other agent CLIs | `core/GLOBAL_BOOTSTRAP.md` pointer | reserved — wiring defined, not yet verified |
+| Antigravity CLI · other agent CLIs | `core/GLOBAL_BOOTSTRAP.md` pointer | as a DELEGATE: verified (mc11 capability + mc12 k=5 reliability, promoted 2026-07-11 — see `docs/evidence.md`); as the DRIVING agent entering this harness: reserved, not yet verified |
 | Bare model or shell | `BOOTSTRAP.md` · `core/GLOBAL_BOOTSTRAP.md` | portable pointer |
 
 One rule for all of them: **classify the task, load only the routed files, do
