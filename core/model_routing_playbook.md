@@ -67,6 +67,15 @@ routing is accurate**:
   files same transform, scaffold, migration) goes to Codex via the
   brief-file protocol in `docs/codex-delegation-policy.md`. Codex output is
   never final authority; "delegate returned" is itself a review trigger.
+- **Antigravity CLI (`agy`) — the `antigravity-delegate` skill:** an
+  alternative cheap executor for bounded mechanical subtasks, promoted
+  2026-07-11 (mc12: pre-registered k=5 reliability gate 5/5; k covered ONE
+  fixture shape — probe new task shapes n=1 first). Same cheap-tier
+  guardrails as every lane here: never reviews, completion verdicts,
+  governance, or anything ambiguous. Invocation contract lives in that
+  skill's SKILL.md (`--mode accept-edits` + `--dangerously-skip-permissions`
+  + absolute `--add-dir`; wrapper `scripts/run_agy.sh` in that global
+  skill, not this repo).
 - **Any other runtime:** the contract is the SPLIT, not the API. Anything
   that can pin a model per subtask (a router surface, a queue, a human)
   can apply rule 1-5 verbatim.
