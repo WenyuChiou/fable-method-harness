@@ -122,10 +122,16 @@ def is_closed(rec_events):
     return False
 
 
-def latest_report(reports):
-    """The newest rolling/harness report by review_date (falls back to file order)."""
+def latest_report(reports, require_recommendations=False):
+    """The newest report by review_date (falls back to file order). With
+    require_recommendations, the newest one whose recommendations list is
+    non-empty - deterministic scheduled heartbeats carry none, and using one
+    as the --open baseline would report '0 open' while unapplied
+    recommendations sit in the report just before it."""
     best = None
     for path, report in reports:
+        if require_recommendations and not report.get("recommendations"):
+            continue
         key = report.get("review_date", "")
         if best is None or key >= best[1].get("review_date", ""):
             best = (path, report)
@@ -189,16 +195,19 @@ def main(argv=None):
             print(f"  {rid}: {len(rows)}x  first {rows[0][1]}  last {rows[-1][1]}"
                   f"{'  [CLOSED]' if is_closed(events.get(rid)) else ''}")
     else:
-        newest = latest_report(reports)
+        newest_with_recs = latest_report(reports, require_recommendations=True)
+        newest = newest_with_recs or latest_report(reports)
         if newest is None:
             print("No history reports found - run the runners first.")
             return 0
         path, report = newest
+        label = ("newest report with recommendations" if newest_with_recs
+                 else "newest report (no report carries recommendations)")
         rec_ids = sorted({r.get("recommendation_id")
                           for r in report.get("recommendations", []) or []
                           if r.get("recommendation_id")})
         open_ids = [rid for rid in rec_ids if not is_closed(events.get(rid))]
-        print(f"newest report: {path.name} ({report.get('review_date', '?')}) - "
+        print(f"{label}: {path.name} ({report.get('review_date', '?')}) - "
               f"{len(open_ids)} open / {len(rec_ids)} total")
         for rid in open_ids:
             print(f"  OPEN {rid}")

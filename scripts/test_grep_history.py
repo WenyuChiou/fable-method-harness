@@ -146,6 +146,41 @@ def test_open_lists_unclosed_from_newest_report():
         assert "REC-20260701-003" not in proc.stdout, "not in the newest report"
 
 
+def test_open_skips_recommendation_less_scheduled_report():
+    """A deterministic scheduled heartbeat (no recommendations) newer than the
+    last real review must NOT make --open report '0 open' - the baseline is
+    the newest report that actually carries recommendations."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = make_repo_with_history(tmp)
+        hist = repo / "reports" / "harness" / "history"
+        (hist / "r3.json").write_text(json.dumps({
+            "review_id": "ahr-r3", "review_date": "2026-07-15T00:00:00+00:00",
+            "mode": "scheduled_harness_review", "recommendations": [],
+        }), encoding="utf-8")
+        proc = run_script("--target", str(repo), "--open")
+        assert proc.returncode == 0, proc.stderr
+        assert "OPEN REC-20260701-002" in proc.stdout, \
+            "unapplied rec from the prior report must survive a rec-less scan"
+        assert "r2.json" in proc.stdout, "output must name the report used as baseline"
+        assert "0 open / 0 total" not in proc.stdout
+
+
+def test_open_falls_back_when_no_report_carries_recommendations():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = make_repo_with_history(tmp)
+        hist = repo / "reports" / "harness" / "history"
+        for p in hist.glob("*.json"):
+            p.unlink()
+        (hist / "only.json").write_text(json.dumps({
+            "review_id": "ahr-only", "review_date": "2026-07-15T00:00:00+00:00",
+            "mode": "scheduled_harness_review", "recommendations": [],
+        }), encoding="utf-8")
+        proc = run_script("--target", str(repo), "--open")
+        assert proc.returncode == 0, proc.stderr
+        assert "no report carries recommendations" in proc.stdout
+        assert "0 open / 0 total" in proc.stdout
+
+
 def test_read_only():
     with tempfile.TemporaryDirectory() as tmp:
         repo = make_repo_with_history(tmp)
