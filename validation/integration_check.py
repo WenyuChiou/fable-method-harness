@@ -3,9 +3,10 @@
 
 Executes the full deterministic verification matrix for the AI-review +
 adaptive-harness system: CLI surface, all modes dry-run, JSON validity,
-dry-run zero-mutation, the E2E data flow (AI-review -> rolling loop ->
-REC-id linkage), scheduled report-only invariants, validators, posture,
-graph build, and all seven test suites. Emits one PASS/FAIL row per check
+dry-run zero-mutation, the E2E data flow (AI-review -> adaptive runner ->
+grep_history REC-id lookup; the rolling-state linkage was retired by
+REC-20260714-001), scheduled report-only invariants, validators, posture,
+graph build, and all eight test suites. Emits one PASS/FAIL row per check
 plus a JSON blob; docs/integration_test_matrix.md records executed
 snapshots of this output (computed, never hand-written).
 
@@ -67,8 +68,7 @@ AI_MODES = ["standard_review", "harness_cleanup_review", "code_invocation_review
             "experiment_review"]
 AH_MODES = ["harness_inventory", "harness_cleanup_review", "code_invocation_review",
             "ai_review_integration", "skill_fit_review", "diff_only_review",
-            "scheduled_harness_review", "experiment_design", "patch_proposal",
-            "rolling_improvement_review"]
+            "scheduled_harness_review", "experiment_design", "patch_proposal"]
 
 
 def main():
@@ -116,7 +116,8 @@ def main():
             row(f"dry-run {mode}", "runner-modes", ok, ev,
                 f"python {script} --mode {mode} --dry-run --no-home")
     row("dry-run zero mutation (all modes above)", "dry-run-safety",
-        git_state() == before, "git status identical before/after 17 dry-runs")
+        git_state() == before,
+        f"git status identical before/after {len(AI_MODES) + len(AH_MODES)} dry-runs")
 
     # 3. E2E data flow in a hermetic temp output
     with tempfile.TemporaryDirectory() as tmp:
@@ -150,20 +151,13 @@ def main():
 
         ah_out = Path(tmp) / "harness"
         rc, out, err = run([PY, "scripts/run_adaptive_harness_review.py", "--mode",
-                            "rolling_improvement_review", "--no-home",
+                            "ai_review_integration", "--no-home",
                             "--read-ai-review", str(latest), "--output", str(ah_out)])
         ah_latest = ah_out / "latest.json"
         ok = rc == 0 and ah_latest.is_file() and (ah_out / "latest.md").is_file()
         row("adaptive-harness reads AI-review + writes latest.json+md", "data-flow", ok, f"exit {rc}")
         if ok:
             ah_report = json.loads(ah_latest.read_text(encoding="utf-8"))
-            recs = ah_report["recommendations"]
-            row("rolling loop carries the AI-review recommendation", "data-flow",
-                any(r.get("recommendation_id") == "REC-20260706-900" for r in recs),
-                f"{len(recs)} recs in harness report")
-            row("recommendations link back to source review id", "traceability",
-                any(r.get("source_review_id") == air_report["review_id"] for r in recs),
-                "source_review_id matches AI-review review_id")
             row("shared schema: same required keys in both reports", "shared-schema",
                 all(k in ah_report and k in air_report for k in
                     ("review_id", "source", "mode", "recommendations", "metrics",
@@ -171,6 +165,16 @@ def main():
                 "review_report core keys present in both")
             row("adaptive-harness history JSONL appended", "data-flow",
                 (ah_out / "history" / "review-log.jsonl").is_file(), "history exists")
+        # linkage is on-demand now (REC-20260714-001): grep_history must find
+        # the ingested REC in the AI-review history and report it OPEN (no
+        # applies-commit exists for it in this repo's log).
+        rc, out, err = run([PY, "scripts/grep_history.py", "--target", str(REPO),
+                            "--history-dir", str(air_out / "history"),
+                            "--rec", "REC-20260706-900"])
+        row("grep_history finds the ingested REC across history", "data-flow",
+            rc == 0 and "1 appearance(s)" in out and "status: OPEN" in out,
+            out.strip().splitlines()[-1] if out.strip() else f"exit {rc}",
+            "python scripts/grep_history.py --rec REC-20260706-900")
 
         # scheduled real runs: report-only (repo untouched, ledger untouched).
         # The ledger guard must not go vacuous when the ledger is absent
@@ -205,6 +209,7 @@ def main():
 
     # 5. Test suites
     for suite in ("scripts/test_run_ai_review.py", "scripts/test_run_adaptive_harness_review.py",
+                  "scripts/test_grep_history.py",
                   "scripts/test_build_harness_graph.py", "scripts/test_check_agent_artifacts.py",
                   "scripts/test_run_long_codex_ab.py",
                   "scripts/test_run_hermes_router_benchmark.py",
@@ -216,6 +221,7 @@ def main():
     # 6. Artifact presence inventory (Phase-3 section 1)
     for path in (".claude/skills/adaptive-harness/SKILL.md", "SKILL.md",
                  "scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py",
+                 "scripts/grep_history.py",
                  "scripts/run_long_codex_ab.py",
                  "scripts/check_codebase_memory_freshness.py",
                  "scripts/test_check_codebase_memory_freshness.py",

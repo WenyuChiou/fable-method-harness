@@ -59,7 +59,7 @@ description: {description}
 # adaptive-harness (launcher stub)
 
 Installed by `setup_harness.py` on {installed_from}. The full skill - modes,
-rolling loop, safety boundaries, runtime portability - is the single source
+improvement loop, safety boundaries, runtime portability - is the single source
 of truth in the harness clone. READ IT AND FOLLOW IT:
 
     {skill_path}

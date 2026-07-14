@@ -9,18 +9,19 @@ description: >-
   the method-harness-compiler project (use the root harness ladder).
 id: SKILL-adaptive-harness
 layer: entry
-purpose: Skill-runtime adapter for the adaptive harness system - maps the 10 review modes onto the two deterministic runners plus the semantic checklists, under the report-only / patch-proposal safety posture.
-read_when: A skill-aware runtime (Claude Code and similar) invokes adaptive-harness; or when wiring the rolling improvement loop into a new project.
+purpose: Skill-runtime adapter for the adaptive harness system - maps the 9 review modes onto the two deterministic runners plus the semantic checklists, under the report-only / patch-proposal safety posture; linkage queries go to the grep-history helper.
+read_when: A skill-aware runtime (Claude Code and similar) invokes adaptive-harness; or when wiring the improvement loop into a new project.
 depends_on:
   - ../../../scripts/run_adaptive_harness_review.py
   - ../../../scripts/run_ai_review.py
+  - ../../../scripts/grep_history.py
   - ../../../prompts/ai-review-modes.md
   - ../../../docs/ai_review_adaptive_harness_integration.md
   - ../../../schemas/review_report.schema.yaml
   - ../../../schemas/recommendation.schema.yaml
 used_by: [claude-code-skill-runtime, AGENTS, PROMPT-hermes-router]
-tags: [entrypoint, skill, adaptive-harness, ai-review, rolling-improvement, report-only]
-retrieval_keywords: [adaptive harness skill, rolling improvement loop, harness inventory, skill fit review, patch proposal mode, scheduled harness review, ai review integration, harness cleanup]
+tags: [entrypoint, skill, adaptive-harness, ai-review, report-only]
+retrieval_keywords: [adaptive harness skill, improvement loop, grep history linkage, harness inventory, skill fit review, patch proposal mode, scheduled harness review, ai review integration, harness cleanup]
 ---
 
 # SKILL: adaptive-harness
@@ -28,16 +29,22 @@ retrieval_keywords: [adaptive harness skill, rolling improvement loop, harness i
 **Relationship to the root `SKILL.md`:** the root file is the repo-level
 launcher for working ON the method-harness-compiler project (the L0→L3
 ladder). THIS adapter is the skill-aware runtime entry for the **adaptive
-harness system** — the rolling loop that keeps a harness (this repo's or the
-operator's global one) reviewed, simplified, and benchmarkable over time.
-AI-review is the local reviewer; adaptive-harness manages how its findings
-evolve. One system, shared schemas, two runners.
+harness system** — the improvement loop that keeps a harness (this repo's or
+the operator's global one) reviewed, simplified, and benchmarkable over time.
+AI-review is the local reviewer; adaptive-harness runs the harness-shaped
+review modes over its findings. One system, shared schemas, two runners.
+Cross-run linkage (which findings repeat, which are closed) is answered
+on demand by `scripts/grep_history.py` — the stateful rolling machinery was
+retired per REC-20260714-001 after the pre-registered A/B measured no recall
+advantage over re-derivation (a B-loses result that shipped to
+`docs/evidence.md`).
 
 ## The loop you are operating
 
-1. **Observe** — `python scripts/run_adaptive_harness_review.py --mode
-   rolling_improvement_review` (reads AI-review `latest.json` + history +
-   harness structure + diff; computes new / repeated / resolved-by-commit).
+1. **Observe** — run AI-review (`python scripts/run_ai_review.py --mode <m>`)
+   and, for harness-shaped scans, the adaptive runner modes below. For
+   cross-run questions: `python scripts/grep_history.py --repeats` / `--open`
+   / `--rec REC-YYYYMMDD-NNN` (read-only; append-only history + git log).
 2. **Diagnose** — answer the mode's semantic checklist in
    `prompts/ai-review-modes.md` with cited evidence.
 3. **Classify** — every finding gets Keep / Simplify / Remove / Replace /
@@ -66,7 +73,9 @@ evolve. One system, shared schemas, two runners.
 | `scheduled_harness_review` | `--mode scheduled_harness_review` | NONE by design (report-only) |
 | `experiment_design` | `--mode experiment_design` | §experiment_review |
 | `patch_proposal` | `--mode patch_proposal` | render only; human applies |
-| `rolling_improvement_review` | `--mode rolling_improvement_review` | full loop above |
+
+(`rolling_improvement_review` was retired — applies REC-20260714-001;
+linkage queries: `scripts/grep_history.py`.)
 
 ## Safety boundaries
 
@@ -75,12 +84,12 @@ Enforced BY CODE (runner invariants, regression-pinned):
 - Scheduled runs are report-only: `--ingest` rejected, `source=
   scheduled_runner`, `changes_made` must be empty, zero writes outside
   `--output`.
-- `--dry-run` writes nothing, including the rolling state.
+- `--dry-run` writes nothing.
 - Ingest findings are validated (required fields, enums, REC-id pattern,
   human-approval flag on high-risk Remove/Replace) or rejected.
-- Rolling-loop memory is never silently reset: unreadable state or missing
-  AI-review input preserves the previous `rolling_state.json` and surfaces
-  a P1 issue.
+- `grep_history.py` is read-only by construction; a legacy
+  `rolling_state.json` (from the retired loop) is still READ by
+  `patch_proposal` so pending items never vanish, but nothing writes it.
 
 Operating POLICY (this skill's instructions to the agent — not machine-
 enforced; violating them is a harness-governance violation):
@@ -93,13 +102,14 @@ enforced; violating them is a harness-governance violation):
 - Loop-closure convention: a commit that applies a recommendation says
   `applies REC-YYYYMMDD-NNN` (or `resolves ...`) in its message; a revert
   says `reverts REC-...`; anything else must not bare-cite REC ids — the
-  applies/resolves verb is what `resolved_by_commit` greps for.
+  applies/resolves verb is what `grep_history.py` treats as closure.
 
 ## Model tiers
 
-Deterministic runners: any tier (code — Haiku or cron can invoke).
+Deterministic runners + `grep_history.py`: any tier (code — Haiku or cron
+can invoke).
 `skill_fit_review` / `diff_only_review` semantic passes: Sonnet-capable.
-`harness_cleanup_review`, `rolling_improvement_review` interpretation,
+`harness_cleanup_review` interpretation and
 `patch_proposal` judgment: Opus/Fable-class. Codex: mechanical scoped work
 only, never final authority (docs/codex-delegation-policy.md).
 Executed tier evidence: `benchmarks/model_compatibility_cases.yaml` (Haiku

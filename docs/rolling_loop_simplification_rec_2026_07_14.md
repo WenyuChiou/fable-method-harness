@@ -1,8 +1,16 @@
 # REC-20260714-001 — Simplify the rolling loop's linkage machinery (propose-only)
 
-- **Status:** proposed — `requires_human_approval: true`. Nothing is
-  dismantled by this document; closure follows the repo convention
-  (a commit whose message says `applies REC-20260714-001`).
+- **Status:** APPLIED 2026-07-14 — the human explicitly authorized
+  application ("apply REC-20260714-001"); the applying commit's message
+  says `applies REC-20260714-001` per the closure convention. What was
+  applied: `rolling_improvement_review` mode + `collect_rolling_state` +
+  the outcome-evidence scanner removed from
+  `scripts/run_adaptive_harness_review.py`; `scripts/grep_history.py`
+  added as the read-only linkage query surface. Outcome-ledger
+  sub-decision: the CODE was retired with the linkage machinery; the
+  commit-verb closure CONVENTION (incl. the `Harness-Outcome:` trailer)
+  is kept as a dormant convention — grep_history treats both as closure,
+  so no runner is needed to honor it.
 - **Opened by:** the frozen consequence of the round-4 A/B
   (`ai_review_only_vs_ai_review_plus_adaptive_harness`, executed
   2026-07-14, **B-loses**). Pre-registration and raw grades are

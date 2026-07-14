@@ -74,16 +74,22 @@ delegation savings: evidence in `docs/codex_long_task_ab.md` §2026-07-10
 loop is in this repo, not in anyone's personal setup:
 
 ```bash
-python scripts/run_adaptive_harness_review.py \
-  --mode rolling_improvement_review --no-home
+python scripts/run_ai_review.py --mode scheduled_review   # report-only heartbeat
+python scripts/grep_history.py --repeats                  # cross-run linkage on demand
+python scripts/grep_history.py --open                     # what is still unapplied
 ```
 
-Run it on a cadence (the §3 schedule covers the report-only heartbeat).
-Findings are tracked with never-silently-lost semantics (measured: 37
-findings → 17 auto-resolved with the resolving commit sha attached, 20
-carried, 0 lost); a finding closes only when a commit says
-`applies REC-YYYYMMDD-NNN`. The loop is propose-only by design — your
-user dispositions, agents never self-approve.
+Run the scan on a cadence (the §3 schedule covers the report-only
+heartbeat). History is append-only, so findings are never silently lost; a
+finding closes only when a commit says `applies REC-YYYYMMDD-NNN` — that
+verb is exactly what `grep_history.py` treats as closure. The loop is
+propose-only by design — your user dispositions, agents never self-approve.
+Honest lineage: a stateful rolling-linkage mode used to do the cross-run
+tagging automatically (its one live run auto-resolved 17 of 37 findings
+with commit shas, 0 lost); its own pre-registered A/B (2026-07-14) then
+showed plain re-derivation matches its recall at 1.00, so the state
+machinery was retired (`applies REC-20260714-001`; `docs/evidence.md`
+carries the B-loses row).
 
 Honest portability note: the maintainer's own setup adds a personal layer
 on top — correction-phrase mining hooks and a curated incident-rule vault

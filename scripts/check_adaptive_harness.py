@@ -10,8 +10,10 @@ vanished (DR-011 no-silent-pass).
 
 Checks:
     1. Every adaptive-layer artifact exists and carries its load-bearing
-       keywords (skill adapter lists all 10 modes; integration doc has the
-       five responsibility sections; runners state report-only).
+       keywords (skill adapter lists all 9 modes; integration doc has the
+       five responsibility sections; runners state report-only; the
+       grep-history helper documents the closure convention it replaced the
+       rolling loop's state machinery with - REC-20260714-001).
     2. Posture: content surfaces contain NO stale private-repo claims
        ("stays private", "private remote", "private_until_reviewed",
        "must never be made public", "a private operating harness") - the repo
@@ -44,11 +46,11 @@ REQUIRED = {
         "harness_inventory", "harness_cleanup_review", "code_invocation_review",
         "ai_review_integration", "skill_fit_review", "diff_only_review",
         "scheduled_harness_review", "experiment_design", "patch_proposal",
-        "rolling_improvement_review", "report-only", "human",
+        "grep_history", "report-only", "human",
     ],
     "docs/ai_review_adaptive_harness_integration.md": [
         "AI-review", "adaptive-harness", "deterministic scripts", "LLM",
-        "human", "shared schemas", "rolling improvement",
+        "human", "shared schemas", "grep_history",
     ],
     "docs/publication_status.md": [
         "PUBLIC", "never-include", "public-safety review", "checklist",
@@ -60,7 +62,10 @@ REQUIRED = {
     "schemas/recommendation.schema.yaml": ["recommendation_id", "source_review_id", "requires_human_approval"],
     "scripts/run_ai_review.py": ["scheduled_review", "report-only", "--dry-run"],
     "scripts/run_adaptive_harness_review.py": [
-        "rolling_improvement_review", "patch_proposal", "report-only", "read-ai-review",
+        "patch_proposal", "report-only", "read-ai-review", "REC-20260714-001",
+    ],
+    "scripts/grep_history.py": [
+        "applies", "read-only", "REC-20260714-001", "Harness-Outcome",
     ],
     "prompts/ai-review-modes.md": ["standard_review", "experiment_review", "ingest"],
     "benchmarks/ai_review_cases.yaml": ["case_name", "linked_recommendation_id"],
