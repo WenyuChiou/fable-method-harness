@@ -23,9 +23,10 @@ the identical discipline to itself.
    globbing or reading the repo tree wholesale.
 
 2. **Route-scoped loading only.** After L3 classification, load exactly
-   the files listed for the chosen route — via `scripts/route_show.py
-   <task_type>` or a grep of that route's `- id:` block, never a wholesale
-   Read of `ROUTES.yaml`. A file not on the route list is presumed
+   the files listed for the chosen route — preferably in ONE call via
+   `scripts/route_pack.py <task_type>` (entry-only: `route_show.py` or a
+   grep of that route's `- id:` block), never a wholesale Read of
+   `ROUTES.yaml`. A file not on the route list is presumed
    irrelevant until proven otherwise. The same grep-entry rule applies to
    `INDEX.yaml`: grep the path or a retrieval keyword and read only the
    matched entry; the whole-file read (~23.5k tokens) is reserved for

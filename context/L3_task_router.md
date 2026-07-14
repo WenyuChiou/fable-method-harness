@@ -19,11 +19,14 @@ retrieval_keywords: [which route, classify task, task router, route table, ROUTE
 
 Classify the task FIRST (restate it in one sentence, name the phase it
 touches, check L2's allowed/forbidden list), THEN pick exactly one route
-below, THEN load ONLY that route's entry — `python scripts/route_show.py
-<task_type>` (add `--header` on first activation for the routing rules), or
-grep `- id: ROUTE-<...>` in `ROUTES.yaml` and read just that block. Do NOT
-Read `ROUTES.yaml` whole (measured: one entry is ~13% of the file; the rest
-is other routes' lists). Do not open rubric/playbook/example files the
+below, THEN load that route's bundle in ONE call — `python
+scripts/route_pack.py <task_type>` (entry + every start+required file;
+measured 2026-07-11: one-call orientation 0.72x total cost vs free, while
+serial route_show+reads broke even on turn overhead). Entry-only fallback:
+`scripts/route_show.py <task_type>` (add `--header` on first activation),
+or grep `- id: ROUTE-<...>` in `ROUTES.yaml` and read just that block. Do
+NOT Read `ROUTES.yaml` whole (measured: one entry is ~13% of the file; the
+rest is other routes' lists). Do not open rubric/playbook/example files the
 route does not list.
 
 ## Route table
@@ -56,7 +59,8 @@ route does not list.
 
 ## After classifying
 
-Load your route's entry (`python scripts/route_show.py <task_type>`, or
-grep the `- id:` block in `ROUTES.yaml`), load ONLY the files it lists, and
-follow `context/L4_progressive_disclosure_policy.md` for any escalation
-beyond that list.
+Load your route's bundle in one call (`python scripts/route_pack.py
+<task_type>`; entry-only: `route_show.py` or grep the `- id:` block), stay
+within the files it lists, and follow
+`context/L4_progressive_disclosure_policy.md` for any escalation beyond
+that list.

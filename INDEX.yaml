@@ -1516,6 +1516,13 @@ files:
     tags: ["validation", "script", "routes", "grep-entry", "context-economy"]
     read_when: "Loading a route's file list after L3 classification, or checking which routes exist."
 
+  - path: scripts/route_pack.py
+    id: SCRIPT-route-pack
+    layer: validation
+    purpose: "Prints a route's ENTIRE lean bundle (entry + full text of every start+required file, per-file byte counts) in ONE call — the turn-cost fix: serial route_show+reads spent ~8 extra turns whose standing-context replay ate the reading savings (live A/B 2026-07-11: packed discipline 0.72x total cost vs free orientation, first frozen bar met; operator audits route-live-ab-packed-20260711)."
+    tags: ["validation", "script", "routes", "context-economy", "turn-economy", "orientation"]
+    read_when: "Activating a route — prefer this ONE call over route_show + per-file reads; --entry-only for the old behavior, --list enumerates route ids."
+
   - path: scripts/build_harness_graph.py
     id: SCRIPT-build-harness-graph
     layer: validation

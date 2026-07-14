@@ -30,8 +30,11 @@ retrieval_keywords: [agent instructions, AGENTS.md, repository rules, coding age
    - `context/L0_bootstrap.md`
    - `context/L2_current_phase.md`
    - `context/L3_task_router.md`
-   - your route's entry only — `python scripts/route_show.py <task_type>`,
-     or grep `- id: ROUTE-<...>` in `ROUTES.yaml` (do not read it whole)
+   - your route's bundle in ONE call — `python scripts/route_pack.py
+     <task_type>` (entry + all start+required contents; measured 0.72x
+     total cost vs free orientation, 2026-07-11). Entry-only fallback:
+     `scripts/route_show.py <task_type>` or grep `- id: ROUTE-<...>` in
+     `ROUTES.yaml` (never read it whole)
 
 3. **Classify the task type first.** Use the table in
    `context/L3_task_router.md`. If the task fits none of the 8 types, say so
