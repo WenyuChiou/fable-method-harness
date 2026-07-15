@@ -2,6 +2,7 @@
 """Regression tests for the fail-closed runtime activation probe."""
 
 import importlib.util
+import hashlib
 import json
 import sqlite3
 import sys
@@ -12,6 +13,7 @@ from unittest import mock
 
 REPO = Path(__file__).resolve().parent.parent
 RUNNER = REPO / "scripts" / "run_runtime_activation_probe.py"
+PREREGISTRATION = REPO / "benchmarks" / "runtime_activation" / "preregistration.json"
 spec = importlib.util.spec_from_file_location("runtime_activation_probe", RUNNER)
 runner = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = runner
@@ -24,6 +26,16 @@ def test_fixture_is_complete_and_valid():
     assert [case["kind"] for case in cases].count("routine") == 2
     assert [case["kind"] for case in cases].count("trigger") == 4
     assert [case["kind"] for case in cases].count("rollback") == 1
+
+
+def test_preregistration_freezes_the_live_inputs_and_claim_boundary():
+    payload = json.loads(PREREGISTRATION.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 1 and payload["frozen_before_new_live_outputs"] is True
+    assert payload["design"]["total_live_calls"] == 14 and payload["design"]["retries"] == 0
+    assert "not an API token or latency claim" in payload["offline_context_measurement"]["claim_boundary"]
+    for relative, expected in payload["frozen_input_sha256"].items():
+        actual = hashlib.sha256((REPO / relative).read_bytes()).hexdigest()
+        assert actual == expected, f"frozen input drifted: {relative}"
 
 
 def test_receipt_parser_rejects_extra_or_invalid_values():

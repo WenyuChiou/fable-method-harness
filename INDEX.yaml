@@ -1551,6 +1551,13 @@ files:
     tags: ["dataset", "codex", "hermes", "activation", "rollback", "benchmark"]
     read_when: "Running or auditing the cross-runtime activation probe."
 
+  - path: benchmarks/runtime_activation/preregistration.json
+    id: PREREG-runtime-activation-telemetry
+    layer: dataset
+    purpose: "Frozen v1 design, input hashes, claim boundary, and gates for the Codex/Hermes activation telemetry proof-of-instrument."
+    tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
+    read_when: "Immediately before a runtime-activation live probe, or when auditing which token, latency, and context claims its scorecard can support."
+
   - path: scripts/summarize_harness_ab_pilot.py
     id: SCRIPT-summarize-harness-ab-pilot
     layer: validation
