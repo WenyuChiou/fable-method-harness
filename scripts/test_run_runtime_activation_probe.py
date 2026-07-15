@@ -13,6 +13,7 @@ from unittest import mock
 REPO = Path(__file__).resolve().parent.parent
 RUNNER = REPO / "scripts" / "run_runtime_activation_probe.py"
 PREREGISTRATION = REPO / "benchmarks" / "runtime_activation" / "preregistration.json"
+PREREGISTRATION_V2 = REPO / "benchmarks" / "runtime_activation" / "preregistration_v2.json"
 spec = importlib.util.spec_from_file_location("runtime_activation_probe", RUNNER)
 runner = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = runner
@@ -34,6 +35,15 @@ def test_preregistration_freezes_the_live_inputs_and_claim_boundary():
     assert "no v1 call may be retried" in payload["invalidation"]
     assert payload["design"]["total_live_calls"] == 14 and payload["design"]["retries"] == 0
     assert "not an API token or latency claim" in payload["offline_context_measurement"]["claim_boundary"]
+
+
+def test_v2_preregistration_freezes_current_inputs_before_live_calls():
+    payload = json.loads(PREREGISTRATION_V2.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 1 and payload["frozen_before_new_live_outputs"] is True
+    assert payload["design"]["total_live_calls"] == 14 and payload["design"]["retries"] == 0
+    assert "Do not claim API-token reduction or speedup" in payload["decision_gates"]["reporting"]
+    for relative, expected in payload["frozen_input_sha256"].items():
+        assert runner.sha256_file(REPO / relative) == expected, f"v2 frozen input drifted: {relative}"
 
 
 def test_receipt_parser_rejects_extra_or_invalid_values():

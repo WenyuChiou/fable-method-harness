@@ -1558,6 +1558,13 @@ files:
     tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
     read_when: "Immediately before a runtime-activation live probe, or when auditing which token, latency, and context claims its scorecard can support."
 
+  - path: benchmarks/runtime_activation/preregistration_v2.json
+    id: PREREG-runtime-activation-telemetry-v2
+    layer: dataset
+    purpose: "Active v2 frozen design and canonical hashes for the post-Windows-cleanup Codex/Hermes activation telemetry run."
+    tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
+    read_when: "Required argument for the v2 runtime-activation live probe; inspect before interpreting its scorecard."
+
   - path: scripts/summarize_harness_ab_pilot.py
     id: SCRIPT-summarize-harness-ab-pilot
     layer: validation
