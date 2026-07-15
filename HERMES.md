@@ -18,10 +18,11 @@ Classify the user's request before reading more harness material.
 - **When inactive**, use normal Hermes behavior.  Do not claim that the
   harness was applied.
 
-For a prompt beginning `FABLE_ACTIVATION_PROBE`, do not use tools.  Return
-only this JSON object: `{"schema_version":1,"harness":"active|inactive","reason":"trigger|routine|rollback"}`.
-If that prompt states that `.fable-harness-off` is present, return
-`inactive` with reason `rollback`.
+For a prompt beginning `FABLE_ACTIVATION_PROBE`, inspect only the
+repository-root `.fable-harness-off` marker; do not load routed material or do
+task work.  Then return only this JSON object:
+`{"schema_version":1,"harness":"active|inactive","reason":"trigger|routine|rollback"}`.
+If the marker exists, return `inactive` with reason `rollback`.
 
 Removing this file returns Hermes to its normal `AGENTS.md` / `CLAUDE.md`
 context precedence.  The marker is a per-repository rollback that requires no

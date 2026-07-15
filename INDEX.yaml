@@ -1509,6 +1509,20 @@ files:
     tags: ["validation", "test", "codex", "hermes", "activation", "rollback"]
     read_when: "After changing runtime activation or rollback instructions."
 
+  - path: scripts/run_runtime_activation_probe.py
+    id: SCRIPT-run-runtime-activation-probe
+    layer: validation
+    purpose: "Fail-closed live probe for Codex/Hermes activation receipts and exact provider usage correlation."
+    tags: ["validation", "codex", "hermes", "activation", "telemetry", "rollback"]
+    read_when: "Measuring conditional activation recall, routine over-triggering, rollback obedience, or exact runtime usage."
+
+  - path: scripts/test_run_runtime_activation_probe.py
+    id: TEST-run-runtime-activation-probe
+    layer: validation
+    purpose: "Regression tests for activation receipt parsing, exact Codex usage extraction, and strict Hermes session correlation."
+    tags: ["validation", "test", "codex", "hermes", "activation", "telemetry"]
+    read_when: "After changing run_runtime_activation_probe.py or its fixture contract."
+
   - path: scripts/check_codebase_memory_freshness.py
     id: SCRIPT-check-codebase-memory-freshness
     layer: validation
@@ -1529,6 +1543,13 @@ files:
     purpose: "Three tracked live probes that freeze expected symbols and files for the codebase-memory freshness sentinel."
     tags: ["dataset", "codebase-memory", "freshness", "benchmark", "probes"]
     read_when: "Auditing or extending which tracked source symbols prove graph freshness."
+
+  - path: benchmarks/runtime_activation/cases.json
+    id: DATASET-runtime-activation-cases
+    layer: dataset
+    purpose: "Seven frozen routine, trigger, and rollback cases for Codex/Hermes conditional activation probes."
+    tags: ["dataset", "codex", "hermes", "activation", "rollback", "benchmark"]
+    read_when: "Running or auditing the cross-runtime activation probe."
 
   - path: scripts/summarize_harness_ab_pilot.py
     id: SCRIPT-summarize-harness-ab-pilot

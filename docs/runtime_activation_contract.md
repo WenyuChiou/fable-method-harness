@@ -54,14 +54,15 @@ reviewer's interpretation of prose:
 {"schema_version":1,"harness":"active","reason":"trigger"}
 ```
 
-`FABLE_ACTIVATION_PROBE` is evaluation-only.  The fixture declares whether a
-case is `trigger`, `routine`, or `rollback`; the runtime must return exactly
-the receipt above without tools.  The scorecard reports all of the following
-separately:
+`FABLE_ACTIVATION_PROBE` is evaluation-only.  The runner creates the actual
+per-case workspace and, for rollback, the real marker file.  The runtime may
+inspect that marker only; it must not load routed material or perform task
+work, then return exactly the receipt above.  The scorecard reports all of the
+following separately:
 
 1. trigger recall (active on required cases),
 2. routine over-trigger count (active on simple cases),
-3. rollback obedience (inactive when the marker is declared present), and
+3. rollback obedience (inactive when the actual marker exists), and
 4. malformed or unavailable receipts as `UNSCORED`, never as a pass.
 
 Exact token measurement is separate from activation correctness.  Codex emits

@@ -214,6 +214,7 @@ def main():
                   "scripts/test_run_long_codex_ab.py",
                   "scripts/test_run_hermes_router_benchmark.py",
                   "scripts/test_runtime_activation_contract.py",
+                  "scripts/test_run_runtime_activation_probe.py",
                   "scripts/test_check_codebase_memory_freshness.py"):
         rc, out, err = run([PY, suite])
         last = out.strip().splitlines()[-1] if out.strip() else err[:100]
@@ -225,7 +226,9 @@ def main():
                  "scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py",
                  "scripts/grep_history.py",
                  "scripts/run_long_codex_ab.py",
+                 "scripts/run_runtime_activation_probe.py",
                  "scripts/test_runtime_activation_contract.py",
+                 "scripts/test_run_runtime_activation_probe.py",
                  "scripts/check_codebase_memory_freshness.py",
                  "scripts/test_check_codebase_memory_freshness.py",
                  "schemas/review_report.schema.yaml", "schemas/recommendation.schema.yaml",

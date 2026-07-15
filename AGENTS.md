@@ -23,10 +23,12 @@ check whether `.fable-harness-off` exists at the repository root first.  If it
 does, stay inactive; deleting that marker restores auto activation.  The full
 contract is `docs/runtime_activation_contract.md`.
 
-For an evaluation prompt beginning `FABLE_ACTIVATION_PROBE`, do not use tools.
-Return only `{"schema_version":1,"harness":"active|inactive","reason":"trigger|routine|rollback"}`.
-If the prompt states that `.fable-harness-off` is present, return inactive with
-reason rollback.  This evaluation receipt is never ordinary user-facing text.
+For an evaluation prompt beginning `FABLE_ACTIVATION_PROBE`, inspect only the
+repository-root `.fable-harness-off` marker; do not load routed material or do
+task work.  Then return only
+`{"schema_version":1,"harness":"active|inactive","reason":"trigger|routine|rollback"}`.
+If the marker exists, return inactive with reason rollback.  This evaluation
+receipt is never ordinary user-facing text.
 
 1. **This repo is an operating harness, not ordinary docs.** Its files are a
    procedure system. Treat file paths and IDs (`ROUTE-*`, `DR-###`, `FM-###`,
