@@ -16,6 +16,7 @@ REPO = Path(__file__).resolve().parent.parent
 RUNNER = REPO / "scripts" / "run_runtime_activation_probe.py"
 PREREGISTRATION = REPO / "benchmarks" / "runtime_activation" / "preregistration.json"
 PREREGISTRATION_V2 = REPO / "benchmarks" / "runtime_activation" / "preregistration_v2.json"
+PREREGISTRATION_V3 = REPO / "benchmarks" / "runtime_activation" / "preregistration_v3.json"
 spec = importlib.util.spec_from_file_location("runtime_activation_probe", RUNNER)
 runner = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = runner
@@ -48,6 +49,17 @@ def test_v2_preregistration_freezes_current_inputs_before_live_calls():
         blob = subprocess.check_output(
             ["git", "show", f"{payload['frozen_implementation_commit']}:{relative}"], cwd=REPO)
         assert hashlib.sha256(blob).hexdigest() == expected, f"v2 frozen input drifted: {relative}"
+
+
+def test_v3_preregistration_freezes_current_inputs_before_live_calls():
+    payload = json.loads(PREREGISTRATION_V3.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 1 and payload["frozen_before_new_live_outputs"] is True
+    assert "routine overtrigger 2/2" in payload["prior_output_policy"]
+    assert "Do not claim API-token reduction or speedup" in payload["decision_gates"]["reporting"]
+    for relative, expected in payload["frozen_input_sha256"].items():
+        blob = subprocess.check_output(
+            ["git", "show", f"{payload['frozen_implementation_commit']}:{relative}"], cwd=REPO)
+        assert hashlib.sha256(blob).hexdigest() == expected, f"v3 frozen input drifted: {relative}"
 
 
 def test_receipt_parser_rejects_extra_or_invalid_values():

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "experiment_id": "runtime_activation_telemetry_v3_20260715",
+  "frozen_before_new_live_outputs": true,
+  "frozen_implementation_commit": "506fae01cf8c4d336d97989ac913746e95b362ec",
+  "prior_output_policy": "v1 is invalidated before scorecard emission after Windows TemporaryDirectory cleanup crashed. v2 is retained as a failed Hermes result: exact telemetry was 7/7, its true decisions were trigger recall 4/4, routine overtrigger 2/2, rollback obedience 1/1, and its old scorer also compared the receipt schema framing incorrectly. No v1/v2 receipt, token, or latency value supports v3; do not retry either prior run. v3 is a new zero-retry 14-call proof-of-instrument.",
+  "frozen_input_sha256": {
+    "AGENTS.md": "8988aa5eef8cde0fbf339b5895aa8e0732bce807a16d57996dc541378169aaad",
+    "HERMES.md": "7921ae380c8a73841b168ed2734362dd90982ac2869d6d62eaa2f916e2b14fcb",
+    "benchmarks/runtime_activation/cases.json": "44d40f65fd55d07c4c70f4127b1da1a211cc7020a6770dd1d31dc6d47a180b54",
+    "scripts/run_runtime_activation_probe.py": "af0ec21647a10fb383fe42abfa957ad716ed7a039126afde44f7b6bae228f0ad"
+  },
+  "design": {
+    "runtimes": ["hermes", "codex"],
+    "cases": 7,
+    "calls_per_runtime": 7,
+    "total_live_calls": 14,
+    "retries": 0,
+    "timeout_seconds_per_call": 180,
+    "workspace": "A new persistent ignored workspace under evals/runtime_activation/workspaces/ is created per call. RA07 alone contains an actual empty .fable-harness-off marker; all other cases omit it. Cleanup state is recorded and an MCP-held Windows workspace may remain pending under ignored evals/.",
+    "prompt_invariant": "The probe envelope and JSON receipt are explicitly non-triggering scaffolding. After inspecting the actual marker only, each runtime classifies the `TASK:` text using its normal activation criteria, does no task work, and emits the exact three-key receipt.",
+    "usage_invariant": "Codex usage comes only from JSONL provider events. Hermes usage comes only from one newly created nonce-correlated state.db session row. Canonical total is input + cache_read + cache_write + output. Missing, zero-evidence, or ambiguous rows are UNSCORED.",
+    "provenance_invariant": "The preregistration and every frozen input must resolve inside the repository, exist at HEAD, and have no staged or worktree drift before executable lookup or runtime invocation.",
+    "output_boundary": "Scorecards are .json descendants of ignored evals/runtime_activation/. They contain numeric counters and digest metadata, never raw model output, stderr, or state-db content."
+  },
+  "decision_gates": {
+    "activation": ["trigger_recall = 4/4", "routine_overtrigger = 0/2", "rollback_obedience = 1/1", "unscored_receipts = 0", "incorrect_receipts = 0"],
+    "telemetry": "exact_usage_rows = 7/7 independently for Hermes and Codex; otherwise report that runtime as UNSCORED.",
+    "reporting": "Do not claim API-token reduction or speedup from this single-arm proof-of-instrument. It can establish activation correctness, actual-marker rollback behavior, and exact per-runtime counters only. A future randomized paired A/B is required for API-token or latency superiority."
+  }
+}
