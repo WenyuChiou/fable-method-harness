@@ -232,9 +232,23 @@ def main():
                  "docs/ai_review_adaptive_harness_integration.md",
                  "docs/publication_status.md", "prompts/ai-review-modes.md"):
         row(f"exists {path}", "inventory", (REPO / path).is_file(), "on disk")
-    row("no GitHub Actions workflow (CI intentionally absent; proposal-only)",
-        "scheduled-safety", not (REPO / ".github").exists(),
-        ".github/ not present - no CI can auto-run anything")
+    # CI posture flipped 2026-07-14 (user-approved application of
+    # fable_ultracode_phase_workspace/patches/github-actions-ci-proposal.md):
+    # the sanctioned workflow is validate.yml ONLY, and it must pin the
+    # token read-only. The invariant now asserts exactly that — any OTHER
+    # workflow file, or a validate.yml without the read-only pin, fails.
+    wf_dir = REPO / ".github" / "workflows"
+    wf_files = sorted(p.name for p in wf_dir.glob("*.yml")) if wf_dir.is_dir() else []
+    _v = REPO / ".github" / "workflows" / "validate.yml"
+    _v_text = _v.read_text(encoding="utf-8") if _v.is_file() else ""
+    ci_ok = (wf_files == ["validate.yml"]
+             and "permissions:" in _v_text and "contents: read" in _v_text
+             and "secrets." not in _v_text)
+    row("CI is the single sanctioned read-only workflow (validate.yml, contents: read, no secrets)",
+        "scheduled-safety", ci_ok,
+        "workflows present: {} - read-only pin {}".format(
+            wf_files or "none",
+            "found" if "contents: read" in _v_text else "MISSING"))
 
     passed = sum(1 for r in ROWS if r["status"] == "PASS")
     if as_json:

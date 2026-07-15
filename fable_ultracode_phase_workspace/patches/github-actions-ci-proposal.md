@@ -1,9 +1,18 @@
-# PATCH PROPOSAL — minimal read-only CI workflow (NOT enabled)
+# PATCH PROPOSAL — minimal read-only CI workflow (APPLIED 2026-07-14)
 
-Status: proposal-only. Per the standing safety rules, GitHub Actions changes
-require human approval / PR; nothing here is active (`.github/` deliberately
-does not exist — verified by integration_check row "no GitHub Actions
-workflow").
+Status: **APPLIED 2026-07-14** — user-directed README/visibility upgrade
+supplied the human approval this proposal required; the workflow shipped as
+`.github/workflows/validate.yml` essentially verbatim (additions: a
+timeout-minutes guard and a header comment citing this file). The
+integration_check invariant was flipped in the same reviewed change: it now
+asserts CI is EXACTLY the single sanctioned read-only workflow
+(validate.yml, `contents: read`, no secrets) instead of asserting `.github/`
+is absent. Original proposal text below, kept verbatim for the record.
+
+Original status line: proposal-only. Per the standing safety rules, GitHub
+Actions changes require human approval / PR; nothing here is active
+(`.github/` deliberately does not exist — verified by integration_check row
+"no GitHub Actions workflow").
 
 ## Why
 

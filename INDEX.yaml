@@ -61,6 +61,34 @@ files:
     tags: ["entrypoint", "overview", "privacy"]
     read_when: "First contact with the repo, or when unsure how the pieces fit"
 
+  - path: README.zh-TW.md
+    id: README-ZH-TW
+    layer: doc
+    purpose: "Traditional-Chinese mirror of README.md - same claims, same numbers, same honesty boundaries; the two must stay in lockstep (multi-locale mirror sync is a mandatory-review class)"
+    tags: ["entrypoint", "overview", "locale-mirror", "zh-TW"]
+    read_when: "First contact by a Chinese-reading visitor; when auditing locale-mirror parity after any README.md change"
+
+  - path: docs/assets/hero.svg
+    id: ASSET-hero-svg
+    layer: doc
+    purpose: "Self-contained promotional hero banner for both READMEs (chaos-in/discipline-out funnel artwork; visual-first, 16 words, measured-number accents only) - no external fonts/scripts, theme-safe on GitHub light+dark"
+    tags: ["asset", "svg", "readme", "promotion"]
+    read_when: "Editing the README hero or re-checking the SVG's self-containment/theme constraints"
+
+  - path: docs/assets/how-it-works.svg
+    id: ASSET-how-it-works-svg
+    layer: doc
+    purpose: "Self-contained pictogram flow for both READMEs (Classify -> Route -> Gate -> Measure with the remove-losers feedback loop; 9 words) - same constraints as hero.svg"
+    tags: ["asset", "svg", "readme", "diagram"]
+    read_when: "Editing the How-it-works section or the diagram itself"
+
+  - path: .github/workflows/validate.yml
+    id: CI-validate
+    layer: validation
+    purpose: "Read-only GitHub Actions run of the individual validators + 4 test suites + retrieval probe (applied 2026-07-14 from the reviewed proposal in fable_ultracode_phase_workspace/patches/; integration_check.py EXCLUDED on purpose - operator-machine-specific collectors; token pinned contents: read) - the README badge reports something COMPUTED, not a hand-maintained claim"
+    tags: ["validation", "ci", "governance"]
+    read_when: "Changing any validator's CLI surface, or diagnosing a red badge"
+
   - path: ROUTES.yaml
     id: ROUTES
     layer: context

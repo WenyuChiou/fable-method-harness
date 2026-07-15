@@ -1,0 +1,98 @@
+<svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0a0b1a"/>
+    <stop offset="55%" stop-color="#160f30"/>
+    <stop offset="100%" stop-color="#241243"/>
+  </linearGradient>
+  <radialGradient id="prismFill" cx="50%" cy="50%" r="60%">
+    <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.6"/>
+    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.12"/>
+  </radialGradient>
+  <filter id="blur1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="22"/></filter>
+  <marker id="arrW" markerWidth="9" markerHeight="9" refX="6.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#e7e9fb"/></marker>
+  <marker id="arrA" markerWidth="9" markerHeight="9" refX="6.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#fb923c"/></marker>
+  <marker id="arrS" markerWidth="9" markerHeight="9" refX="6.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#38bdf8"/></marker>
+  <marker id="arrR" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#f87171"/></marker>
+  <marker id="arrV" markerWidth="9" markerHeight="9" refX="6.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#a78bfa"/></marker>
+  <style>text{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;}</style>
+</defs>
+
+<rect x="1" y="1" width="878" height="298" rx="26" fill="url(#bg)" stroke="#ffffff" stroke-opacity="0.07"/>
+
+<!-- glow blobs -->
+<circle cx="118" cy="120" r="58" fill="#8b5cf6" opacity="0.22" filter="url(#blur1)"/>
+<circle cx="330" cy="66"  r="50" fill="#fb923c" opacity="0.16" filter="url(#blur1)"/>
+<circle cx="330" cy="184" r="60" fill="#38bdf8" opacity="0.14" filter="url(#blur1)"/>
+<circle cx="545" cy="128" r="58" fill="#8b5cf6" opacity="0.20" filter="url(#blur1)"/>
+<circle cx="765" cy="120" r="52" fill="#34d399" opacity="0.18" filter="url(#blur1)"/>
+
+<!-- loop-back arrow (drawn early, sits behind icons/labels) -->
+<path d="M788,138 C 838,168 842,232 812,262 C 762,294 300,296 190,266 C 128,250 63,248 60,200 C 58,158 64,128 90,118"
+      fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" marker-end="url(#arrV)" opacity="0.55"/>
+
+<!-- falling discarded block on the loop -->
+<g opacity="0.8">
+  <rect x="440" y="280" width="10" height="10" rx="2" fill="#475569" stroke="#94a3b8" stroke-width="1" transform="rotate(20 445 285)"/>
+  <line x1="432" y1="270" x2="438" y2="277" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="424" y1="275" x2="431" y2="281" stroke="#94a3b8" stroke-width="1.2"/>
+</g>
+
+<!-- incoming beam -->
+<line x1="24" y1="120" x2="86" y2="120" stroke="#e7e9fb" stroke-width="3" stroke-linecap="round" marker-end="url(#arrW)" opacity="0.85"/>
+
+<!-- Station 1: Classify prism -->
+<polygon points="118,94 150,120 118,146 86,120" fill="url(#prismFill)" stroke="#a78bfa" stroke-width="2.5"/>
+<line x1="118" y1="94" x2="118" y2="146" stroke="#c4b5fd" stroke-width="1" opacity="0.5"/>
+
+<!-- fork paths from prism -->
+<path d="M150,112 C 205,84 255,68 314,68" fill="none" stroke="#fb923c" stroke-width="7" stroke-linecap="round" marker-end="url(#arrA)"/>
+<path d="M150,128 C 195,154 245,184 305,184" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrS)"/>
+<text x="222" y="57" font-size="11" fill="#fbbf24" font-weight="700">−27%</text>
+
+<!-- small chip (cheap / Codex) -->
+<rect x="317" y="55" width="26" height="26" rx="5" fill="#2a1c12" stroke="#fb923c" stroke-width="2"/>
+<rect x="323" y="61" width="14" height="14" rx="2" fill="none" stroke="#fb923c" stroke-width="1.4" opacity="0.85"/>
+<line x1="330" y1="55" x2="330" y2="50" stroke="#fb923c" stroke-width="1.6"/>
+<line x1="330" y1="81" x2="330" y2="86" stroke="#fb923c" stroke-width="1.6"/>
+<line x1="317" y1="68" x2="312" y2="68" stroke="#fb923c" stroke-width="1.6"/>
+<line x1="343" y1="68" x2="348" y2="68" stroke="#fb923c" stroke-width="1.6"/>
+<text x="330" y="41" font-size="11" fill="#fdba74" text-anchor="middle" font-weight="600">Codex</text>
+
+<!-- large chip (strong / Claude) -->
+<rect x="309" y="163" width="42" height="42" rx="7" fill="#0d2230" stroke="#38bdf8" stroke-width="2"/>
+<rect x="318" y="172" width="24" height="24" rx="3" fill="none" stroke="#38bdf8" stroke-width="1.4" opacity="0.85"/>
+<line x1="330" y1="163" x2="330" y2="156" stroke="#38bdf8" stroke-width="1.6"/>
+<line x1="330" y1="205" x2="330" y2="212" stroke="#38bdf8" stroke-width="1.6"/>
+<line x1="309" y1="184" x2="302" y2="184" stroke="#38bdf8" stroke-width="1.6"/>
+<line x1="351" y1="184" x2="358" y2="184" stroke="#38bdf8" stroke-width="1.6"/>
+<text x="330" y="228" font-size="11" fill="#7dd3fc" text-anchor="middle" font-weight="600">Claude</text>
+
+<!-- reconverge to gate -->
+<path d="M343,68 C 412,66 470,92 511,111" fill="none" stroke="#fb923c" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+<path d="M351,184 C 420,184 476,160 511,146" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+
+<!-- rejected red arc -->
+<path d="M505,102 C 524,64 566,64 566,90" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrR)" opacity="0.9"/>
+
+<!-- gate shield -->
+<path d="M545,96 C 561,96 573,101 573,101 C 573,130 566,150 545,163 C 524,150 517,130 517,101 C 517,101 529,96 545,96 Z" fill="#170f2e" stroke="#a78bfa" stroke-width="3"/>
+<circle cx="545" cy="123" r="10" fill="none" stroke="#c4b5fd" stroke-width="2"/>
+
+<!-- output path to measure -->
+<path d="M573,121 C 630,113 690,112 733,119" fill="none" stroke="#e7e9fb" stroke-width="3" stroke-linecap="round" marker-end="url(#arrW)" opacity="0.9"/>
+
+<!-- measure scale icon -->
+<line x1="763" y1="100" x2="763" y2="140" stroke="#34d399" stroke-width="2.5"/>
+<line x1="741" y1="100" x2="785" y2="100" stroke="#34d399" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M741,100 L733,114 A10,8 0 0 0 749,114 Z" fill="none" stroke="#34d399" stroke-width="1.6"/>
+<path d="M785,100 L777,114 A10,8 0 0 0 793,114 Z" fill="none" stroke="#34d399" stroke-width="1.6"/>
+<polygon points="763,140 755,150 771,150" fill="#34d399" opacity="0.9"/>
+<text x="763" y="86" font-size="11" fill="#6ee7b7" text-anchor="middle" font-weight="700">0 lift</text>
+
+<!-- station labels (drawn last = always on top / legible) -->
+<text x="118" y="230" font-size="15" fill="#eef0fb" text-anchor="middle" font-weight="700">Classify</text>
+<text x="235" y="128" font-size="15" fill="#eef0fb" text-anchor="middle" font-weight="700" opacity="0.92">Route</text>
+<text x="545" y="230" font-size="15" fill="#eef0fb" text-anchor="middle" font-weight="700">Gate</text>
+<text x="763" y="230" font-size="15" fill="#eef0fb" text-anchor="middle" font-weight="700">Measure</text>
+</svg>

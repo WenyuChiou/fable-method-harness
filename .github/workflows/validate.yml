@@ -1,0 +1,26 @@
+# Read-only CI: the repo's own validators + test suites, world-visible.
+# Applied 2026-07-14 from the reviewed proposal at
+# fable_ultracode_phase_workspace/patches/github-actions-ci-proposal.md —
+# integration_check.py is EXCLUDED on purpose (its home-telemetry
+# collectors and ledger-mtime checks are operator-machine-specific).
+# permissions pins the token read-only: CI can never push or modify.
+name: validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scripts/check_agent_artifacts.py
+      - run: python scripts/check_adaptive_harness.py
+      - run: python scripts/test_run_ai_review.py
+      - run: python scripts/test_run_adaptive_harness_review.py
+      - run: python scripts/test_build_harness_graph.py
+      - run: python scripts/test_check_agent_artifacts.py
+      - run: python validation/retrieval_probe.py
+      - run: python scripts/build_harness_graph.py --dry-run

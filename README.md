@@ -1,5 +1,13 @@
 # fable-method-harness
 
+[![Integration Checks](https://github.com/WenyuChiou/fable-method-harness/actions/workflows/validate.yml/badge.svg)](https://github.com/WenyuChiou/fable-method-harness/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](SETUP.md)
+
+**English** | [繁體中文](README.zh-TW.md)
+
+![Chaos in, discipline out — raw context funnels through classify/route/gate into one ordered beam; measured accents −27%, 0.37×, 0.72×](docs/assets/hero.svg)
+
 > **Fable-grade planning discipline for any AI agent — measured token savings
 > on long tasks, a self-improvement loop that publishes its own losses, and
 > zero capability lift by design.**
@@ -110,6 +118,16 @@ python scripts/run_ai_review.py --mode scheduled_review   # report-only scan
 python scripts/grep_history.py --repeats                  # what keeps coming back
 python scripts/grep_history.py --open                     # what is still unapplied
 ```
+
+## How it works
+
+![Four stations: Classify splits the beam, Route sends bulk to a small model and judgment to a large one, Gate bounces failures back, Measure loops results into pre-registered A/Bs whose losers get removed](docs/assets/how-it-works.svg)
+
+One pass, four disciplines: **Classify** (the strong model decides, never a
+cheap one) → **Route** (mechanical bulk to the cheap lane, honesty-critical
+work stays strong) → **Gate** (verify-file, completion-honesty, review — a
+"done" claim has to pass, not be believed) → **Measure** (pre-registered
+A/Bs with frozen bars; winners ship, losers get removed, both get published).
 
 ## Before / after — what changes when you use it
 
