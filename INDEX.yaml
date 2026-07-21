@@ -96,6 +96,20 @@ files:
     tags: ["asset", "readme", "image2", "prompt", "provenance", "v3"]
     read_when: "Auditing or regenerating the current README source illustration."
 
+  - path: docs/assets/harness-core-image4.png
+    id: ASSET-harness-core-image4
+    layer: doc
+    purpose: "Text-free Image 2.0 v4 dark terminal/dashboard art layer for the bilingual README infographics, covering intake, selective skill loading, task routing, verification, rollback, and feedback."
+    tags: ["asset", "png", "readme", "image2", "source-art", "v4", "dark"]
+    read_when: "Regenerating or restyling the current dark bilingual README harness visuals."
+
+  - path: docs/assets/harness-core-image4.prompt.md
+    id: DOC-harness-core-image4-prompt
+    layer: doc
+    purpose: "Generation provenance and text-free production prompt for the Image 2.0 v4 dark README source art, including the honest non-bit-exact reproducibility boundary."
+    tags: ["asset", "readme", "image2", "prompt", "provenance", "v4", "dark"]
+    read_when: "Auditing or regenerating the current dark README source illustration."
+
   - path: docs/assets/readme-harness.en.png
     id: ASSET-readme-harness-en
     layer: doc
@@ -113,9 +127,16 @@ files:
   - path: scripts/render_readme_visuals.py
     id: SCRIPT-render-readme-visuals
     layer: tool
-    purpose: "Deterministically typeset the English and Traditional-Chinese README infographics over the current Image 2.0 source-art layer so metrics and translated labels remain exact"
+    purpose: "Deterministically typeset the English and Traditional-Chinese dark README infographics over the current Image 2.0 source-art layer so metrics and translated labels remain exact"
     tags: ["script", "readme", "image", "locale-mirror", "deterministic-render"]
     read_when: "Regenerating the README infographics after copy, evidence, or design changes"
+
+  - path: scripts/test_render_readme_visuals.py
+    id: SCRIPT-test-render-readme-visuals
+    layer: validation
+    purpose: "Regression check that the selected README source-art layer renders both English and Traditional-Chinese RGB hero images at the canonical dimensions."
+    tags: ["test", "readme", "image", "locale-mirror", "renderer"]
+    read_when: "Changing the README source art, renderer, or bilingual visual contract before a milestone merge."
 
   - path: docs/assets/how-it-works.svg
     id: ASSET-how-it-works-svg

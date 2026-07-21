@@ -16,21 +16,21 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "docs" / "assets"
-ART = ASSETS / "harness-core-image3.png"
+ART = ASSETS / "harness-core-image4.png"
 WIDTH, HEIGHT = 2048, 1480
 
 COLORS = {
-    "paper": "#FFFFFF",
-    "navy": "#0B1B5A",
-    "ink": "#17233D",
-    "muted": "#5B6982",
-    "line": "#DCE7F5",
-    "pale": "#EEF5FF",
-    "blue": "#176BFF",
-    "purple": "#6757E8",
-    "teal": "#009C9C",
-    "amber": "#F2A900",
-    "amber_pale": "#FFF5D9",
+    "paper": "#0B101A",
+    "navy": "#F4F7FF",
+    "ink": "#E4EAF7",
+    "muted": "#AAB6CD",
+    "line": "#2B3850",
+    "pale": "#17243A",
+    "blue": "#61A7FF",
+    "purple": "#A581FF",
+    "teal": "#35D4B1",
+    "amber": "#FFB454",
+    "amber_pale": "#3B2B18",
 }
 
 def first_existing_font(label: str, *candidates: str) -> Path:
@@ -56,16 +56,16 @@ FONT_EN_BOLD = first_existing_font(
 )
 FONT_TC = first_existing_font(
     "Traditional Chinese regular",
-    r"C:\Windows\Fonts\NotoSansTC-VF.ttf",
     r"C:\Windows\Fonts\msjh.ttc",
+    r"C:\Windows\Fonts\NotoSansTC-VF.ttf",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
     "/usr/share/fonts/opentype/noto/NotoSansTC-Regular.otf",
     "/System/Library/Fonts/PingFang.ttc",
 )
 FONT_TC_BOLD = first_existing_font(
     "Traditional Chinese bold",
-    r"C:\Windows\Fonts\NotoSansTC-VF.ttf",
     r"C:\Windows\Fonts\msjhbd.ttc",
+    r"C:\Windows\Fonts\NotoSansTC-VF.ttf",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
     "/usr/share/fonts/opentype/noto/NotoSansTC-Bold.otf",
     "/System/Library/Fonts/PingFang.ttc",
@@ -104,14 +104,14 @@ COPY = {
         "metrics": [
             {
                 "tag": "CODEX  /  LONG TASKS",
-                "value": "−27%",
+                "value": "-27%",
                 "label": "input tokens",
-                "pills": ["−59% tool calls", "−34% wall-clock"],
+                "pills": ["-59% tool calls", "-34% wall-clock"],
                 "note": "inline micro-contract · 80 executed trials",
             },
             {
                 "tag": "HERMES  /  ROUTINE WORK",
-                "value": "−69.9%",
+                "value": "-69.9%",
                 "label": "fixed project context",
                 "pills": ["5,994 B → 1,803 B"],
                 "note": "offline bytes · not API tokens / cost / latency",
@@ -164,14 +164,14 @@ COPY = {
         "metrics": [
             {
                 "tag": "CODEX  /  長任務",
-                "value": "−27%",
+                "value": "-27%",
                 "label": "輸入 tokens",
-                "pills": ["−59% 工具呼叫", "−34% 執行時間"],
+                "pills": ["-59% 工具呼叫", "-34% 執行時間"],
                 "note": "inline micro-contract · 80 次已執行試驗",
             },
             {
                 "tag": "HERMES  /  日常工作",
-                "value": "−69.9%",
+                "value": "-69.9%",
                 "label": "固定專案脈絡",
                 "pills": ["5,994 B → 1,803 B"],
                 "note": "離線 bytes · 不是 API tokens / 成本 / 延遲",
@@ -232,12 +232,12 @@ def rounded_card(
         draw.rounded_rectangle(
             (x1 + 4, y1 + 9, x2 + 4, y2 + 9),
             radius=radius,
-            fill=(11, 27, 90, 18),
+            fill=(0, 0, 0, 120),
         )
     draw.rounded_rectangle(
         box,
         radius=radius,
-        fill=(255, 255, 255, 244),
+        fill=(19, 27, 42, 246),
         outline=rgb(outline) + (255,),
         width=2,
     )
@@ -383,7 +383,7 @@ def metric_card(
         (x1 + 30, y2 - 37),
         note,
         font=font(16 if lang == "en" else 17, lang=lang),
-        fill="#A56700" if warning else COLORS["muted"],
+        fill="#FFCB78" if warning else COLORS["muted"],
     )
 
 
