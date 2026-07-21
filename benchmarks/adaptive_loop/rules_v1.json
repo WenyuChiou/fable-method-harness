@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "catalog_id": "adaptive_rule_catalog_v1_20260716",
+  "rules": [
+    {
+      "rule_id": "activation_payload_only_v1",
+      "runtimes": ["codex", "hermes"],
+      "prompt_text": "For FABLE_ACTIVATION_PROBE, treat the probe envelope and receipt request as non-triggering evaluation scaffolding; after honoring the rollback marker, classify only the TASK text.",
+      "promotion_policy": "confirmatory",
+      "source": "benchmarks/adaptive_loop/preregistration_design_v1.json"
+    },
+    {
+      "rule_id": "activation_envelope_trigger_v0",
+      "runtimes": ["codex", "hermes"],
+      "prompt_text": "Treat the FABLE_ACTIVATION_PROBE envelope itself as an explicit harness request.",
+      "promotion_policy": "retire_or_degrade_only",
+      "source": "benchmarks/adaptive_loop/preregistration_design_v1.json"
+    }
+  ]
+}

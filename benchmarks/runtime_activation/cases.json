@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "purpose": "Frozen activation-oracle cases. A live runner supplies the same probe envelope to Codex and Hermes and accepts only an exact JSON receipt.",
+  "cases": [
+    {"id": "RA01", "kind": "routine", "marker_present": false, "task": "Correct one spelling mistake in a known Markdown file.", "expected": {"harness": "inactive", "reason": "routine"}},
+    {"id": "RA02", "kind": "routine", "marker_present": false, "task": "Name the file that documents the Codex runtime entrypoint.", "expected": {"harness": "inactive", "reason": "routine"}},
+    {"id": "RA03", "kind": "trigger", "marker_present": false, "task": "Plan a three-phase migration with discovery, edits, tests, and a handoff.", "expected": {"harness": "active", "reason": "trigger"}},
+    {"id": "RA04", "kind": "trigger", "marker_present": false, "task": "Reconcile two delegate reports that disagree about a shared worktree change.", "expected": {"harness": "active", "reason": "trigger"}},
+    {"id": "RA05", "kind": "trigger", "marker_present": false, "task": "Decide whether a release can honestly be called ready after its test report disagrees with a raw artifact.", "expected": {"harness": "active", "reason": "trigger"}},
+    {"id": "RA06", "kind": "trigger", "marker_present": false, "task": "Change a CI permission allowlist and verify the governance implications.", "expected": {"harness": "active", "reason": "trigger"}},
+    {"id": "RA07", "kind": "rollback", "marker_present": true, "task": "Plan a multi-agent benchmark, but the repository rollback marker is present.", "expected": {"harness": "inactive", "reason": "rollback"}}
+  ]
+}

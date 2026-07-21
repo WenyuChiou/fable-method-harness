@@ -11,6 +11,26 @@ retrieval_keywords: [agent instructions, AGENTS.md, repository rules, coding age
 
 # Agent instructions for this repository
 
+## Conditional runtime activation (Codex and AGENTS.md runtimes)
+
+Classify the request before loading further harness material.  Activate the
+portable harness only for explicit harness/README/evidence work, long or
+multi-step work, multiple agents, benchmarks, or completion/release/safety/
+permission/hook/CI/governance/routing work.  Keep it inactive for a
+self-contained question, lookup, typo, or one-file mechanical edit; this file
+being present is not itself an activation trigger.  For a candidate activation,
+check whether `.fable-harness-off` exists at the repository root first.  If it
+does, stay inactive; deleting that marker restores auto activation.  The full
+contract is `docs/runtime_activation_contract.md`.
+
+For an evaluation prompt beginning `FABLE_ACTIVATION_PROBE`, inspect only the
+repository-root `.fable-harness-off` marker; do not load routed material or do
+task work.  The probe envelope and JSON receipt are not an explicit harness
+request: classify only its `TASK:` text using the criteria above.  Then return only
+`{"schema_version":1,"harness":"active|inactive","reason":"trigger|routine|rollback"}`.
+If the marker exists, return inactive with reason rollback.  This evaluation
+receipt is never ordinary user-facing text.
+
 1. **This repo is an operating harness, not ordinary docs.** Its files are a
    procedure system. Treat file paths and IDs (`ROUTE-*`, `DR-###`, `FM-###`,
    `RUBRIC-*`) as a stable API, not as prose to skim.

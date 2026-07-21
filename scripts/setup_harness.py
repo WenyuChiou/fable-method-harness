@@ -93,6 +93,8 @@ Claude Code (global auto-discovery):
 Codex CLI / Cursor / OpenCode / any AGENTS.md-convention agent:
     Working inside this clone: nothing to do - AGENTS.md is auto-read.
     For OTHER repos, add to that repo's (or your global) AGENTS.md:
+        Before activation, check for .fable-harness-off at the TARGET repository root.
+        If it exists, do not load this harness for that task.
         For large, multi-agent, high-risk, phase-gated, or completion-sensitive tasks:
             read {repo}/core/GLOBAL_BOOTSTRAP.md and follow its routing.
         For AI-harness maintenance, README/evidence work, AGENTS.md/CLAUDE.md/hooks/skills/settings review:
@@ -100,7 +102,19 @@ Codex CLI / Cursor / OpenCode / any AGENTS.md-convention agent:
         Runners are plain Python CLIs; never act as final authority - see
         {repo}/docs/codex-delegation-policy.md
 
-Hermes / any router surface - add a routing row:
+Hermes / any router surface:
+    Create <target-repository>/HERMES.md with this target-ready shim:
+        # Fable conditional harness switch
+        Classify the request before loading more harness material.
+        Activate for explicit harness work; long or multi-step work; multiple agents;
+        benchmark/evidence work; or completion, release, safety, permission, hook, CI,
+        governance, or routing changes. Stay inactive for routine self-contained work.
+        Before activation, check <target-repository>/.fable-harness-off. If it exists,
+        stay inactive. Otherwise read <target-repository>/AGENTS.md when present, then
+        read {repo}/core/GLOBAL_BOOTSTRAP.md and load only the route it selects. Do not
+        claim the harness was applied while inactive.
+    Remove that target HERMES.md file to restore Hermes's native context precedence.
+    Add this routing row if Hermes receives maintenance work directly:
     harness maintenance (audit/simplify/benchmark an AI setup) ->
     deterministic scans: python "{repo}/scripts/run_ai_review.py" (run directly);
     semantic checklists -> route to a strong-reasoning surface.

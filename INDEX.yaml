@@ -68,17 +68,80 @@ files:
     tags: ["entrypoint", "overview", "locale-mirror", "zh-TW"]
     read_when: "First contact by a Chinese-reading visitor; when auditing locale-mirror parity after any README.md change"
 
-  - path: docs/assets/hero.svg
-    id: ASSET-hero-svg
+  - path: docs/assets/harness-core-image2.png
+    id: ASSET-harness-core-image2
     layer: doc
-    purpose: "Self-contained promotional hero banner for both READMEs (chaos-in/discipline-out funnel artwork; visual-first, 16 words, measured-number accents only) - no external fonts/scripts, theme-safe on GitHub light+dark"
-    tags: ["asset", "svg", "readme", "promotion"]
-    read_when: "Editing the README hero or re-checking the SVG's self-containment/theme constraints"
+    purpose: "Text-free Image 2.0 art layer for the bilingual README architecture infographics - four illustrated scenes cover multi-CLI entry, selective loading, routing, and evidence feedback; provenance is recorded in the adjacent prompt manifest"
+    tags: ["asset", "png", "readme", "image2", "source-art"]
+    read_when: "Regenerating or restyling the bilingual README harness visuals"
+
+  - path: docs/assets/harness-core-image2.prompt.md
+    id: DOC-harness-core-image2-prompt
+    layer: doc
+    purpose: "Generation provenance and text-free production prompt for the Image 2.0 README source art, including the honest non-bit-exact reproducibility boundary"
+    tags: ["asset", "readme", "image2", "prompt", "provenance"]
+    read_when: "Regenerating the README source illustration or auditing how the visual was produced"
+
+  - path: docs/assets/harness-core-image3.png
+    id: ASSET-harness-core-image3
+    layer: doc
+    purpose: "Text-free Image 2.0 v3 art layer for the bilingual README architecture infographics, with a connected flow from multi-CLI input through selective skills, routing, verification, halt, and evidence feedback."
+    tags: ["asset", "png", "readme", "image2", "source-art", "v3"]
+    read_when: "Regenerating or restyling the current bilingual README harness visuals."
+
+  - path: docs/assets/harness-core-image3.prompt.md
+    id: DOC-harness-core-image3-prompt
+    layer: doc
+    purpose: "Generation provenance and text-free production prompt for the Image 2.0 v3 README source art, including the honest non-bit-exact reproducibility boundary."
+    tags: ["asset", "readme", "image2", "prompt", "provenance", "v3"]
+    read_when: "Auditing or regenerating the current README source illustration."
+
+  - path: docs/assets/harness-core-image4.png
+    id: ASSET-harness-core-image4
+    layer: doc
+    purpose: "Text-free Image 2.0 v4 dark terminal/dashboard art layer for the bilingual README infographics, covering intake, selective skill loading, task routing, verification, rollback, and feedback."
+    tags: ["asset", "png", "readme", "image2", "source-art", "v4", "dark"]
+    read_when: "Regenerating or restyling the current dark bilingual README harness visuals."
+
+  - path: docs/assets/harness-core-image4.prompt.md
+    id: DOC-harness-core-image4-prompt
+    layer: doc
+    purpose: "Generation provenance and text-free production prompt for the Image 2.0 v4 dark README source art, including the honest non-bit-exact reproducibility boundary."
+    tags: ["asset", "readme", "image2", "prompt", "provenance", "v4", "dark"]
+    read_when: "Auditing or regenerating the current dark README source illustration."
+
+  - path: docs/assets/readme-harness.en.png
+    id: ASSET-readme-harness-en
+    layer: doc
+    purpose: "English README hero infographic - four runtime entries, selective skill loading, task-character routing, evidence feedback loop, and four evidence-bounded efficiency results"
+    tags: ["asset", "png", "readme", "infographic", "english"]
+    read_when: "Auditing the English README visual, its measured numbers, or locale parity"
+
+  - path: docs/assets/readme-harness.zh-TW.png
+    id: ASSET-readme-harness-zh-tw
+    layer: doc
+    purpose: "Traditional-Chinese mirror of the README harness infographic with identical architecture, metrics, and evidence boundaries"
+    tags: ["asset", "png", "readme", "infographic", "zh-TW", "locale-mirror"]
+    read_when: "Auditing the Traditional-Chinese README visual, its measured numbers, or locale parity"
+
+  - path: scripts/render_readme_visuals.py
+    id: SCRIPT-render-readme-visuals
+    layer: tool
+    purpose: "Deterministically typeset the English and Traditional-Chinese dark README infographics over the current Image 2.0 source-art layer so metrics and translated labels remain exact"
+    tags: ["script", "readme", "image", "locale-mirror", "deterministic-render"]
+    read_when: "Regenerating the README infographics after copy, evidence, or design changes"
+
+  - path: scripts/test_render_readme_visuals.py
+    id: SCRIPT-test-render-readme-visuals
+    layer: validation
+    purpose: "Regression check that the selected README source-art layer renders both English and Traditional-Chinese RGB hero images at the canonical dimensions."
+    tags: ["test", "readme", "image", "locale-mirror", "renderer"]
+    read_when: "Changing the README source art, renderer, or bilingual visual contract before a milestone merge."
 
   - path: docs/assets/how-it-works.svg
     id: ASSET-how-it-works-svg
     layer: doc
-    purpose: "Self-contained pictogram flow for both READMEs (Classify -> Route -> Gate -> Measure with the remove-losers feedback loop; 9 words) - same constraints as hero.svg"
+    purpose: "Self-contained pictogram flow for both READMEs (Classify -> Route -> Gate -> Measure with the remove-losers feedback loop; 9 words)"
     tags: ["asset", "svg", "readme", "diagram"]
     read_when: "Editing the How-it-works section or the diagram itself"
 
@@ -515,6 +578,20 @@ files:
     purpose: "Codex runtime interface for the same harness project, using AGENTS.md instead of the Claude skill wrapper."
     tags: ["codex", "opencode", "hermes", "agents-md", "runtime-interface", "global-pointer"]
     read_when: "Wiring this harness into Codex, OpenCode, Cursor, Hermes, or any AGENTS.md-convention runtime."
+
+  - path: docs/runtime_activation_contract.md
+    id: DOC-runtime-activation-contract
+    layer: doc
+    purpose: "Shared measurable and reversible conditional-activation contract for Codex and Hermes."
+    tags: ["codex", "hermes", "activation", "rollback", "telemetry", "evaluation"]
+    read_when: "Wiring the portable harness into Codex or Hermes, or evaluating activation recall, routine over-triggering, rollback, or telemetry."
+
+  - path: docs/runtime_activation_telemetry_2026_07_15.md
+    id: DOC-runtime-activation-telemetry-2026-07-15
+    layer: doc
+    purpose: "Executed v3 result ledger for Codex/Hermes conditional activation, exact telemetry, real rollback, and Hermes context reduction."
+    tags: ["evidence", "codex", "hermes", "activation", "telemetry", "rollback"]
+    read_when: "Citing or auditing the measured Codex/Hermes runtime switch benefits and their explicit non-claims."
 
   - path: docs/harness_ab_pilot_2026_07_07.md
     id: DOC-harness-ab-pilot-2026-07-07
@@ -1189,6 +1266,13 @@ files:
     tags: ["entrypoint", "agent-instructions", "conventions"]
     read_when: "Auto-loaded at session start by convention-following agents; humans read to see what agents are told."
 
+  - path: HERMES.md
+    id: HERMES-runtime-switch
+    layer: entry
+    purpose: "Short first-priority Hermes shim that conditionally activates the full harness and names the local rollback marker."
+    tags: ["entrypoint", "hermes", "activation", "rollback", "prompt-economy"]
+    read_when: "Starting Hermes in this repository, or auditing its conditional harness activation and context cost."
+
   - path: SKILL.md
     id: SKILL
     layer: entry
@@ -1203,12 +1287,33 @@ files:
     tags: ["entrypoint", "setup", "onboarding", "ai-runbook", "cross-runtime"]
     read_when: "Immediately after cloning, on any machine, by whichever agent the user has."
 
+  - path: docs/adoption-guide.md
+    id: DOC-adoption-guide
+    layer: doc
+    purpose: "User-facing guide for deciding whether to adopt the portable harness, wiring it into another project, rolling it back, and measuring its local value."
+    tags: ["adoption", "onboarding", "codex", "hermes", "rollback", "evidence"]
+    read_when: "Before adding the harness pointer to another repository or explaining its controls and evidence boundary to a project owner."
+
+  - path: docs/adoption-guide.zh-TW.md
+    id: DOC-adoption-guide-zh-TW
+    layer: doc
+    purpose: "提供採用者判斷是否導入可攜 harness、整合到另一個專案、撤回，以及量測本地效益的繁中指南。"
+    tags: ["adoption", "onboarding", "codex", "hermes", "rollback", "evidence", "zh-TW"]
+    read_when: "在另一個 repository 加入 harness pointer 前，或向專案負責人說明控制權與證據邊界時。"
+
   - path: scripts/setup_harness.py
     id: SCRIPT-setup-harness
     layer: validation
     purpose: "Idempotent stdlib post-clone setup: enables pre-commit gates, runs the 59-check verification, optionally installs the global Claude Code skill stub (path baked at install), wires the CLAUDE.md pointer (duplicate-safe), registers the weekly report-only scan, and prints per-runtime wiring for Codex/Cursor/Hermes/cron."
     tags: ["validation", "script", "setup", "onboarding", "idempotent"]
     read_when: "Right after clone (any agent), or when the clone moves and the global stub needs re-pointing."
+
+  - path: scripts/test_setup_harness.py
+    id: SCRIPT-test-setup-harness
+    layer: validation
+    purpose: "Regression check that generated Codex and Hermes wiring includes a target-repository rollback marker and target-ready bootstrap path."
+    tags: ["test", "setup", "wiring", "codex", "hermes", "rollback"]
+    read_when: "Changing the generated runtime wiring or verifying that a new-project installation has a local rollback path."
 
   - path: scripts/register_scheduled_scan.bat
     id: SCRIPT-register-scheduled-scan
@@ -1488,6 +1593,27 @@ files:
     tags: ["validation", "test", "hermes", "routing", "benchmark"]
     read_when: "After changing run_hermes_router_benchmark.py or prompts/hermes-router.md."
 
+  - path: scripts/test_runtime_activation_contract.py
+    id: TEST-runtime-activation-contract
+    layer: validation
+    purpose: "Static regression checks for the shared Codex/Hermes activation probe, rollback marker, and Hermes shim context budget."
+    tags: ["validation", "test", "codex", "hermes", "activation", "rollback"]
+    read_when: "After changing runtime activation or rollback instructions."
+
+  - path: scripts/run_runtime_activation_probe.py
+    id: SCRIPT-run-runtime-activation-probe
+    layer: validation
+    purpose: "Fail-closed live probe for Codex/Hermes activation receipts and exact provider usage correlation."
+    tags: ["validation", "codex", "hermes", "activation", "telemetry", "rollback"]
+    read_when: "Measuring conditional activation recall, routine over-triggering, rollback obedience, or exact runtime usage."
+
+  - path: scripts/test_run_runtime_activation_probe.py
+    id: TEST-run-runtime-activation-probe
+    layer: validation
+    purpose: "Regression tests for activation receipt parsing, exact Codex usage extraction, and strict Hermes session correlation."
+    tags: ["validation", "test", "codex", "hermes", "activation", "telemetry"]
+    read_when: "After changing run_runtime_activation_probe.py or its fixture contract."
+
   - path: scripts/check_codebase_memory_freshness.py
     id: SCRIPT-check-codebase-memory-freshness
     layer: validation
@@ -1508,6 +1634,111 @@ files:
     purpose: "Three tracked live probes that freeze expected symbols and files for the codebase-memory freshness sentinel."
     tags: ["dataset", "codebase-memory", "freshness", "benchmark", "probes"]
     read_when: "Auditing or extending which tracked source symbols prove graph freshness."
+
+  - path: benchmarks/runtime_activation/cases.json
+    id: DATASET-runtime-activation-cases
+    layer: dataset
+    purpose: "Seven frozen routine, trigger, and rollback cases for Codex/Hermes conditional activation probes."
+    tags: ["dataset", "codex", "hermes", "activation", "rollback", "benchmark"]
+    read_when: "Running or auditing the cross-runtime activation probe."
+
+  - path: benchmarks/runtime_activation/preregistration.json
+    id: PREREG-runtime-activation-telemetry
+    layer: dataset
+    purpose: "Frozen v1 design, input hashes, claim boundary, and gates for the Codex/Hermes activation telemetry proof-of-instrument."
+    tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
+    read_when: "Immediately before a runtime-activation live probe, or when auditing which token, latency, and context claims its scorecard can support."
+
+  - path: benchmarks/runtime_activation/preregistration_v2.json
+    id: PREREG-runtime-activation-telemetry-v2
+    layer: dataset
+    purpose: "Active v2 frozen design and canonical hashes for the post-Windows-cleanup Codex/Hermes activation telemetry run."
+    tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
+    read_when: "Required argument for the v2 runtime-activation live probe; inspect before interpreting its scorecard."
+
+  - path: benchmarks/runtime_activation/preregistration_v3.json
+    id: PREREG-runtime-activation-telemetry-v3
+    layer: dataset
+    purpose: "Active v3 frozen design and canonical hashes for the probe-envelope-bias remediation run."
+    tags: ["preregistration", "codex", "hermes", "activation", "telemetry", "evaluation"]
+    read_when: "Required argument for the fresh v3 runtime-activation live probe; inspect before interpreting its scorecard."
+
+  - path: benchmarks/adaptive_loop/cases_v1.json
+    id: DATASET-adaptive-loop-cases-v1
+    layer: dataset
+    purpose: "Six unseen paired Codex/Hermes activation cases for measuring repeated defects and actual corrective work."
+    tags: ["dataset", "adaptive-harness", "codex", "hermes", "activation", "rework", "benchmark"]
+    read_when: "Running or auditing the adaptive rule-lifecycle confirmatory experiment."
+
+  - path: benchmarks/adaptive_loop/evidence_v1.json
+    id: EVIDENCE-adaptive-rule-lifecycle-v1
+    layer: dataset
+    purpose: "Computed public-safe aggregate of the frozen Codex/Hermes adaptive lifecycle observations, including UNSCORED outcomes."
+    tags: ["evidence", "adaptive-harness", "codex", "hermes", "telemetry", "rework"]
+    read_when: "Interpreting the completed adaptive rule-lifecycle result and its explicit claim boundary."
+
+  - path: benchmarks/adaptive_loop/final_binding_v1.json
+    id: BINDING-adaptive-rule-lifecycle-v1
+    layer: dataset
+    purpose: "Immutable public-safe instrument binding for the frozen Codex/Hermes adaptive rule-lifecycle live experiment."
+    tags: ["binding", "adaptive-harness", "codex", "hermes", "telemetry", "rework", "evaluation"]
+    read_when: "Required before running, resuming, scoring, or auditing the bound adaptive rule-lifecycle experiment."
+
+  - path: benchmarks/adaptive_loop/preregistration_design_v1.json
+    id: PREREG-adaptive-rule-lifecycle-design-v1
+    layer: dataset
+    purpose: "Frozen design for exact token and rework measurement plus exhaustive active, degraded, and retired rule transitions."
+    tags: ["preregistration", "adaptive-harness", "codex", "hermes", "telemetry", "rework", "evaluation"]
+    read_when: "Before implementing, binding, running, or interpreting the adaptive rule-lifecycle experiment."
+
+  - path: benchmarks/adaptive_loop/rules_v1.json
+    id: DATASET-adaptive-rule-catalog-v1
+    layer: dataset
+    purpose: "Versioned Codex/Hermes learned-rule catalog with confirmatory and retire-or-degrade-only promotion policies."
+    tags: ["dataset", "adaptive-harness", "codex", "hermes", "rules", "prompt-pack"]
+    read_when: "Initializing lifecycle state, scoring a rule window, or rendering runtime prompt packs."
+
+  - path: scripts/adaptive_rule_lifecycle.py
+    id: SCRIPT-adaptive-rule-lifecycle
+    layer: validation
+    purpose: "Deterministic safety-first scorer that updates local rule state and excludes candidate, degraded, or retired rules from Codex/Hermes packs."
+    tags: ["validation", "adaptive-harness", "codex", "hermes", "lifecycle", "telemetry"]
+    read_when: "Scoring paired rule evidence, auditing automatic degradation or retirement, or regenerating active prompt packs."
+
+  - path: scripts/test_adaptive_rule_lifecycle.py
+    id: TEST-adaptive-rule-lifecycle
+    layer: validation
+    purpose: "Regression tests for harm-first retirement, exact rework metrics, duplicate-window rejection, cost-only promotion, catalog drift, and pack exclusion."
+    tags: ["validation", "test", "adaptive-harness", "codex", "hermes", "lifecycle"]
+    read_when: "After changing the adaptive rule catalog, lifecycle scorer, state schema, or prompt-pack policy."
+
+  - path: scripts/run_adaptive_loop_experiment.py
+    id: SCRIPT-run-adaptive-loop-experiment
+    layer: validation
+    purpose: "Preregistered zero-retry paired Codex/Hermes runner with immutable git-blob semantics, exact usage normalization, frozen marker evidence, disabled Codex shell access, zero-tool Hermes execution, per-call runtime/OAuth identity receipts, blocked cross-runtime auth fallbacks, sanitized absolute launchers, must-remove credentials, HMAC anti-rollback checkpoints, canonical locking, and public-safe observations."
+    tags: ["validation", "adaptive-harness", "codex", "hermes", "ab-test", "telemetry", "rework"]
+    read_when: "Binding, running, resuming, or auditing the adaptive rule-lifecycle live experiment."
+
+  - path: scripts/test_run_adaptive_loop_experiment.py
+    id: TEST-run-adaptive-loop-experiment
+    layer: validation
+    purpose: "Regression tests for paired schedule symmetry, cache-safe Codex accounting, frozen marker evidence, disabled Codex shell access, zero-tool Hermes execution, oracle-derived rework, immutable semantic inputs, OAuth/child-env and cross-runtime auth isolation, credential deletion, HMAC forgery/rollback rejection, strict binding parity, and no-retry recovery."
+    tags: ["validation", "test", "adaptive-harness", "codex", "hermes", "ab-test", "fail-closed"]
+    read_when: "After changing the adaptive-loop live runner, binding schema, usage semantics, workspace isolation, or progress state machine."
+
+  - path: scripts/summarize_adaptive_loop.py
+    id: SCRIPT-summarize-adaptive-loop
+    layer: validation
+    purpose: "Deterministically renders public-safe adaptive-loop aggregates from canonical local observations and lifecycle scorecards."
+    tags: ["validation", "adaptive-harness", "codex", "hermes", "evidence", "unscored"]
+    read_when: "Publishing or auditing the adaptive-loop evidence artifact without exposing raw local telemetry."
+
+  - path: scripts/test_summarize_adaptive_loop.py
+    id: TEST-summarize-adaptive-loop
+    layer: validation
+    purpose: "Regression tests for adaptive-loop aggregate source matching and public-path exclusion."
+    tags: ["validation", "test", "adaptive-harness", "evidence"]
+    read_when: "After changing the adaptive-loop summary renderer or public evidence contract."
 
   - path: scripts/summarize_harness_ab_pilot.py
     id: SCRIPT-summarize-harness-ab-pilot

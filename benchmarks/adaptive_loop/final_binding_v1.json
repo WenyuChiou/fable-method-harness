@@ -1,0 +1,405 @@
+{
+  "schema_version": 1,
+  "experiment_id": "adaptive_loop_binding_v1_20260716",
+  "status": "frozen_before_live_calls",
+  "frozen_before_new_live_outputs": true,
+  "instrument_commit": "2077409d9657b806492512447829255018d11098",
+  "instrument_python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "case_set_id": "adaptive_loop_unseen_activation_cases_v1_20260716",
+  "frozen_input_sha256": {
+    "benchmarks/adaptive_loop/cases_v1.json": "d7b10285a90b42eb9aee771a7acfeb240ab48cd6134f60794b5569c166c833a7",
+    "benchmarks/adaptive_loop/preregistration_design_v1.json": "5d82c9bda435d467ddd1d79bac9c3e69f32d7359667b1d1629292fcca3d231f2",
+    "benchmarks/adaptive_loop/rules_v1.json": "4e70230f24cb41a44823c86bc49db3de3f987271b430957a27571ea6ddf0a8f7",
+    "scripts/adaptive_rule_lifecycle.py": "6b1ead9363eb042ae9b88fa87d3fab3db3c25e5119c8785f473989855e0a8708",
+    "scripts/run_adaptive_loop_experiment.py": "3831786a86094cd322fe649713dee29f342bb72da1dcd7e3672325218c58b45d",
+    "scripts/run_runtime_activation_probe.py": "1532793e70712d8d8fda31cb6a7a58d34a1fac0dd508b864995af99a9f86c6df"
+  },
+  "arm_entrypoints": {
+    "control": {
+      "git_commit": "1d103e7b29870b23fa2b24411263862cf8fa4d22",
+      "sha256": {
+        "AGENTS.md": "a5161cb54881ab28a5c67c93be7697b9b399de5a1a7530729b7a55109414a61f",
+        "HERMES.md": "be62ebc3f29c295f353a42e02b7658bdbd6ff23105a2a22fde818adb6163adbd"
+      }
+    },
+    "treatment": {
+      "git_commit": "506fae01cf8c4d336d97989ac913746e95b362ec",
+      "sha256": {
+        "AGENTS.md": "8988aa5eef8cde0fbf339b5895aa8e0732bce807a16d57996dc541378169aaad",
+        "HERMES.md": "7921ae380c8a73841b168ed2734362dd90982ac2869d6d62eaa2f916e2b14fcb"
+      }
+    }
+  },
+  "schedule_seed": "adaptive-loop-v1-20260716-a",
+  "schedule": [
+    {
+      "index": 0,
+      "schedule_id": "S01-hermes-AL04-control",
+      "runtime": "hermes",
+      "case_id": "AL04",
+      "arm": "control"
+    },
+    {
+      "index": 1,
+      "schedule_id": "S02-hermes-AL04-treatment",
+      "runtime": "hermes",
+      "case_id": "AL04",
+      "arm": "treatment"
+    },
+    {
+      "index": 2,
+      "schedule_id": "S03-codex-AL02-control",
+      "runtime": "codex",
+      "case_id": "AL02",
+      "arm": "control"
+    },
+    {
+      "index": 3,
+      "schedule_id": "S04-codex-AL02-treatment",
+      "runtime": "codex",
+      "case_id": "AL02",
+      "arm": "treatment"
+    },
+    {
+      "index": 4,
+      "schedule_id": "S05-hermes-AL01-treatment",
+      "runtime": "hermes",
+      "case_id": "AL01",
+      "arm": "treatment"
+    },
+    {
+      "index": 5,
+      "schedule_id": "S06-hermes-AL01-control",
+      "runtime": "hermes",
+      "case_id": "AL01",
+      "arm": "control"
+    },
+    {
+      "index": 6,
+      "schedule_id": "S07-hermes-AL03-treatment",
+      "runtime": "hermes",
+      "case_id": "AL03",
+      "arm": "treatment"
+    },
+    {
+      "index": 7,
+      "schedule_id": "S08-hermes-AL03-control",
+      "runtime": "hermes",
+      "case_id": "AL03",
+      "arm": "control"
+    },
+    {
+      "index": 8,
+      "schedule_id": "S09-codex-AL01-control",
+      "runtime": "codex",
+      "case_id": "AL01",
+      "arm": "control"
+    },
+    {
+      "index": 9,
+      "schedule_id": "S10-codex-AL01-treatment",
+      "runtime": "codex",
+      "case_id": "AL01",
+      "arm": "treatment"
+    },
+    {
+      "index": 10,
+      "schedule_id": "S11-hermes-AL02-treatment",
+      "runtime": "hermes",
+      "case_id": "AL02",
+      "arm": "treatment"
+    },
+    {
+      "index": 11,
+      "schedule_id": "S12-hermes-AL02-control",
+      "runtime": "hermes",
+      "case_id": "AL02",
+      "arm": "control"
+    },
+    {
+      "index": 12,
+      "schedule_id": "S13-hermes-AL05-control",
+      "runtime": "hermes",
+      "case_id": "AL05",
+      "arm": "control"
+    },
+    {
+      "index": 13,
+      "schedule_id": "S14-hermes-AL05-treatment",
+      "runtime": "hermes",
+      "case_id": "AL05",
+      "arm": "treatment"
+    },
+    {
+      "index": 14,
+      "schedule_id": "S15-codex-AL03-control",
+      "runtime": "codex",
+      "case_id": "AL03",
+      "arm": "control"
+    },
+    {
+      "index": 15,
+      "schedule_id": "S16-codex-AL03-treatment",
+      "runtime": "codex",
+      "case_id": "AL03",
+      "arm": "treatment"
+    },
+    {
+      "index": 16,
+      "schedule_id": "S17-codex-AL04-treatment",
+      "runtime": "codex",
+      "case_id": "AL04",
+      "arm": "treatment"
+    },
+    {
+      "index": 17,
+      "schedule_id": "S18-codex-AL04-control",
+      "runtime": "codex",
+      "case_id": "AL04",
+      "arm": "control"
+    },
+    {
+      "index": 18,
+      "schedule_id": "S19-codex-AL05-control",
+      "runtime": "codex",
+      "case_id": "AL05",
+      "arm": "control"
+    },
+    {
+      "index": 19,
+      "schedule_id": "S20-codex-AL05-treatment",
+      "runtime": "codex",
+      "case_id": "AL05",
+      "arm": "treatment"
+    },
+    {
+      "index": 20,
+      "schedule_id": "S21-hermes-AL06-control",
+      "runtime": "hermes",
+      "case_id": "AL06",
+      "arm": "control"
+    },
+    {
+      "index": 21,
+      "schedule_id": "S22-hermes-AL06-treatment",
+      "runtime": "hermes",
+      "case_id": "AL06",
+      "arm": "treatment"
+    },
+    {
+      "index": 22,
+      "schedule_id": "S23-codex-AL06-treatment",
+      "runtime": "codex",
+      "case_id": "AL06",
+      "arm": "treatment"
+    },
+    {
+      "index": 23,
+      "schedule_id": "S24-codex-AL06-control",
+      "runtime": "codex",
+      "case_id": "AL06",
+      "arm": "control"
+    }
+  ],
+  "schedule_sha256": "03f243f2d598843e2ff42040e8c0fa5244685f9a4be26e2a860527a92cf51578",
+  "prompt_template_sha256": "77d518984804fbe1fcf52b2bee2c32ca74c3711b03d39a2f878343f5498ade21",
+  "corrective_suffix_sha256": "a7da15b4c56c7ec35f6fe08c5eea12ea9ca0da71205adad83b939c514357cda3",
+  "timeout_seconds_per_call": 180,
+  "infrastructure_retries": 0,
+  "runtime_bindings": {
+    "codex": {
+      "identity": {
+        "executable": "codex",
+        "resolved_basename": "codex.cmd",
+        "resolved_sha256": "c54db6755e710c39703f7c37512f9e35ed41042d8080558d2b84b8d2694323c3",
+        "resolved_size_bytes": 341,
+        "version": "codex-cli 0.144.1",
+        "runtime_source": {
+          "install_mode": "npm_package",
+          "package_name": "@openai/codex",
+          "package_version": "0.144.1",
+          "package_tree": {
+            "file_count": 11,
+            "total_bytes": 409168912,
+            "tree_sha256": "b1cf7a980beeade8b4bf24085e2c27346410e3bfc2c720290c77cf064e2f0ed7"
+          },
+          "node": {
+            "basename": "node.exe",
+            "sha256": "63c259c81e5d472b5f11c8d506070130cb04a1ecf84b80377a34ed6ec9048088",
+            "size_bytes": 91380224
+          }
+        }
+      },
+      "home_isolation": {
+        "policy": "per-invocation-clean-auth-only",
+        "environment_variable": "CODEX_HOME",
+        "credential_source": "auth.json",
+        "credential_identity_method": "experiment-scoped-stable-account-sha256",
+        "credential_identity_sha256": "00a75095c2316b356866c28bbddb3248de7d6d22481252b3c8973229156e5bde",
+        "cleared_environment_prefixes": [
+          "CODEX_",
+          "HERMES_",
+          "OPENAI_",
+          "AZURE_OPENAI_"
+        ],
+        "cleared_environment_variables": [
+          "HTTP_PROXY",
+          "HTTPS_PROXY",
+          "ALL_PROXY",
+          "NO_PROXY",
+          "http_proxy",
+          "https_proxy",
+          "all_proxy",
+          "no_proxy",
+          "SSL_CERT_FILE",
+          "REQUESTS_CA_BUNDLE",
+          "PYTHONPATH",
+          "PYTHONHOME",
+          "PYTHONSTARTUP",
+          "PYTHONINSPECT",
+          "NODE_OPTIONS",
+          "NODE_PATH",
+          "VIRTUAL_ENV",
+          "CONDA_PREFIX",
+          "TERMINAL_CWD",
+          "MESSAGING_CWD"
+        ],
+        "rebuilt_environment": {
+          "PATH": "verified-runtime-bin-plus-os-system",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONSAFEPATH": "1"
+        },
+        "cross_runtime_home_variable": "HERMES_HOME",
+        "cross_runtime_home_policy": "isolated-disposable-path-under-runtime-home",
+        "initial_files": [
+          "auth.json"
+        ],
+        "global_rules_loaded": false,
+        "memory_loaded": false,
+        "credentials_persist_after_call": false,
+        "hermes_telemetry": "not_applicable"
+      },
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "disabled_features": [
+        "shell_tool"
+      ],
+      "sandbox": "read-only",
+      "user_config": "ignored",
+      "session": "ephemeral"
+    },
+    "hermes": {
+      "identity": {
+        "executable": "hermes",
+        "resolved_basename": "hermes.exe",
+        "resolved_sha256": "612dab361af3beee27b80e3ce1f4785150ffe251465f63181c628d356e1c693c",
+        "resolved_size_bytes": 46080,
+        "version": "Hermes Agent v0.16.0 (2026.6.5)\nPython: 3.11.9\nOpenAI SDK: 2.24.0",
+        "runtime_source": {
+          "install_mode": "editable_project",
+          "ignored_project_fallbacks_absent": [
+            "cli-config.yaml",
+            ".env"
+          ],
+          "project_git": {
+            "git_head": "b1af653bf6bda75efdec10225f5adeced30d34bd",
+            "git_status_sha256": "52faee27db5679dec5d8ba544bfb8029ac662b7a61b255b08f25e622e939e91e",
+            "changed_content_sha256": "374640aed91df7a23eec0af163d223855f27105d5f5641e7e9f8bde9ae36e5db",
+            "changed_entry_count": 434,
+            "untracked_entry_count": 6,
+            "dirty": true,
+            "worktree_fingerprint": "6fbdd20438a9c82908cc9c8bfbc0de9c7253e031ae085504979b4d5e993da651"
+          },
+          "python_environment": {
+            "distribution_count": 116,
+            "distribution_set_sha256": "9c33c2a0a08b4f61999ca56979e8cbcd90800e6eb54131616937dcaad1c45d17",
+            "python_sha256": "21bb438c0d4a6f1f164b9a646f6ee000340185e5871180aec06db8d3f07c0082",
+            "python_size_bytes": 274712
+          }
+        }
+      },
+      "home_isolation": {
+        "policy": "per-invocation-clean-auth-only",
+        "environment_variable": "HERMES_HOME",
+        "credential_source": "auth.json",
+        "credential_identity_method": "experiment-scoped-stable-account-sha256",
+        "credential_identity_sha256": "82d85ef18594340fd07f4ad4e927353a9d167dc660958170406ef2a21741dbea",
+        "cleared_environment_prefixes": [
+          "CODEX_",
+          "HERMES_",
+          "OPENAI_",
+          "AZURE_OPENAI_"
+        ],
+        "cleared_environment_variables": [
+          "HTTP_PROXY",
+          "HTTPS_PROXY",
+          "ALL_PROXY",
+          "NO_PROXY",
+          "http_proxy",
+          "https_proxy",
+          "all_proxy",
+          "no_proxy",
+          "SSL_CERT_FILE",
+          "REQUESTS_CA_BUNDLE",
+          "PYTHONPATH",
+          "PYTHONHOME",
+          "PYTHONSTARTUP",
+          "PYTHONINSPECT",
+          "NODE_OPTIONS",
+          "NODE_PATH",
+          "VIRTUAL_ENV",
+          "CONDA_PREFIX",
+          "TERMINAL_CWD",
+          "MESSAGING_CWD"
+        ],
+        "rebuilt_environment": {
+          "PATH": "verified-runtime-bin-plus-os-system",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONSAFEPATH": "1"
+        },
+        "cross_runtime_home_variable": "CODEX_HOME",
+        "cross_runtime_home_policy": "isolated-disposable-path-under-runtime-home",
+        "initial_files": [
+          "auth.json",
+          "SOUL.md"
+        ],
+        "global_rules_loaded": false,
+        "memory_loaded": false,
+        "credentials_persist_after_call": false,
+        "hermes_telemetry": "isolated_home_state_db"
+      },
+      "model": "gpt-5.6-luna",
+      "provider": "openai-codex",
+      "reasoning_effort": "medium",
+      "reasoning_source": "Hermes built-in default under --ignore-user-config",
+      "toolsets": "context_engine",
+      "user_config": "ignored",
+      "session": "fresh oneshot"
+    }
+  },
+  "token_semantics": {
+    "canonical_total": "noncached_input + cache_read + cache_write + output",
+    "codex_cached_input": "cached_input_tokens is a subset of raw input_tokens and is subtracted before canonical summation",
+    "hermes": "state.db stores noncached input and cache buckets separately",
+    "reasoning_tokens": "reported descriptively and not added because they are a subset of output",
+    "missing_or_ambiguous": "UNSCORED"
+  },
+  "workspace_policy": {
+    "location": "fresh external directory whose parents contain no agent rule files",
+    "parent_rule_files": "forbidden",
+    "entrypoints": "only frozen AGENTS.md and HERMES.md git blobs",
+    "marker_evidence": "frozen workspace marker state is echoed in the prompt",
+    "runtime_homes": "fresh per-invocation credential-only homes outside episode workspaces",
+    "corrective_continuity": "same workspace, fresh process, same nonce"
+  },
+  "progress_policy": {
+    "checkpoint_before_each_call": true,
+    "uncertain_started_call": "mark interrupted and never retry",
+    "raw_output": "digests only"
+  },
+  "parity_fingerprints": {
+    "codex": "fb3369871daf231b8df7f8bd6626d9905304878d9d48612ff3a2059a80cbac74",
+    "hermes": "670c8acd104bed83a04aedfe092754602413b29184afa6b568e3f8c025f6332d"
+  },
+  "binding_fingerprint": "0a1e027b83fb5a7dd55da6ef417999c502896c70af86581728ab9b3f4af824fb"
+}

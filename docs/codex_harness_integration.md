@@ -28,7 +28,7 @@ This is not a second harness and not a prompt dump. Claude/Fable enters through 
 Run `python scripts/setup_harness.py --print-wiring` and paste the emitted absolute-path pointer into a repo-level or global `AGENTS.md` used by Codex and other AGENTS.md-convention agents. The generic form is:
 
 ```text
-For large, multi-agent, high-risk, phase-gated, or completion-sensitive tasks, read <harness-root>/core/GLOBAL_BOOTSTRAP.md and follow its routing. For AI-harness maintenance, README/evidence work, AGENTS.md/CLAUDE.md/hooks/skills/settings review, read <harness-root>/.claude/skills/adaptive-harness/SKILL.md. Load routed files only; do not bulk-read the harness repo.
+Classify first.  For large, multi-agent, high-risk, phase-gated, completion-sensitive, benchmark, or harness-maintenance tasks, read <harness-root>/core/GLOBAL_BOOTSTRAP.md and follow its routing.  For routine self-contained questions, lookups, typos, or one-file mechanical edits, do not load the harness merely because this pointer exists.  Before activation, honor a repository-root `.fable-harness-off` marker as a local rollback.  For AI-harness maintenance, README/evidence work, AGENTS.md/CLAUDE.md/hooks/skills/settings review, read <harness-root>/.claude/skills/adaptive-harness/SKILL.md. Load routed files only; do not bulk-read the harness repo.
 ```
 
 Use the generated absolute path for real sessions; keep `<harness-root>` only in portable documentation.
@@ -74,3 +74,8 @@ Manual check for another repo:
 - OpenCode and Cursor are documented through the AGENTS.md-compatible entry path, but live scored runs are not yet in `benchmarks/model_compatibility_cases.yaml`.
 - The GPT-5.5 forced-activation pilot did not show quality lift; use the harness for discipline and evidence, not as a blanket capability upgrade.
 - Governance-sensitive permission changes need stronger stop behavior; T5 in the pilot exposed this gap.
+- Conditional activation is specified in
+  [`docs/runtime_activation_contract.md`](runtime_activation_contract.md).
+  Its recall, routine over-trigger rate, rollback behavior, and Hermes exact
+  token extraction require a separate pre-registered probe; do not infer them
+  from the older scoped-edit or long-task experiments.

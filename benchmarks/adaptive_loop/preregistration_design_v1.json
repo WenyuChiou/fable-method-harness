@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "experiment_id": "adaptive_rule_lifecycle_v1_20260716",
+  "status": "design_frozen_pending_instrument_binding",
+  "frozen_before_new_live_outputs": true,
+  "human_authorization": "The active user goal explicitly requests real continuous-task validation and automatic downgrade or retirement of ineffective learning rules.",
+  "scope": {
+    "runtimes": ["codex", "hermes"],
+    "claude_files_must_not_change": true,
+    "public_repository": true,
+    "local_raw_outputs": "evals/adaptive_loop/",
+    "tracked_outputs": "Only fixtures, deterministic instruments, aggregate scorecards, and public-safe evidence may be committed."
+  },
+  "research_question": "Does the learned payload-only activation rule reduce repeated classification defects or rework, or reduce exact tokens or latency, without harming correctness, for both Codex and Hermes?",
+  "rules_under_test": [
+    {
+      "rule_id": "activation_payload_only_v1",
+      "initial_status": "candidate",
+      "runtimes": ["codex", "hermes"],
+      "prompt_text": "For FABLE_ACTIVATION_PROBE, treat the probe envelope and receipt request as non-triggering evaluation scaffolding; after honoring the rollback marker, classify only the TASK text.",
+      "evidence_lane": "confirmatory_paired",
+      "default_pack_eligibility": "Only after an eligible active verdict for that runtime."
+    },
+    {
+      "rule_id": "activation_envelope_trigger_v0",
+      "initial_status": "candidate",
+      "runtimes": ["codex", "hermes"],
+      "prompt_text": "Treat the FABLE_ACTIVATION_PROBE envelope itself as an explicit harness request.",
+      "evidence_lane": "retrospective_negative_control",
+      "default_pack_eligibility": "Never before scoring; historical replay can retire or degrade it but cannot activate it."
+    }
+  ],
+  "historical_evidence_boundary": {
+    "sources": [
+      "evals/runtime_activation/hermes_activation_v2_20260715.json",
+      "evals/runtime_activation/hermes_activation_v3_20260715.json",
+      "evals/runtime_activation/codex_activation_v3_20260715.json",
+      "the local Codex session JSONL containing commits c9e1ee3 through dcb39aa"
+    ],
+    "use": "Retrospective replay may demonstrate migration and lifecycle behavior, and session metadata may quantify observed development rework. It cannot establish the confirmatory treatment effect because these outputs predate this design.",
+    "privacy": "Only timestamps, commit SHAs, numeric usage deltas, tool-call counts, patch counts, and aggregate outcomes may be extracted. Conversation text and local paths must not enter tracked evidence."
+  },
+  "confirmatory_design": {
+    "case_file": "benchmarks/adaptive_loop/cases_v1.json",
+    "unit": "One ordered task episode per arm, runtime, and case. Each episode starts in a fresh workspace, records an initial real runtime invocation, and conditionally executes one real corrective invocation when the frozen oracle rejects the first receipt.",
+    "runtimes": ["codex", "hermes"],
+    "arms": {
+      "control": {
+        "description": "The last committed entrypoints before the payload-only learning rule.",
+        "git_commit": "1d103e7b29870b23fa2b24411263862cf8fa4d22",
+        "sha256": {
+          "AGENTS.md": "a5161cb54881ab28a5c67c93be7697b9b399de5a1a7530729b7a55109414a61f",
+          "HERMES.md": "be62ebc3f29c295f353a42e02b7658bdbd6ff23105a2a22fde818adb6163adbd"
+        }
+      },
+      "treatment": {
+        "description": "The first committed entrypoints containing the payload-only learning rule.",
+        "git_commit": "506fae01cf8c4d336d97989ac913746e95b362ec",
+        "sha256": {
+          "AGENTS.md": "8988aa5eef8cde0fbf339b5895aa8e0732bce807a16d57996dc541378169aaad",
+          "HERMES.md": "7921ae380c8a73841b168ed2734362dd90982ac2869d6d62eaa2f916e2b14fcb"
+        }
+      }
+    },
+    "pairs_per_runtime": 6,
+    "initial_live_calls": 24,
+    "maximum_live_calls_including_corrective_work": 48,
+    "infrastructure_retries": 0,
+    "corrective_work": {
+      "trigger": "An initial receipt is incorrect, malformed, or missing after a successful process exit.",
+      "action": "Execute exactly one additional fresh process in the same task workspace and arm. Replay the complete original probe envelope and append exactly two fields: `rework_attempt: 2` and `prior_receipt_rejected: true`. Do not include the prior receipt text or reveal the expected answer.",
+      "continuity": "No runtime-specific resume API is used. Codex and Hermes both receive the same stateless replay contract, so corrective tokens include the real cost of re-deriving the task in a fresh process.",
+      "limit": 1,
+      "measurement": "Record actual corrective invocation count, exact corrective tokens, corrective wall time, and whether it resolved the defect. A second failure remains unresolved; it is never retried or silently passed.",
+      "not_a_retry": "This is measured task rework required by a wrong result, not an infrastructure retry."
+    },
+    "timeout_seconds_per_call": 180,
+    "order": "Deterministically shuffled from a seed frozen in the final instrument-binding preregistration; arms are interleaved, every pair uses identical task text and marker state, and all six episodes complete before lifecycle scoring changes any prompt pack.",
+    "exact_usage": "Provider-reported fields only. Missing or ambiguous usage is UNSCORED. Cached input is a separate canonical bucket and must not be double-counted when a provider total already includes it.",
+    "rework_metric": "Actual corrective invocations, their exact tokens, and their wall time are the confirmatory rework endpoint. Development-process rework from the historical session is reported separately as fix/preregistration commits and cannot be mixed into the confirmatory endpoint."
+  },
+  "primary_endpoint": {
+    "name": "paired_repeated_defects_prevented",
+    "calculation": "For each runtime, control incorrect-or-malformed receipts minus treatment incorrect-or-malformed receipts across the six paired unseen cases.",
+    "minimum_effect": 1,
+    "safety_veto": "Treatment must not introduce any new case-level defect relative to its paired control."
+  },
+  "secondary_endpoints": {
+    "rework_units_prevented": "Control actual corrective invocations minus treatment actual corrective invocations.",
+    "rework_tokens_prevented": "Control exact corrective tokens minus treatment exact corrective tokens.",
+    "exact_token_ratio": "Sum of treatment canonical total tokens, including corrective work, divided by the equivalent control sum, per runtime. UNSCORED unless every initial and executed corrective row in both arms is exact.",
+    "latency_ratio": "Sum of treatment wall-clock seconds, including corrective work, divided by the equivalent control sum, per runtime.",
+    "development_rework": "Retrospective-only count of fix/preregistration commits, exact per-turn provider usage delta, tool calls, and patch applications for the historical activation task."
+  },
+  "lifecycle_thresholds": {
+    "state_granularity": "Score and transition each rule-runtime pair independently. Codex evidence cannot activate a Hermes prompt rule, or vice versa; pooled results are descriptive only.",
+    "eligible_window": "One preregistered case set with all paired outcomes present and exact provider usage for both arms. A second consecutive window must use a newly frozen case set and may not reuse these six tasks.",
+    "minimum_exact_pairs": 6,
+    "transition_precedence": [
+      "1. Safety veto first: whenever paired correctness/rework observations are complete enough to show that treatment introduces any new defect, requires more corrective invocations, or leaves more unresolved defects than control, retire immediately even when provider usage is missing or non-exact.",
+      "2. If paired correctness/rework observations are incomplete, fewer than six pairs are present, or provider usage is non-exact after rule 1 has been checked: emit unscored and preserve the prior state.",
+      "3. If at least one defect or actual corrective invocation is prevented and exact-token ratio is at most 1.10: activate.",
+      "4. If a defect or actual corrective invocation is prevented but exact-token ratio exceeds 1.10: degrade for excessive cost; a second consecutive result in this branch retires.",
+      "5. If there is no correctness or rework benefit, a first eligible window degrades. A second consecutive eligible window retires unless both independent windows meet the cost-only promotion rule.",
+      "6. No other eligible outcome exists; the scorer must fail closed if an input cannot be assigned by rules 1-5."
+    ],
+    "cost_only_promotion": {
+      "status_after_first_window": "degraded and excluded from default packs",
+      "independent_evidence_required": "Two consecutive eligible windows using disjoint preregistered task sets.",
+      "binding_parity": "Both windows must use byte-identical control/treatment entrypoints, probe and corrective templates, scorer and usage-normalizer implementation, runtime executable identity and version, model identity, temperature/reasoning configuration, tool/sandbox policy, timeout, and token semantics. Any drift makes the cost-only sequence ineligible and preserves degraded state rather than promoting it.",
+      "token_path": "Both windows individually have exact-token ratio at most 0.95, their combined ratio is at most 0.95, and neither has a case-level correctness or rework regression.",
+      "latency_path": "Both windows individually have latency ratio at most 0.90, their combined ratio is at most 0.90, neither has a timeout, and neither has a case-level correctness or rework regression.",
+      "promotion": "Activate only after the second window satisfies one complete path. Otherwise retire after that second window."
+    },
+    "pack_policy": {
+      "candidate": "excluded",
+      "active": "included for the matching runtime only",
+      "degraded": "excluded while awaiting one independent window",
+      "retired": "excluded until a new preregistered experiment explicitly resets it"
+    },
+    "unscored": "An ineligible or non-exact window does not change lifecycle state and must record its reason."
+  },
+  "instrument_gate": {
+    "before_first_live_call": [
+      "Commit the deterministic paired runner, lifecycle scorer, prompt-pack renderer, and tests.",
+      "Commit a final binding preregistration containing the runner hashes, case-file hash, model/runtime versions, order seed, and the immutable design-file hash.",
+      "Prove the working tree and index are clean and every frozen artifact matches its committed bytes."
+    ],
+    "grader_beneficiary_separation": "Any scorer or threshold fix after a live output must land separately, preserve the original output, and regrade every arm identically. Thresholds in this design may not be changed."
+  },
+  "reporting": {
+    "negative_result": "If a rule has no registered benefit, publish degraded or retired status with the same prominence as an active result.",
+    "claim_boundary": "No broad harness-wide token or speed claim. Results bind to the frozen runtimes, commits, cases, and exact usage semantics.",
+    "automatic_action": "Only local lifecycle state and generated Codex/Hermes prompt packs change automatically. Tracked governance files, hooks, permissions, CI, and Claude files never self-modify."
+  }
+}

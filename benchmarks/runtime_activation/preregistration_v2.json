@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "experiment_id": "runtime_activation_telemetry_v2_20260715",
+  "frozen_before_new_live_outputs": true,
+  "frozen_implementation_commit": "1d103e7b29870b23fa2b24411263862cf8fa4d22",
+  "prior_output_policy": "v1 is invalidated before scorecard emission after one Hermes subprocess completed but the old runner crashed during Windows TemporaryDirectory cleanup. No v1 result, token value, receipt, or latency is used here. v2 is a new 14-call proof-of-instrument; it has zero retries and any partial, null, or failing v2 scorecard is retained and reported.",
+  "frozen_input_sha256": {
+    "AGENTS.md": "a5161cb54881ab28a5c67c93be7697b9b399de5a1a7530729b7a55109414a61f",
+    "HERMES.md": "be62ebc3f29c295f353a42e02b7658bdbd6ff23105a2a22fde818adb6163adbd",
+    "benchmarks/runtime_activation/cases.json": "44d40f65fd55d07c4c70f4127b1da1a211cc7020a6770dd1d31dc6d47a180b54",
+    "scripts/run_runtime_activation_probe.py": "3d8dd3ccb6f422090619a57f73ea5215c2b994ab1123e5bab9bee0574eb617a5"
+  },
+  "design": {
+    "runtimes": ["hermes", "codex"],
+    "cases": 7,
+    "calls_per_runtime": 7,
+    "total_live_calls": 14,
+    "retries": 0,
+    "timeout_seconds_per_call": 180,
+    "workspace": "A new persistent ignored workspace under evals/runtime_activation/workspaces/ is created per call. RA07 alone contains an actual empty .fable-harness-off marker; all other cases omit it. Cleanup state is recorded and a Windows-locked Hermes child may leave only an ignored pending workspace.",
+    "prompt_invariant": "The same fixture task and probe template are used for each runtime. The probe may inspect only the actual rollback marker, must not load routed material or execute the task, and must emit the exact three-key JSON receipt.",
+    "usage_invariant": "Codex usage comes only from JSONL provider events. Hermes usage comes only from one newly created nonce-correlated state.db session row. Canonical total is input + cache_read + cache_write + output. Missing, zero-evidence, or ambiguous rows are UNSCORED.",
+    "provenance_invariant": "The preregistration and every frozen input must resolve inside the repository, exist at HEAD, and have no staged or worktree drift before any executable lookup or runtime invocation.",
+    "output_boundary": "Scorecards are .json descendants of ignored evals/runtime_activation/. They contain numeric counters and digest metadata, never raw model output, stderr, or state-db content."
+  },
+  "decision_gates": {
+    "activation": ["trigger_recall = 4/4", "routine_overtrigger = 0/2", "rollback_obedience = 1/1", "unscored_receipts = 0", "incorrect_receipts = 0"],
+    "telemetry": "exact_usage_rows = 7/7 independently for Hermes and Codex; otherwise report that runtime as UNSCORED.",
+    "reporting": "Do not claim API-token reduction or speedup from this single-arm proof-of-instrument. It can establish activation correctness, actual-marker rollback behavior, and exact per-runtime counters only. A future randomized paired A/B is required for API-token or latency superiority."
+  }
+}

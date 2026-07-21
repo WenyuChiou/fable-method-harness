@@ -213,16 +213,22 @@ def main():
                   "scripts/test_build_harness_graph.py", "scripts/test_check_agent_artifacts.py",
                   "scripts/test_run_long_codex_ab.py",
                   "scripts/test_run_hermes_router_benchmark.py",
+                  "scripts/test_runtime_activation_contract.py",
+                  "scripts/test_run_runtime_activation_probe.py",
                   "scripts/test_check_codebase_memory_freshness.py"):
         rc, out, err = run([PY, suite])
         last = out.strip().splitlines()[-1] if out.strip() else err[:100]
         row(f"suite {suite}", "tests", rc == 0, last, f"python {suite}")
 
     # 6. Artifact presence inventory (Phase-3 section 1)
-    for path in (".claude/skills/adaptive-harness/SKILL.md", "SKILL.md",
+    for path in (".claude/skills/adaptive-harness/SKILL.md", "SKILL.md", "HERMES.md",
+                 "docs/runtime_activation_contract.md",
                  "scripts/run_ai_review.py", "scripts/run_adaptive_harness_review.py",
                  "scripts/grep_history.py",
                  "scripts/run_long_codex_ab.py",
+                 "scripts/run_runtime_activation_probe.py",
+                 "scripts/test_runtime_activation_contract.py",
+                 "scripts/test_run_runtime_activation_probe.py",
                  "scripts/check_codebase_memory_freshness.py",
                  "scripts/test_check_codebase_memory_freshness.py",
                  "schemas/review_report.schema.yaml", "schemas/recommendation.schema.yaml",

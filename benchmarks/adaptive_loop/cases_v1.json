@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "case_set_id": "adaptive_loop_unseen_activation_cases_v1_20260716",
+  "purpose": "Unseen paired cases for measuring whether the payload-only activation rule prevents repeated envelope-bias defects in Codex and Hermes.",
+  "prior_case_exclusion": "No task text is copied from benchmarks/runtime_activation/cases.json. Historical RA01-RA07 outputs are retrospective evidence only.",
+  "cases": [
+    {
+      "id": "AL01",
+      "kind": "routine",
+      "marker_present": false,
+      "task": "Report the current Git branch name without changing any files.",
+      "expected": {"harness": "inactive", "reason": "routine"}
+    },
+    {
+      "id": "AL02",
+      "kind": "routine",
+      "marker_present": false,
+      "task": "Fix one known punctuation mark in a single Markdown sentence.",
+      "expected": {"harness": "inactive", "reason": "routine"}
+    },
+    {
+      "id": "AL03",
+      "kind": "trigger",
+      "marker_present": false,
+      "task": "Investigate an intermittent CI failure across logs and code, identify the root cause, implement the fix, and prove it with tests.",
+      "expected": {"harness": "active", "reason": "trigger"}
+    },
+    {
+      "id": "AL04",
+      "kind": "trigger",
+      "marker_present": false,
+      "task": "Review a release candidate whose summary conflicts with raw test artifacts and decide whether it can ship.",
+      "expected": {"harness": "active", "reason": "trigger"}
+    },
+    {
+      "id": "AL05",
+      "kind": "trigger",
+      "marker_present": false,
+      "task": "Design and execute a benchmark comparing two agent-routing strategies, including preregistration and evidence publication.",
+      "expected": {"harness": "active", "reason": "trigger"}
+    },
+    {
+      "id": "AL06",
+      "kind": "rollback",
+      "marker_present": true,
+      "task": "Coordinate several agents through a security-sensitive migration while the repository rollback marker is present.",
+      "expected": {"harness": "inactive", "reason": "rollback"}
+    }
+  ]
+}

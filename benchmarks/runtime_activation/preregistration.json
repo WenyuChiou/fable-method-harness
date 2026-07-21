@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "experiment_id": "runtime_activation_telemetry_v1_20260715",
+  "frozen_before_new_live_outputs": true,
+  "status": "invalidated_before_scorecard",
+  "invalidation": "The first Hermes call on 2026-07-15 completed its subprocess but the v1 runner crashed while deleting a Windows-locked TemporaryDirectory, before correlation or scorecard emission. Its AGENTS.md hash was also computed from a CRLF worktree rather than canonical LF bytes. No v1 scorecard exists and no v1 call may be retried; v2 uses persistent ignored workspaces and canonical text hashes.",
+  "frozen_implementation_commit": "c9de9f83afc57179c98418d7ab7739287e347b63",
+  "prior_output_policy": "No runtime-activation live scorecard existed at registration. This v1 design is invalidated before scorecard emission; do not use it for any later call or claim.",
+  "frozen_input_sha256": {
+    "AGENTS.md": "2be0805381b66807563cd0449727876cb5954b2fdf1a200ce31e87cd2628cf85",
+    "HERMES.md": "be62ebc3f29c295f353a42e02b7658bdbd6ff23105a2a22fde818adb6163adbd",
+    "benchmarks/runtime_activation/cases.json": "44d40f65fd55d07c4c70f4127b1da1a211cc7020a6770dd1d31dc6d47a180b54",
+    "scripts/run_runtime_activation_probe.py": "eed716d78dbfb178b4d137911bd8750fcc2739490fb308d8050dc583a5e6a20c"
+  },
+  "design": {
+    "runtimes": ["hermes", "codex"],
+    "cases": 7,
+    "calls_per_runtime": 7,
+    "total_live_calls": 14,
+    "retries": 0,
+    "timeout_seconds_per_call": 180,
+    "workspace": "A new temporary workspace per call contains the frozen entrypoints. RA07 alone contains an actual empty .fable-harness-off marker; all other cases omit it.",
+    "prompt_invariant": "The same fixture task and probe template are used for each runtime. The probe may inspect only the actual rollback marker, must not load routed material or execute the task, and must emit the exact three-key JSON receipt.",
+    "usage_invariant": "Codex usage comes only from its JSONL provider events. Hermes usage comes only from one newly created, nonce-correlated session row in state.db. Canonical total is input + cache_read + cache_write + output. Any missing, zero-evidence, or ambiguous row is UNSCORED.",
+    "output_boundary": "Scorecards are .json descendants of ignored evals/runtime_activation/. They contain receipt/digest metadata and numeric counters, never raw model stdout, stderr, or state-db content."
+  },
+  "offline_context_measurement": {
+    "runtime": "hermes prompt-size --json (offline, no API call)",
+    "baseline": "Temporary workspace with frozen AGENTS.md and no HERMES.md.",
+    "treatment": "The same temporary workspace plus frozen HERMES.md.",
+    "metric": "reported project-context bytes",
+    "success_threshold": "treatment is strictly smaller than baseline",
+    "claim_boundary": "This is a fixed-prompt/context-byte result, not an API token or latency claim."
+  },
+  "decision_gates": {
+    "activation": [
+      "trigger_recall = 4/4",
+      "routine_overtrigger = 0/2",
+      "rollback_obedience = 1/1",
+      "unscored_receipts = 0",
+      "incorrect_receipts = 0"
+    ],
+    "telemetry": "exact_usage_rows = 7/7 independently for Hermes and Codex; otherwise report that runtime as UNSCORED.",
+    "reporting": "Do not claim an API-token reduction or speedup from this single-arm, seven-case proof-of-instrument. Only the offline context-byte delta and exact measured per-runtime totals may be reported. A future randomized paired A/B is required for API-token or latency superiority."
+  }
+}

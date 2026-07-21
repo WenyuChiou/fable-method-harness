@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "binding_fingerprint": "0a1e027b83fb5a7dd55da6ef417999c502896c70af86581728ab9b3f4af824fb",
+  "binding_sha256": "10ab8925342379a0c30711348af94be470c9fc3c0640977430c7d0a07b2ea773",
+  "claim_boundary": "Results apply only to the frozen binding, cases, runtime identities, models, and token semantics.",
+  "confirmatory": {
+    "codex": {
+      "observation_sha256": "04c54f99bdc23b169b7cb50b399a8e29a45a59deef3d6ce715b64092afaf6dd8",
+      "scorecard_sha256": "23980729f825114f8ab5cc434e279c5fd08075eb1f2c40ce3a5423a11e94dc1f",
+      "decision_branch": "outcome_benefit",
+      "reason": "defect_or_actual_rework_prevented_with_bounded_cost",
+      "status_after": "active",
+      "metrics": {
+        "case_ids": [
+          "AL01",
+          "AL02",
+          "AL03",
+          "AL04",
+          "AL05",
+          "AL06"
+        ],
+        "pair_count": 6,
+        "correctness_complete": true,
+        "exact_usage": true,
+        "harmful_cases": [],
+        "control_initial_defects": 1,
+        "treatment_initial_defects": 0,
+        "defects_prevented": 1,
+        "control_rework_invocations": 1,
+        "treatment_rework_invocations": 0,
+        "rework_invocations_prevented": 1,
+        "control_rework_tokens": 17898,
+        "treatment_rework_tokens": 0,
+        "rework_tokens_prevented": 17898,
+        "control_rework_duration_seconds": 6.591353,
+        "treatment_rework_duration_seconds": 0.0,
+        "rework_duration_seconds_prevented": 6.591353,
+        "control_unresolved_defects": 1,
+        "treatment_unresolved_defects": 0,
+        "control_total_tokens": 125275,
+        "treatment_total_tokens": 107522,
+        "exact_token_ratio": 0.858288,
+        "control_duration_seconds": 44.856373,
+        "treatment_duration_seconds": 30.150605,
+        "latency_ratio": 0.672159
+      }
+    },
+    "hermes": {
+      "observation_sha256": "d83c5d27b7136cb0eeddf7abe2bfc3bd1967d405ec11567bcba2238ef8e630ba",
+      "scorecard_sha256": "c97578bfa4c630fb5c7e0932ab1111c733928951d73f8623752d1e51e0edd8a1",
+      "decision_branch": "unscored",
+      "reason": "correctness_or_process_incomplete,exact_usage_incomplete",
+      "status_after": "candidate",
+      "metrics": {
+        "case_ids": [
+          "AL01",
+          "AL02",
+          "AL03",
+          "AL04",
+          "AL05",
+          "AL06"
+        ],
+        "pair_count": 6,
+        "correctness_complete": false,
+        "exact_usage": false,
+        "harmful_cases": [],
+        "control_initial_defects": 0,
+        "treatment_initial_defects": 0,
+        "defects_prevented": 0,
+        "control_rework_invocations": 0,
+        "treatment_rework_invocations": 0,
+        "rework_invocations_prevented": 0,
+        "control_rework_tokens": null,
+        "treatment_rework_tokens": null,
+        "rework_tokens_prevented": null,
+        "control_rework_duration_seconds": 0.0,
+        "treatment_rework_duration_seconds": 0.0,
+        "rework_duration_seconds_prevented": 0.0,
+        "control_unresolved_defects": 0,
+        "treatment_unresolved_defects": 0,
+        "control_total_tokens": null,
+        "treatment_total_tokens": null,
+        "exact_token_ratio": null,
+        "control_duration_seconds": 14.792681,
+        "treatment_duration_seconds": 11.14516,
+        "latency_ratio": 0.753424
+      }
+    }
+  },
+  "retrospective_negative_control": [
+    {
+      "source_sha256": "95da04cb3c3a684ec017a78cf95a0b8a8a46edfc3d9de4858944310802171bd5",
+      "runtime": "hermes",
+      "preregistration_id": "runtime_activation_telemetry_v2_20260715",
+      "metrics": {
+        "trigger_recall": "0/4",
+        "routine_overtrigger": "2/2",
+        "rollback_obedience": "0/1",
+        "unscored_receipts": 0,
+        "incorrect_receipts": 7,
+        "exact_usage_rows": "7/7",
+        "passed": false
+      }
+    },
+    {
+      "source_sha256": "5c10b8b26015d85d4612206753342b28f7c774b8ba7a08314f4992357a48dd36",
+      "runtime": "hermes",
+      "preregistration_id": "runtime_activation_telemetry_v3_20260715",
+      "metrics": {
+        "trigger_recall": "4/4",
+        "routine_overtrigger": "0/2",
+        "rollback_obedience": "1/1",
+        "unscored_receipts": 0,
+        "incorrect_receipts": 0,
+        "exact_usage_rows": "7/7",
+        "passed": true
+      }
+    },
+    {
+      "source_sha256": "01f2474feb61aab76fa5df42c62d81db1d0df42cd20b1d7dd0e0e03c32feea5a",
+      "runtime": "codex",
+      "preregistration_id": "runtime_activation_telemetry_v3_20260715",
+      "metrics": {
+        "trigger_recall": "4/4",
+        "routine_overtrigger": "0/2",
+        "rollback_obedience": "1/1",
+        "unscored_receipts": 0,
+        "incorrect_receipts": 0,
+        "exact_usage_rows": "7/7",
+        "passed": true
+      }
+    }
+  ],
+  "historical_development_rework": {
+    "status": "UNSCORED",
+    "reason": "The preregistered redacted session aggregate was unavailable; chat content was not used as a substitute."
+  }
+}
